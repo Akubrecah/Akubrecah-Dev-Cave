@@ -85,3 +85,7 @@
 ## 2026-02-10
 - Added initial 10 PDF tools across conversion and editing categories.
 - Standardized ToolCard layout.
+
+## 2026-01-01
+- Initial brainstorming for a secure, browser-based PDF toolkit.
+- Evaluated client-side PDF processing libraries.
