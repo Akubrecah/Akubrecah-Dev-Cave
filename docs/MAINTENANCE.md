@@ -93,3 +93,7 @@
 ## 2026-01-02
 - Analyzed existing PDF tools and identified privacy gaps.
 - Defined the unique value proposition for Akubrecah.
+
+## 2026-01-03
+- Researched WebAssembly performance for PDF manipulation.
+- Tested base PDF-lib scripts in local environments.
