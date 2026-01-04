@@ -97,3 +97,7 @@
 ## 2026-01-03
 - Researched WebAssembly performance for PDF manipulation.
 - Tested base PDF-lib scripts in local environments.
+
+## 2026-01-04
+- Selected Next.js 16 as the primary framework.
+- Decided on Tailwind CSS for the design system.
