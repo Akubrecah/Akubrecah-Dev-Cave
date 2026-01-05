@@ -101,3 +101,7 @@
 ## 2026-01-04
 - Selected Next.js 16 as the primary framework.
 - Decided on Tailwind CSS for the design system.
+
+## 2026-01-05
+- Sketched the high-level architecture for the PDF Lab.
+- Defined the workflow node structure.
