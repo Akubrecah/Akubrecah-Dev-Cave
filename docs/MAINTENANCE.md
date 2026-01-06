@@ -105,3 +105,7 @@
 ## 2026-01-05
 - Sketched the high-level architecture for the PDF Lab.
 - Defined the workflow node structure.
+
+## 2026-01-06
+- Created initial wireframes for the homepage.
+- Drafted the tool card design system.
