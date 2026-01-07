@@ -109,3 +109,7 @@
 ## 2026-01-06
 - Created initial wireframes for the homepage.
 - Drafted the tool card design system.
+
+## 2026-01-07
+- Established the 'Files never leave your device' technical manifest.
+- Researched IndexedDB for secure temporary storage.
