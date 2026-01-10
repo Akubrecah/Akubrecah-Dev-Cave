@@ -121,3 +121,7 @@
 ## 2026-01-09
 - Built proof-of-concept for the circular branding logo.
 - Tested glass-panel UI effects.
+
+## 2026-01-10
+- Defined the structure for Privacy Policy and Terms of Service layouts.
+- Integrated Lucide icons for legal sections.
