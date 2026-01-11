@@ -125,3 +125,7 @@
 ## 2026-01-10
 - Defined the structure for Privacy Policy and Terms of Service layouts.
 - Integrated Lucide icons for legal sections.
+
+## 2026-01-11
+- Outlined the database schema for user status and audits.
+- Evaluated Neon serverless PostgreSQL for data residency.
