@@ -129,3 +129,7 @@
 ## 2026-01-11
 - Outlined the database schema for user status and audits.
 - Evaluated Neon serverless PostgreSQL for data residency.
+
+## 2026-01-12
+- Researched API structures for regional tax compliance tools.
+- Drafted the AuditCore logic flow.
