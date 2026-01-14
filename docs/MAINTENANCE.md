@@ -137,3 +137,7 @@
 ## 2026-01-13
 - Mapped out support for 12 major languages.
 - Researched RTL support for Arabic localization.
+
+## 2026-01-14
+- Defined the interactive logic for the Workflow Editor.
+- Researched ReactFlow integrations.
