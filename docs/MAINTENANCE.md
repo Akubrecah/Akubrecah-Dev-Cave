@@ -141,3 +141,7 @@
 ## 2026-01-14
 - Defined the interactive logic for the Workflow Editor.
 - Researched ReactFlow integrations.
+
+## 2026-01-15
+- Committed to WCAG 2.1 AA compliance.
+- Integrated high-contrast mode tokens into the design system.
