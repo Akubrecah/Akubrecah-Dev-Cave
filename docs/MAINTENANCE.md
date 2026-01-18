@@ -153,3 +153,7 @@
 ## 2026-01-17
 - Verified layout responsiveness for mobile devices.
 - Optimized touch targets for PDF manipulation.
+
+## 2026-01-18
+- Conducted initial vulnerability scanning on chosen dependencies.
+- Implemented strict Content Security Policy (CSP) drafts.
