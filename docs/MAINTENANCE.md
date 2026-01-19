@@ -157,3 +157,7 @@
 ## 2026-01-18
 - Conducted initial vulnerability scanning on chosen dependencies.
 - Implemented strict Content Security Policy (CSP) drafts.
+
+## 2026-01-19
+- Evaluated OCR speed in different browser engines.
+- Optimized language data loading sequences.
