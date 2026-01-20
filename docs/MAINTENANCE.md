@@ -161,3 +161,7 @@
 ## 2026-01-19
 - Evaluated OCR speed in different browser engines.
 - Optimized language data loading sequences.
+
+## 2026-01-20
+- Finalized the monochromatic dark mode palette.
+- Added subtle micro-animations for theme toggles.
