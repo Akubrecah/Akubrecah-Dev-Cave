@@ -177,3 +177,7 @@
 ## 2026-01-23
 - Designed the build cache strategy for Next.js deployments.
 - Optimized static site generation (SSG) targets.
+
+## 2026-01-24
+- Created base components for Merge and Split PDF nodes.
+- Defined input/output port logic.
