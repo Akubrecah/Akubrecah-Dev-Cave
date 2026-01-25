@@ -181,3 +181,7 @@
 ## 2026-01-24
 - Created base components for Merge and Split PDF nodes.
 - Defined input/output port logic.
+
+## 2026-01-25
+- Designed the dashboard for saved projects and audit logs.
+- Integrated Clerk authentication hooks.
