@@ -185,3 +185,7 @@
 ## 2026-01-25
 - Designed the dashboard for saved projects and audit logs.
 - Integrated Clerk authentication hooks.
+
+## 2026-01-26
+- Analyzed initial bundle weights for heavy PDF libraries.
+- Decided on dynamic imports for heavy components.
