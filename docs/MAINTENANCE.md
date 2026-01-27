@@ -189,3 +189,7 @@
 ## 2026-01-26
 - Analyzed initial bundle weights for heavy PDF libraries.
 - Decided on dynamic imports for heavy components.
+
+## 2026-01-27
+- Built the 'How it Works' section for the landing page.
+- Added customer trust indicators.
