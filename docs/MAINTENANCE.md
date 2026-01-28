@@ -193,3 +193,7 @@
 ## 2026-01-27
 - Built the 'How it Works' section for the landing page.
 - Added customer trust indicators.
+
+## 2026-01-28
+- Established ESLint and Prettier rules for the project.
+- Integrated Husky for pre-commit hooks.
