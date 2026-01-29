@@ -197,3 +197,7 @@
 ## 2026-01-28
 - Established ESLint and Prettier rules for the project.
 - Integrated Husky for pre-commit hooks.
+
+## 2026-01-29
+- Set up the docs folder for internal project logging.
+- Standardized README usage.
