@@ -201,3 +201,7 @@
 ## 2026-01-29
 - Set up the docs folder for internal project logging.
 - Standardized README usage.
+
+## 2026-01-30
+- Conducted stress tests with large PDF files (100MB+).
+- Verified browser memory stability.
