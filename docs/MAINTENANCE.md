@@ -49,3 +49,7 @@
 ## 2026-02-01
 - Established project structure and directory layout.
 - Initialized git repository and base configuration files.
+
+## 2026-02-02
+- Configured Next.js 16.2.3 and Turbopack for faster development.
+- Set up TypeScript and ESLint rules.
