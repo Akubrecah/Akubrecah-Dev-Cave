@@ -57,3 +57,7 @@
 ## 2026-02-03
 - Implemented CSS variables for theme support.
 - Configured Tailwind CSS with custom color palette.
+
+## 2026-02-04
+- Created FileDropzone and FilePreview components.
+- Implemented base PDF-lib utility functions.
