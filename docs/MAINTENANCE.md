@@ -61,3 +61,7 @@
 ## 2026-02-04
 - Created FileDropzone and FilePreview components.
 - Implemented base PDF-lib utility functions.
+
+## 2026-02-05
+- Implemented serverless merge functionality.
+- Added drag-and-drop reordering for PDF files.
