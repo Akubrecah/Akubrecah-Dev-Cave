@@ -69,3 +69,7 @@
 ## 2026-02-06
 - Built the hero section with branding elements.
 - Implemented the responsive navigation header.
+
+## 2026-02-07
+- Integrated Clerk for secure user authentication.
+- Set up protected admin and user profile routes.
