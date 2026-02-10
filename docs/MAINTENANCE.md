@@ -81,3 +81,7 @@
 ## 2026-02-09
 - Implemented the core logic for KRA PIN status checks.
 - Created the AuditCore component skeleton.
+
+## 2026-02-10
+- Added initial 10 PDF tools across conversion and editing categories.
+- Standardized ToolCard layout.
