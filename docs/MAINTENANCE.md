@@ -318,3 +318,7 @@
 ## 2026-04-19
 - Finalized branding standardization to Akubrecah.
 - Resolved build-time TypeScript errors and optimized icons.
+
+## 2026-02-11
+- Configured strict Content-Security-Policy.
+- Added X-Frame-Options and X-Content-Type-Options.
