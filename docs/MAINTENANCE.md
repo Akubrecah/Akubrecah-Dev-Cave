@@ -13,3 +13,7 @@
 ## 2026-02-12
 - Optimized PDF-lib loading sequences.
 - Improved browser memory management for high-resolution documents.
+
+## 2026-02-13
+- Added OCR capabilities for scan-to-text workflows.
+- Configured worker scripts for background text extraction.
