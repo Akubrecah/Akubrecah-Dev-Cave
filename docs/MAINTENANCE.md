@@ -17,3 +17,7 @@
 ## 2026-02-13
 - Added OCR capabilities for scan-to-text workflows.
 - Configured worker scripts for background text extraction.
+
+## 2026-02-14
+- Encrypted temporary project data stored in IndexedDB.
+- Added auto-purge triggers for abandoned sessions.
