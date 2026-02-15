@@ -21,3 +21,7 @@
 ## 2026-02-14
 - Encrypted temporary project data stored in IndexedDB.
 - Added auto-purge triggers for abandoned sessions.
+
+## 2026-02-15
+- Set up next-intl for cross-browser localization.
+- Drafted initial English and Spanish messages.
