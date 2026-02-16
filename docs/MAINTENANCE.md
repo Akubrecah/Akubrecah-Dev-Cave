@@ -25,3 +25,7 @@
 ## 2026-02-15
 - Set up next-intl for cross-browser localization.
 - Drafted initial English and Spanish messages.
+
+## 2026-02-16
+- Verified high-contrast mode compatibility.
+- Added screen reader labels for all complex PDF tools.
