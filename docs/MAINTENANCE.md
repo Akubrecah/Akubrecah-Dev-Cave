@@ -322,3 +322,6 @@
 ## 2026-02-11
 - Configured strict Content-Security-Policy.
 - Added X-Frame-Options and X-Content-Type-Options.
+
+## 2026-02-17
+- Optimized layer visibility toggles for multi-page PDFs.
