@@ -325,3 +325,6 @@
 
 ## 2026-02-17
 - Optimized layer visibility toggles for multi-page PDFs.
+
+## 2026-02-18
+- Integrated browser-native image compression before PDF embedding.
