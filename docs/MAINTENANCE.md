@@ -29,3 +29,7 @@
 ## 2026-02-16
 - Verified high-contrast mode compatibility.
 - Added screen reader labels for all complex PDF tools.
+
+## 2026-02-19
+- Identified and resolved memory leaks in heavy image-to-PDF conversions.
+- Reduced asset bundle size by 15%.
