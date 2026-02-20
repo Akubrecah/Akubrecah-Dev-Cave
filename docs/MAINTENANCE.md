@@ -328,3 +328,6 @@
 
 ## 2026-02-18
 - Integrated browser-native image compression before PDF embedding.
+
+## 2026-02-20
+- Added animations to category selection on the home page.
