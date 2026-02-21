@@ -33,3 +33,7 @@
 ## 2026-02-19
 - Identified and resolved memory leaks in heavy image-to-PDF conversions.
 - Reduced asset bundle size by 15%.
+
+## 2026-02-21
+- Implemented ReactFlow base for visual PDF pipelines.
+- Added initial node drag-and-drop logic.
