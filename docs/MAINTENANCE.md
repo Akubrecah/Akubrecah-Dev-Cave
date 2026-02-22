@@ -37,3 +37,7 @@
 ## 2026-02-21
 - Implemented ReactFlow base for visual PDF pipelines.
 - Added initial node drag-and-drop logic.
+
+## 2026-02-22
+- Resolved tiling issues when splitting non-standard PDF page sizes.
+- Added overlap margin support.
