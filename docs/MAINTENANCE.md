@@ -209,3 +209,7 @@
 ## 2026-01-31
 - Finalized the MVP feature set for the February 1 build.
 - Synchronized all planning documentation.
+
+## 2026-02-23
+- Implemented Zustand store for global workflow state.
+- Added undo/redo support for node connections.
