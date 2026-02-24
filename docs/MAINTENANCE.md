@@ -213,3 +213,7 @@
 ## 2026-02-23
 - Implemented Zustand store for global workflow state.
 - Added undo/redo support for node connections.
+
+## 2026-02-24
+- Integrated bank-grade AES-256 encryption for PDF protection.
+- Added password strength validation.
