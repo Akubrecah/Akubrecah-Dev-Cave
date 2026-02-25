@@ -217,3 +217,6 @@
 ## 2026-02-24
 - Integrated bank-grade AES-256 encryption for PDF protection.
 - Added password strength validation.
+
+## 2026-02-25
+- Added text and image watermarking with rotation and opacity controls.
