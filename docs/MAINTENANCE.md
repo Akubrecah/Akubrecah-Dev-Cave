@@ -220,3 +220,6 @@
 
 ## 2026-02-25
 - Added text and image watermarking with rotation and opacity controls.
+
+## 2026-02-26
+- Implemented 'Fast Web View' optimization for large documents.
