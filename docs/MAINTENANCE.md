@@ -223,3 +223,6 @@
 
 ## 2026-02-26
 - Implemented 'Fast Web View' optimization for large documents.
+
+## 2026-02-27
+- Optimized navigation for mobile tablet viewports.
