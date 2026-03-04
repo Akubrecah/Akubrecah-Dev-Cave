@@ -239,3 +239,6 @@
 
 ## 2026-03-03
 - Evaluated row/column extraction accuracy for tabular data.
+
+## 2026-03-04
+- Drafted Google Drive and Dropbox integration skeletons.
