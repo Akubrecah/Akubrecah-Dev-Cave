@@ -242,3 +242,6 @@
 
 ## 2026-03-04
 - Drafted Google Drive and Dropbox integration skeletons.
+
+## 2026-03-05
+- Added support for editing Author, Subject, and Creator fields.
