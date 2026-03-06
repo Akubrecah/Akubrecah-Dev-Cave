@@ -245,3 +245,6 @@
 
 ## 2026-03-05
 - Added support for editing Author, Subject, and Creator fields.
+
+## 2026-03-06
+- Reduced render time for complex vector-based PDF pages.
