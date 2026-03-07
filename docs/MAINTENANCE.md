@@ -248,3 +248,6 @@
 
 ## 2026-03-06
 - Reduced render time for complex vector-based PDF pages.
+
+## 2026-03-07
+- Built the UI for in-app compliance alerts.
