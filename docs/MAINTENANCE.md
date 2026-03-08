@@ -251,3 +251,6 @@
 
 ## 2026-03-07
 - Built the UI for in-app compliance alerts.
+
+## 2026-03-08
+- Refined accent colors for better contrast in dark theme.
