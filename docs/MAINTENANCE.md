@@ -254,3 +254,6 @@
 
 ## 2026-03-08
 - Refined accent colors for better contrast in dark theme.
+
+## 2026-03-09
+- Integrated basic e-signature drawing component.
