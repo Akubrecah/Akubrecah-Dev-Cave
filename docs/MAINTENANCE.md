@@ -257,3 +257,6 @@
 
 ## 2026-03-09
 - Integrated basic e-signature drawing component.
+
+## 2026-03-10
+- Implemented internal logs for compliance operations.
