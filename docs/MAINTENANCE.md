@@ -260,3 +260,6 @@
 
 ## 2026-03-10
 - Implemented internal logs for compliance operations.
+
+## 2026-03-11
+- Added sitemap exclusions for private tool routes.
