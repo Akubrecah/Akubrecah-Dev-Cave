@@ -41,3 +41,7 @@
 ## 2026-02-22
 - Resolved tiling issues when splitting non-standard PDF page sizes.
 - Added overlap margin support.
+
+## 2026-03-12
+- Implemented JSON-LD structured data for every individual tool page.
+- Optimized sitemap generation logic.
