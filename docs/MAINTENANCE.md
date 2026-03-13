@@ -263,3 +263,6 @@
 
 ## 2026-03-11
 - Added sitemap exclusions for private tool routes.
+
+## 2026-03-13
+- Continued iterative improvements to PDF processing modules and UI consistency.
