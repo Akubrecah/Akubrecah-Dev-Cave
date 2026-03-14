@@ -39,3 +39,18 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# clerk configuration (can include secrets)
+/.clerk/
+
+# netlify
+.netlify/
+
+# prisma generated client
+/lib/generated/
+
+# excluded folders
+/legacy/
+/skills/
+/generated/
+/prisma/client/

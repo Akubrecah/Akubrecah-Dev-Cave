@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/client"
+}
+
+datasource db {
+  provider  = "postgresql"
+}
+
+model User {
+  id                 String    @id @default(uuid())
+  clerkId            String    @unique
+  email              String    @unique
+  name               String?
+  role               String    @default("personal") // personal or cyber
+  credits            Int       @default(0)
+  subscriptionStatus String    @default("inactive") // active, inactive, expired
+  subscriptionEnd    DateTime?
+  
+  // Daily Generation Tracking
+  dailyGeneratesCount Int       @default(0)
+  lastGenerateDate    DateTime?
+
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  transactions  Transaction[]
+  verifications Verification[]
+  certificates  Certificate[]
+}
+
+model Transaction {
+  id              String   @id @default(uuid())
+  userId          String
+  amount          Int
+  type            String   // credit_purchase, subscription_monthly, subscription_weekly
+  status          String   @default("pending") // pending, completed, failed
+  stripeSessionId String?  @unique
+  mpesaCode       String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Verification {
+  id           String   @id @default(uuid())
+  userId       String
+  kraPin       String
+  taxpayerName String?
+  result       Json     // Store full KRA response
+  createdAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Certificate {
+  id           String   @id @default(uuid())
+  userId       String
+  kraPin       String
+  taxpayerName String?
+  pdfUrl       String?
+  createdAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}

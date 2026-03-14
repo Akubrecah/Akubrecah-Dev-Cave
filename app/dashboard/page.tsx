@@ -1,0 +1,696 @@
+"use client";
+
+import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import { 
+  FileCheck2, FileText, ArrowLeft, Eye, CheckCircle, Coins, Search, Hash, 
+  Download, Activity 
+} from 'lucide-react';
+import { KENYA_DATA } from '@/lib/kenya-data';
+import { useAuth } from '@clerk/nextjs';
+
+export default function Dashboard() {
+  const router = useRouter();
+  const { isLoaded } = useAuth();
+  
+  // Dashboard routing
+  const [selectedService, setSelectedService] = useState<'selection' | 'kra'>('selection');
+  const [feature, setFeature] = useState<'generator' | 'viewer'>('generator');
+  
+  // KRA Wizard stats
+  const [stats, setStats] = useState({ verifications: 0, certificates: 0, credits: 5 });
+  
+  // Viewer state
+  const [viewerPin, setViewerPin] = useState('');
+  const [viewerLoading, setViewerLoading] = useState(false);
+  const [viewerResult, setViewerResult] = useState<Record<string, string> | null>(null);
+  
+  // Generator State
+  const [currentStep, setCurrentStep] = useState(1);
+  const [statusMessage, setStatusMessage] = useState('');
+  const [isStatusError, setIsStatusError] = useState(false);
+  const [isStatusPending, setIsStatusPending] = useState(false);
+  
+  // Form State
+  const [formData, setFormData] = useState({
+    kraPin: '',
+    idNumber: '',
+    taxpayerName: '',
+    email: '',
+    building: '',
+    street: '',
+    city: '',
+    county: '',
+    district: '',
+    lrNumber: '',
+    box: '',
+    postal: '',
+    taxArea: '',
+    obligation: 'INCOME TAX - RESIDENT INDIVIDUAL',
+    station: '',
+    status: 'Active',
+    fromDate: '',
+    tillDate: 'N.A.',
+    activity: ''
+  });
+
+  const certContainerRef = useRef<HTMLDivElement>(null);
+
+  // Initialize dates and stats
+  useEffect(() => {
+    const today = new Date().toISOString().split('T')[0];
+    setFormData(prev => ({ ...prev, fromDate: prev.fromDate || today }));
+    
+    // In a real app, fetch stats from your DB route /api/user/credits
+    const storedStats = localStorage.getItem('userStats');
+    if (storedStats) {
+      setStats(JSON.parse(storedStats));
+    } else {
+      setStats({ verifications: 0, certificates: 0, credits: 5 });
+    }
+  }, []);
+
+  // Update formData helpers
+  const updateForm = (field: keyof typeof formData, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleCountyChange = (county: string) => {
+    const countyData = KENYA_DATA[county];
+    setFormData(prev => ({
+      ...prev,
+      county,
+      district: '',
+      postal: countyData ? countyData.postalCode : ''
+    }));
+  };
+
+  const showStatus = (message: string, isError = false, isPending = false) => {
+    setStatusMessage(message);
+    setIsStatusError(isError);
+    setIsStatusPending(isPending);
+    
+    if (!isPending) {
+      setTimeout(() => setStatusMessage(''), 5000);
+    }
+  };
+
+  const verifyAndAutofill = async () => {
+    if (!formData.kraPin && !formData.idNumber) {
+      showStatus('Please enter a KRA PIN or ID Number', true);
+      return;
+    }
+
+    showStatus('Verifying with KRA...', false, true);
+
+    try {
+      const endpoint = formData.kraPin 
+        ? '/api/kra/check-pin-by-pin' 
+        : '/api/kra/check-pin';
+      
+      const body = formData.kraPin 
+        ? { pin: formData.kraPin.toUpperCase() } 
+        : { idType: 'NATIONAL_ID', idNumber: formData.idNumber };
+
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      
+      if (!res.ok) throw new Error('Failed to verify PIN. Make sure keys are valid or try a mocked PIN like A123456789Z.');
+
+      const result = await res.json();
+      
+      setFormData(prev => ({
+        ...prev,
+        kraPin: result.TaxpayerPIN || prev.kraPin,
+        taxpayerName: result.TaxpayerName || prev.taxpayerName,
+        obligation: result.Type || prev.obligation,
+        status: result.Status || prev.status
+      }));
+
+      // Update local storage stats for UI
+      const newStats = { ...stats, verifications: stats.verifications + 1 };
+      setStats(newStats);
+      localStorage.setItem('userStats', JSON.stringify(newStats));
+
+      showStatus('PIN verified! Proceed to edit and generate certificate.');
+    } catch (error: Error | unknown) {
+      console.error(error);
+      const msg = error instanceof Error ? error.message : 'Error occurred during verification';
+      showStatus(msg, true);
+    }
+  };
+
+  const handleQuickView = async () => {
+    if (!viewerPin) {
+      alert("Please enter a PIN");
+      return;
+    }
+    setViewerLoading(true);
+    setViewerResult(null);
+    try {
+      const res = await fetch('/api/kra/check-pin-by-pin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pin: viewerPin })
+      });
+      if (!res.ok) throw new Error('Verification failed.');
+      const data = await res.json();
+      setViewerResult(data);
+    } catch (err: Error | unknown) {
+      const msg = err instanceof Error ? err.message : 'Unknown error';
+      setViewerResult({ error: msg });
+    } finally {
+      setViewerLoading(false);
+    }
+  };
+
+  const generateCertificate = async () => {
+    if (!formData.taxpayerName) {
+      showStatus('Please enter at least the Taxpayer Name', true);
+      return;
+    }
+
+    showStatus('Checking user limits...', false, true);
+
+    try {
+      // 1. Check permissions server-side
+      const limitRes = await fetch('/api/user/generate', { method: 'POST' });
+      const limitData = await limitRes.json();
+      
+      if (!limitRes.ok) {
+         showStatus(limitData.error || 'Failed to authorize generation', true);
+         alert(limitData.error || 'Failed to authorize generation. Please upgrade.');
+         return;
+      }
+
+      showStatus('Generating PDF...', false, true);
+
+      // Lazy load html2pdf client-side
+      const html2pdf = (await import('html2pdf.js')).default;
+      
+      const element = certContainerRef.current;
+      if (!element) throw new Error('Certificate container not found');
+
+      // Unhide the ref temporarily for generation
+      element.style.display = 'block';
+
+      const filename = formData.kraPin 
+        ? `KRA_PIN_Certificate_${formData.kraPin}.pdf` 
+        : `KRA_PIN_Certificate_${formData.taxpayerName.replace(/\\s+/g, '_')}.pdf`;
+      
+      const opt = {
+        margin: 0,
+        filename: filename,
+        image: { type: 'jpeg' as const, quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, logging: false },
+        jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const }
+      };
+
+      await html2pdf().set(opt).from(element).save();
+      
+      element.style.display = 'none';
+
+      // Update local storage stats for UI purely for display feedback
+      const newStats = { ...stats, certificates: stats.certificates + 1 };
+      setStats(newStats);
+      localStorage.setItem('userStats', JSON.stringify(newStats));
+      
+      let successMsg = 'Certificate generated successfully!';
+      if (limitData.remainingFreeGenerates !== undefined) {
+         successMsg += ` (${limitData.remainingFreeGenerates} free uses left today)`;
+      }
+      showStatus(successMsg);
+
+    } catch (err) {
+      console.error(err);
+      showStatus('Failed to generate PDF. Make sure "html2pdf.js" is functioning.', true);
+      if (certContainerRef.current) certContainerRef.current.style.display = 'none';
+    }
+  };
+
+  // UI Selection Views
+  if (selectedService === 'selection') {
+    return (
+      <div className="min-h-screen pt-32 pb-16 px-6">
+        <div className="max-w-4xl mx-auto text-center">
+          <h1 className="text-4xl font-bold text-white mb-2">Welcome Back!</h1>
+          <p className="text-[var(--color-text-secondary)] text-lg mb-12">Choose a service to get started</p>
+          
+          <div className="grid md:grid-cols-2 gap-8">
+            <div 
+              onClick={() => setSelectedService('kra')}
+              className="bg-[#111111] border border-white/10 p-12 rounded-3xl cursor-pointer hover:-translate-y-2 hover:border-[var(--color-brand-red)] transition-all duration-300"
+            >
+              <div className="w-20 h-20 bg-[var(--color-brand-red)]/10 text-[var(--color-brand-red)] rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <FileCheck2 size={40} />
+              </div>
+              <h2 className="text-2xl font-bold text-white mb-4">KRA PIN CERTIFICATE</h2>
+              <p className="text-[var(--color-text-secondary)] mb-6">Verify KRA PINs and generate professional PDF certificates with full taxpayer details.</p>
+              <button className="w-full py-3 rounded-xl bg-[var(--color-brand-red)] text-white font-bold hover:bg-[var(--color-deep-crimson)] transition-colors">
+                ENTER KRA DASHBOARD →
+              </button>
+            </div>
+
+            <div 
+              onClick={() => router.push('/pdf-tools')}
+              className="bg-[#111111] border border-white/10 p-12 rounded-3xl cursor-pointer hover:-translate-y-2 hover:border-[#F5C200] transition-all duration-300"
+            >
+              <div className="w-20 h-20 bg-[#F5C200]/10 text-[#F5C200] rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <FileText size={40} />
+              </div>
+              <h2 className="text-2xl font-bold text-white mb-4">PDF PRO TOOLS</h2>
+              <p className="text-[var(--color-text-secondary)] mb-6">Complete PDF toolkit – merge, split, compress, and more. All processing in-browser.</p>
+              <button className="w-full py-3 rounded-xl border border-[#F5C200] text-[#F5C200] font-bold hover:bg-[#F5C200]/10 transition-colors">
+                ENTER PDF TOOLS →
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // --- HTML2PDF Certificate Template (Hidden in DOM, rendered by html2pdf) ---
+  const todayStr = new Date().toLocaleDateString('en-GB');
+
+  return (
+    <div className="min-h-screen pt-24 pb-16 px-6">
+      <div className="max-w-[1400px] mx-auto">
+        
+        {/* Navigation back */}
+        <button 
+          onClick={() => setSelectedService('selection')}
+          className="flex items-center gap-2 text-white/60 hover:text-white mb-8 transition-colors"
+        >
+          <ArrowLeft size={16} /> BACK TO SERVICES
+        </button>
+
+        {/* Top Controls Generator vs Viewer */}
+        <div className="grid md:grid-cols-2 gap-4 mb-8">
+          <div 
+            onClick={() => setFeature('generator')}
+            className={`p-6 rounded-2xl cursor-pointer border-2 transition-all flex items-center gap-4 ${feature === 'generator' ? 'border-[var(--color-brand-red)] bg-[#111111]' : 'border-white/10 bg-black/50 hover:border-white/20'}`}
+          >
+            <div className={`p-4 rounded-xl ${feature === 'generator' ? 'bg-[var(--color-brand-red)]/20 text-[var(--color-brand-red)]' : 'bg-white/5 text-white/50'}`}>
+              <FileCheck2 size={24} />
+            </div>
+            <div>
+              <h3 className={`font-bold text-lg ${feature === 'generator' ? 'text-white' : 'text-white/50'}`}>GENERATE CERTIFICATE</h3>
+              <p className="text-sm text-white/50">Full verification & PDF download</p>
+            </div>
+          </div>
+
+          <div 
+            onClick={() => setFeature('viewer')}
+            className={`p-6 rounded-2xl cursor-pointer border-2 transition-all flex items-center gap-4 ${feature === 'viewer' ? 'border-[#F5C200] bg-[#111111]' : 'border-white/10 bg-black/50 hover:border-white/20'}`}
+          >
+            <div className={`p-4 rounded-xl ${feature === 'viewer' ? 'bg-[#F5C200]/20 text-[#F5C200]' : 'bg-white/5 text-white/50'}`}>
+              <Eye size={24} />
+            </div>
+            <div>
+              <h3 className={`font-bold text-lg ${feature === 'viewer' ? 'text-white' : 'text-white/50'}`}>QUICK PIN VIEW</h3>
+              <p className="text-sm text-white/50">View details without generating certificate</p>
+            </div>
+          </div>
+        </div>
+
+        {/* View mode block */}
+        {feature === 'viewer' && (
+          <div className="bg-[#111111] border border-white/10 rounded-3xl p-8 max-w-3xl mx-auto">
+            <h2 className="text-xl font-bold text-white flex items-center gap-2 mb-6">
+              <Search className="text-[#F5C200]" /> QUICK PIN LOOKUP
+            </h2>
+            <div className="flex gap-4">
+              <div className="relative flex-1">
+                <Hash className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" size={20} />
+                <input 
+                  type="text" 
+                  value={viewerPin}
+                  onChange={e => setViewerPin(e.target.value.toUpperCase())}
+                  placeholder="Enter KRA PIN (e.g., A001234567Z)"
+                  className="w-full bg-black/50 border border-white/10 rounded-xl py-4 pl-12 pr-4 text-white uppercase"
+                />
+              </div>
+              <button 
+                onClick={handleQuickView}
+                disabled={viewerLoading}
+                className="bg-[#F5C200] text-black font-bold px-8 rounded-xl hover:bg-[#F5C200]/90 transition-colors disabled:opacity-50"
+              >
+                {viewerLoading ? 'SEARCHING...' : 'SEARCH'}
+              </button>
+            </div>
+
+            {viewerResult && (
+              <div className="mt-8 p-6 bg-black/50 rounded-2xl border border-white/5">
+                {viewerResult.error ? (
+                  <p className="text-[var(--color-brand-red)]">{viewerResult.error}</p>
+                ) : (
+                  <div className="text-white space-y-2">
+                    <p><strong>PIN:</strong> {viewerResult.TaxpayerPIN || viewerPin}</p>
+                    <p><strong>Name:</strong> {viewerResult.TaxpayerName || 'N/A'}</p>
+                    <p><strong>Type:</strong> {viewerResult.Type || 'N/A'}</p>
+                    <p><strong>Status:</strong> {viewerResult.Status || 'N/A'}</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Generator mode block */}
+        {feature === 'generator' && (
+          <>
+            {/* Stats */}
+            <div className="grid grid-cols-3 gap-6 mb-8">
+              <div className="bg-[#111111] rounded-2xl p-6 border border-white/5 flex items-center gap-4">
+                <div className="bg-white/5 p-3 rounded-lg text-white/50"><CheckCircle /></div>
+                <div>
+                  <div className="text-2xl font-bold text-white">{stats.verifications}</div>
+                  <div className="text-sm text-white/40">Verifications Today</div>
+                </div>
+              </div>
+              <div className="bg-[#111111] rounded-2xl p-6 border border-white/5 flex items-center gap-4">
+                <div className="bg-white/5 p-3 rounded-lg text-white/50"><FileText /></div>
+                <div>
+                  <div className="text-2xl font-bold text-white">{stats.certificates}</div>
+                  <div className="text-sm text-white/40">Certificates Generated</div>
+                </div>
+              </div>
+              <div className="bg-[#111111] rounded-2xl p-6 border border-white/5 flex items-center gap-4">
+                <div className="bg-[var(--color-brand-red)]/10 p-3 rounded-lg text-[var(--color-brand-red)]"><Coins /></div>
+                <div>
+                  <div className="text-2xl font-bold text-white">{stats.credits}</div>
+                  <div className="text-sm text-[var(--color-brand-red)]">Credits Remaining</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid lg:grid-cols-5 gap-8">
+              {/* Wizard Form */}
+              <div className="lg:col-span-3 bg-[#111111] rounded-3xl border border-white/10 p-8">
+                
+                {/* Steps Header */}
+                <div className="flex items-center justify-between mb-10 relative">
+                  <div className="absolute top-1/2 -translate-y-1/2 left-0 w-full h-1 bg-white/5 z-0"></div>
+                  
+                  {[1, 2, 3, 4].map(step => (
+                    <div key={step} className="relative z-10 flex flex-col items-center gap-2 cursor-pointer" onClick={() => setCurrentStep(step)}>
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-colors ${currentStep >= step ? 'bg-[var(--color-brand-red)] text-white' : 'bg-[#222] text-white/30 border border-white/10'}`}>
+                        {step}
+                      </div>
+                      <span className={`text-[10px] font-bold uppercase tracking-wider ${currentStep >= step ? 'text-white/80' : 'text-white/30'}`}>
+                        {step === 1 ? 'Verify' : step === 2 ? 'Personal' : step === 3 ? 'Address' : 'Tax & Gen'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Status Message */}
+                {statusMessage && (
+                  <div className={`p-4 rounded-xl mb-6 flex items-center gap-3 border ${isStatusError ? 'bg-red-500/10 border-red-500/20 text-red-400' : isStatusPending ? 'bg-blue-500/10 border-blue-500/20 text-blue-400' : 'bg-green-500/10 border-green-500/20 text-green-400'}`}>
+                    {isStatusError ? <Activity size={18} /> : isStatusPending ? <Search size={18} className="animate-pulse" /> : <CheckCircle size={18} />}
+                    {statusMessage}
+                  </div>
+                )}
+
+                {/* Form Sections */}
+                <div className="space-y-6">
+                  {currentStep === 1 && (
+                    <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+                      <h3 className="text-xl font-bold text-white mb-6">VERIFY PIN</h3>
+                      <div className="bg-black/40 rounded-2xl p-6 border border-white/5 space-y-4">
+                        <div>
+                          <label className="block text-xs font-bold text-white/50 uppercase mb-2">KRA PIN</label>
+                          <input 
+                            type="text" 
+                            className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white uppercase focus:border-[var(--color-brand-red)] focus:outline-none transition-colors"
+                            placeholder="e.g., A012345678Z"
+                            value={formData.kraPin}
+                            onChange={(e) => updateForm('kraPin', e.target.value.toUpperCase())}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-white/50 uppercase mb-2">ID Number</label>
+                          <input 
+                            type="text" 
+                            className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white focus:border-[var(--color-brand-red)] focus:outline-none transition-colors"
+                            placeholder="e.g., 12345678"
+                            value={formData.idNumber}
+                            onChange={(e) => updateForm('idNumber', e.target.value)}
+                          />
+                        </div>
+                        <button 
+                          onClick={verifyAndAutofill}
+                          disabled={isStatusPending}
+                          className="w-full py-4 bg-white/5 border border-white/10 text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-white/10 transition-colors disabled:opacity-50"
+                        >
+                          <Search size={18} /> VERIFY & AUTO-FILL
+                        </button>
+                      </div>
+                      <div className="flex justify-end mt-8">
+                        <button onClick={() => setCurrentStep(2)} className="py-3 px-6 bg-[var(--color-brand-red)] text-white rounded-xl font-bold hover:bg-[var(--color-deep-crimson)] transition-colors">
+                          NEXT: PERSONAL DETAILS →
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {currentStep === 2 && (
+                    <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+                      <h3 className="text-xl font-bold text-white mb-6">PERSONAL DETAILS</h3>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div className="md:col-span-2">
+                          <label className="block text-xs font-bold text-white/50 uppercase mb-2">Taxpayer Name *</label>
+                          <input type="text" className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white uppercase focus:border-[var(--color-brand-red)] outline-none" placeholder="FULL NAME AS PER KRA" value={formData.taxpayerName} onChange={(e) => updateForm('taxpayerName', e.target.value.toUpperCase())} />
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="block text-xs font-bold text-white/50 uppercase mb-2">Email Address</label>
+                          <input type="email" className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white focus:border-[var(--color-brand-red)] outline-none" placeholder="email@example.com" value={formData.email} onChange={(e) => updateForm('email', e.target.value)} />
+                        </div>
+                      </div>
+                      <div className="flex justify-between mt-8">
+                        <button onClick={() => setCurrentStep(1)} className="py-3 px-6 border border-white/20 text-white rounded-xl font-bold hover:bg-white/5 transition-colors">← BACK</button>
+                        <button onClick={() => setCurrentStep(3)} className="py-3 px-6 bg-[var(--color-brand-red)] text-white rounded-xl font-bold hover:bg-[var(--color-deep-crimson)] transition-colors">NEXT: ADDRESS →</button>
+                      </div>
+                    </div>
+                  )}
+
+                  {currentStep === 3 && (
+                    <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+                      <h3 className="text-xl font-bold text-white mb-6">ADDRESS DETAILS</h3>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div><label className="block text-xs font-bold text-white/50 uppercase mb-2">Building</label><input type="text" className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white uppercase outline-none" value={formData.building} onChange={(e) => updateForm('building', e.target.value.toUpperCase())} /></div>
+                        <div><label className="block text-xs font-bold text-white/50 uppercase mb-2">Street/Road</label><input type="text" className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white uppercase outline-none" value={formData.street} onChange={(e) => updateForm('street', e.target.value.toUpperCase())} /></div>
+                        <div><label className="block text-xs font-bold text-white/50 uppercase mb-2">City/Town</label><input type="text" className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white uppercase outline-none" value={formData.city} onChange={(e) => updateForm('city', e.target.value.toUpperCase())} /></div>
+                        
+                        <div>
+                          <label className="block text-xs font-bold text-white/50 uppercase mb-2">County</label>
+                          <select className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white uppercase outline-none" value={formData.county} onChange={(e) => handleCountyChange(e.target.value)}>
+                            <option value="">-- SELECT COUNTY --</option>
+                            {Object.keys(KENYA_DATA).sort().map(c => <option key={c} value={c}>{c}</option>)}
+                          </select>
+                        </div>
+                        
+                        <div>
+                          <label className="block text-xs font-bold text-white/50 uppercase mb-2">Sub-County</label>
+                          <select className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white uppercase outline-none" value={formData.district} onChange={(e) => updateForm('district', e.target.value)}>
+                            <option value="">-- SUB-COUNTY --</option>
+                            {formData.county && KENYA_DATA[formData.county]?.subCounties.map(sub => <option key={sub} value={sub}>{sub}</option>)}
+                          </select>
+                        </div>
+
+                        <div><label className="block text-xs font-bold text-white/50 uppercase mb-2">L.R. Number</label><input type="text" className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white uppercase outline-none" value={formData.lrNumber} onChange={(e) => updateForm('lrNumber', e.target.value.toUpperCase())} /></div>
+                        <div><label className="block text-xs font-bold text-white/50 uppercase mb-2">P.O. Box</label><input type="text" className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white uppercase outline-none" value={formData.box} onChange={(e) => updateForm('box', e.target.value)} /></div>
+                        <div><label className="block text-xs font-bold text-white/50 uppercase mb-2">Postal Code</label><input type="text" className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white uppercase outline-none" value={formData.postal} onChange={(e) => updateForm('postal', e.target.value)} /></div>
+                        <div><label className="block text-xs font-bold text-white/50 uppercase mb-2">Tax Area</label><input type="text" className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white uppercase outline-none" value={formData.taxArea} onChange={(e) => updateForm('taxArea', e.target.value.toUpperCase())} /></div>
+                      </div>
+                      <div className="flex justify-between mt-8">
+                        <button onClick={() => setCurrentStep(2)} className="py-3 px-6 border border-white/20 text-white rounded-xl font-bold hover:bg-white/5 transition-colors">← BACK</button>
+                        <button onClick={() => setCurrentStep(4)} className="py-3 px-6 bg-[var(--color-brand-red)] text-white rounded-xl font-bold hover:bg-[var(--color-deep-crimson)] transition-colors">NEXT: TAX DETAILS →</button>
+                      </div>
+                    </div>
+                  )}
+
+                  {currentStep === 4 && (
+                    <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+                      <h3 className="text-xl font-bold text-white mb-6">TAX DETAILS</h3>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div className="md:col-span-2"><label className="block text-xs font-bold text-white/50 uppercase mb-2">Tax Obligation</label><input type="text" className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white uppercase" value={formData.obligation} onChange={(e) => updateForm('obligation', e.target.value.toUpperCase())} /></div>
+                        <div><label className="block text-xs font-bold text-white/50 uppercase mb-2">Station</label><input type="text" className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white uppercase" value={formData.station} onChange={(e) => updateForm('station', e.target.value.toUpperCase())} /></div>
+                        <div>
+                          <label className="block text-xs font-bold text-white/50 uppercase mb-2">Status</label>
+                          <select className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white" value={formData.status} onChange={(e) => updateForm('status', e.target.value)}>
+                            <option value="Active">Active</option><option value="Dormant">Dormant</option><option value="Cancelled">Cancelled</option>
+                          </select>
+                        </div>
+                        <div><label className="block text-xs font-bold text-white/50 uppercase mb-2">Effective From</label><input type="date" className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white" value={formData.fromDate} onChange={(e) => updateForm('fromDate', e.target.value)} /></div>
+                        <div><label className="block text-xs font-bold text-white/50 uppercase mb-2">Effective Till</label><input type="text" className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white uppercase" value={formData.tillDate} onChange={(e) => updateForm('tillDate', e.target.value)} /></div>
+                        <div className="md:col-span-2"><label className="block text-xs font-bold text-white/50 uppercase mb-2">Principal Activity</label><input type="text" className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white uppercase" placeholder="e.g., RETAIL TRADE" value={formData.activity} onChange={(e) => updateForm('activity', e.target.value.toUpperCase())} /></div>
+                      </div>
+                      <div className="flex justify-between mt-8">
+                        <button onClick={() => setCurrentStep(3)} className="py-3 px-6 border border-white/20 text-white rounded-xl font-bold hover:bg-white/5 transition-colors">← BACK</button>
+                        <button onClick={generateCertificate} disabled={isStatusPending} className="py-3 px-6 bg-[#F5C200] text-black rounded-xl font-extrabold flex items-center gap-2 hover:bg-yellow-400 transition-colors disabled:opacity-50">
+                          <Download size={18} /> GENERATE CERTIFICATE
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+              </div>
+
+              {/* Live Preview Side Panel */}
+              <div className="lg:col-span-2">
+                <div className="sticky top-24 bg-[#111111] rounded-3xl border border-white/10 p-6 overflow-hidden">
+                  <h3 className="font-bold text-white mb-6 uppercase tracking-wider text-sm">Live Preview</h3>
+                  
+                  <div className="bg-white rounded-xl p-6 text-black relative shadow-lg">
+                    <div className="absolute top-0 w-full h-8 bg-black/5 opacity-50 left-0"></div>
+                    
+                    <div className="text-center border-b border-black/10 pb-4 mb-4 relative z-10">
+                      <h4 className="font-bold text-sky-900 border border-sky-900 mx-auto w-max px-4 py-1 text-sm bg-sky-50">CERTIFICATE PREVIEW</h4>
+                    </div>
+
+                    <div className="space-y-3 text-xs">
+                      <div className="flex justify-between border-b border-gray-100 pb-2">
+                        <span className="font-bold text-gray-500">PIN</span>
+                        <span className="font-bold">{formData.kraPin || '-'}</span>
+                      </div>
+                      <div className="flex justify-between border-b border-gray-100 pb-2">
+                        <span className="font-bold text-gray-500">Taxpayer</span>
+                        <span className="font-bold">{formData.taxpayerName || '-'}</span>
+                      </div>
+                      <div className="flex justify-between border-b border-gray-100 pb-2">
+                        <span className="font-bold text-gray-500">Address</span>
+                        <span className="text-right">
+                          {[formData.building, formData.street, formData.city].filter(Boolean).join(', ') || '-'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between border-b border-gray-100 pb-2">
+                        <span className="font-bold text-gray-500">Tax Obligation</span>
+                        <span className="text-right">{formData.obligation || '-'}</span>
+                      </div>
+                      <div className="flex justify-between border-b border-gray-100 pb-2">
+                        <span className="font-bold text-gray-500">Status</span>
+                        <span className={`font-bold ${formData.status === 'Active' ? 'text-green-600' : 'text-red-500'}`}>{formData.status}</span>
+                      </div>
+                    </div>
+
+                    <div className="mt-6 text-[10px] text-gray-400 text-center">
+                      Disclaimer : This is a live preview. Click Generate to download the official PDF.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* Hidden Certificate Container for html2pdf */}
+      <div 
+        ref={certContainerRef} 
+        style={{ display: 'none', width: '210mm', minHeight: '297mm', background: 'white', padding: '20mm', boxSizing: 'border-box', fontFamily: 'system-ui, -apple-system, sans-serif', color: 'black' }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '2px solid black', paddingBottom: '10px', marginBottom: '15px', position: 'relative' }}>
+          <div><h2 style={{ fontSize: '18px', margin: 0 }}>KRA LOGO PLACEHOLDER</h2></div>
+          <div style={{ background: '#e5e7eb', padding: '10px 40px', fontWeight: 900, fontSize: '18px', border: '1px solid #d1d5db', position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>
+            PIN Certificate
+          </div>
+          <div style={{ textAlign: 'right', fontSize: '9px', lineHeight: 1.4 }}>
+            <strong>For General Tax Questions<br/>Contact KRA Call Centre</strong><br/>
+            Tel: +254 (020) 4999 999<br/>
+            Email: callcentre@kra.go.ke
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
+          <div style={{ textAlign: 'right', lineHeight: 1.5 }}>
+            <div style={{ fontSize: '11px' }}><strong>Certificate Date :</strong> {todayStr}</div>
+            <div style={{ fontWeight: 700, fontSize: '12px', marginTop: '5px' }}>Personal Identification Number</div>
+            <div style={{ fontWeight: 500, fontSize: '11px' }}>{formData.kraPin || 'N/A'}</div>
+          </div>
+        </div>
+
+        <div style={{ textAlign: 'center', fontSize: '11px', marginBottom: '20px' }}>
+          This is to certify that taxpayer shown herein has been registered with Kenya Revenue Authority
+        </div>
+
+        <div style={{ textAlign: 'center', fontWeight: 700, fontSize: '13px', marginBottom: '10px' }}>Taxpayer Information</div>
+        <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '20px', fontSize: '11px' }}>
+          <tbody>
+            <tr>
+              <td style={{ border: '1px solid black', padding: '3px 6px', fontWeight: 700, width: '30%' }}>Taxpayer Name</td>
+              <td style={{ border: '1px solid black', padding: '3px 6px' }}>{formData.taxpayerName || 'N/A'}</td>
+            </tr>
+            <tr>
+              <td style={{ border: '1px solid black', padding: '3px 6px', fontWeight: 700, width: '30%' }}>Email Address</td>
+              <td style={{ border: '1px solid black', padding: '3px 6px' }}>{formData.email || 'N/A'}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div style={{ textAlign: 'center', fontWeight: 700, fontSize: '13px', marginBottom: '10px' }}>Registered Address</div>
+        <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '20px', fontSize: '11px' }}>
+          <tbody>
+            <tr>
+              <td style={{ border: '1px solid black', padding: '3px 6px' }}><strong>L.R. Number :</strong> {formData.lrNumber}</td>
+              <td style={{ border: '1px solid black', padding: '3px 6px' }}><strong>Building :</strong> {formData.building}</td>
+            </tr>
+            <tr>
+              <td style={{ border: '1px solid black', padding: '3px 6px' }}><strong>Street/Road :</strong> {formData.street}</td>
+              <td style={{ border: '1px solid black', padding: '3px 6px' }}><strong>City/Town :</strong> {formData.city}</td>
+            </tr>
+            <tr>
+              <td style={{ border: '1px solid black', padding: '3px 6px' }}><strong>County :</strong> {formData.county}</td>
+              <td style={{ border: '1px solid black', padding: '3px 6px' }}><strong>Sub-County :</strong> {formData.district}</td>
+            </tr>
+            <tr>
+              <td style={{ border: '1px solid black', padding: '3px 6px' }}><strong>Tax Area :</strong> {formData.taxArea}</td>
+              <td style={{ border: '1px solid black', padding: '3px 6px' }}><strong>Station :</strong> {formData.station}</td>
+            </tr>
+            <tr>
+              <td style={{ border: '1px solid black', padding: '3px 6px' }}><strong>P. O. Box :</strong> {formData.box}</td>
+              <td style={{ border: '1px solid black', padding: '3px 6px' }}><strong>Postal Code :</strong> {formData.postal}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div style={{ textAlign: 'center', fontWeight: 700, fontSize: '13px', marginBottom: '10px' }}>Tax Obligation(s) Registration</div>
+        <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '20px', fontSize: '11px', textAlign: 'center' }}>
+          <thead>
+            <tr>
+              <th style={{ border: '1px solid black', padding: '3px 6px' }}>Sr. No.</th>
+              <th style={{ border: '1px solid black', padding: '3px 6px' }}>Tax Obligation(s)</th>
+              <th style={{ border: '1px solid black', padding: '3px 6px' }}>Effective From Date</th>
+              <th style={{ border: '1px solid black', padding: '3px 6px' }}>Effective Till</th>
+              <th style={{ border: '1px solid black', padding: '3px 6px' }}>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style={{ border: '1px solid black', padding: '3px 6px' }}>1</td>
+              <td style={{ border: '1px solid black', padding: '3px 6px' }}>{formData.obligation}</td>
+              <td style={{ border: '1px solid black', padding: '3px 6px' }}>{formData.fromDate}</td>
+              <td style={{ border: '1px solid black', padding: '3px 6px' }}>{formData.tillDate}</td>
+              <td style={{ border: '1px solid black', padding: '3px 6px', color: formData.status === 'Active' ? 'green' : 'red', fontWeight: 600 }}>{formData.status}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div style={{ fontSize: '10px', lineHeight: 1.5, marginTop: '100px', paddingTop: '20px' }}>
+          The above PIN must appear on all your tax invoices and correspondences with Kenya Revenue Authority. 
+          Your accounting end date is 31st December as per the provisions stated in the Income Tax Act unless 
+          a change has been approved by the Commissioner-Domestic Taxes Department.
+        </div>
+        <div style={{ borderTop: '1px solid black', paddingTop: '5px', marginTop: '30px', fontWeight: 700, fontSize: '10px' }}>
+          Disclaimer : This is a system generated certificate and does not require signature.
+        </div>
+      </div>
+    </div>
+  );
+}

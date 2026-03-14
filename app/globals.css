@@ -1,26 +1,51 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@import "tailwindcss";
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+@theme {
+  --color-brand-red: #e30613;
+  --color-brand-crimson: #7b0a0a;
+  --color-brand-yellow: #f5c200;
+  --color-brand-white: #ffffff;
+  --color-brand-black: #111111;
+  --color-background: var(--color-brand-black);
+  --color-foreground: var(--color-brand-white);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root {
+  --background: #111111;
+  --foreground: #ffffff;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
+
+/* Base button styles applied globally to ensure consistency */
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-lg px-6 py-3 text-sm font-semibold tracking-wide text-white transition-all duration-300;
+    background: linear-gradient(135deg, var(--color-brand-red) 0%, var(--color-brand-crimson) 100%);
+    box-shadow: 0 4px 14px 0 rgba(227, 6, 19, 0.39);
+  }
+
+  .btn-primary:hover {
+    @apply transform scale-[1.02] shadow-lg brightness-110;
+    box-shadow: 0 6px 20px rgba(227, 6, 19, 0.5);
+  }
+
+  .btn-primary:active {
+    @apply transform scale-[0.98];
+  }
+}
+
+/* Glass panel variants */
+.glass-panel {
+  @apply bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl;
+}
+
