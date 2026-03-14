@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import AppFooter from "@/components/AppFooter";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -41,7 +41,7 @@ export default function RootLayout({
             <main className="flex-1 pt-16">
               {children}
             </main>
-            <Footer />
+            <AppFooter />
           </ClerkProvider>
         </body>
       </html>
