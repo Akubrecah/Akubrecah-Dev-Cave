@@ -14,6 +14,12 @@ export default function PdfTools() {
   const router = useRouter();
   const [hasPremiumAccess, setHasPremiumAccess] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [subscriptionInfo, setSubscriptionInfo] = useState<{
+    tier?: string;
+    subscriptionEnd?: string | null;
+    pdfPremiumEnd?: string | null;
+  } | null>(null);
+  const [timeLeft, setTimeLeft] = useState<number | null>(null);
 
   useEffect(() => {
     const checkAccess = async () => {
@@ -26,10 +32,17 @@ export default function PdfTools() {
       try {
         const res = await fetch('/api/user/status');
         if (res.ok) {
-           const data = await res.json();
-           if (data.isCyberPro || data.hasPdfPremium) {
-             setHasPremiumAccess(true);
-           }
+          const data = await res.json();
+
+          if (data.isCyberPro || data.hasPdfPremium) {
+            setHasPremiumAccess(true);
+          }
+
+          setSubscriptionInfo({
+            tier: data.subscriptionTier,
+            subscriptionEnd: data.subscriptionEnd,
+            pdfPremiumEnd: data.pdfPremiumEnd,
+          });
         }
       } catch (err) {
         console.error("Error checking access status", err);
@@ -40,6 +53,38 @@ export default function PdfTools() {
 
     checkAccess();
   }, [isSignedIn]);
+
+  useEffect(() => {
+    if (!subscriptionInfo) return;
+
+    const target =
+      subscriptionInfo.tier === 'daily'
+        ? subscriptionInfo.pdfPremiumEnd
+        : subscriptionInfo.subscriptionEnd;
+
+    if (!target) {
+      setTimeLeft(null);
+      return;
+    }
+
+    const interval = setInterval(() => {
+      const end = new Date(target).getTime();
+      const now = Date.now();
+      const diff = Math.floor((end - now) / 1000);
+
+      setTimeLeft(diff > 0 ? diff : 0);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [subscriptionInfo]);
+
+  const formatTime = (seconds: number) => {
+    if (seconds <= 0) return 'Expired';
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    return `${h}h ${m}m ${s}s`;
+  };
 
   const handlePremiumClick = (e: React.MouseEvent) => {
     if (loading) {
@@ -121,6 +166,12 @@ export default function PdfTools() {
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold text-white mb-4">Powerful Utilities</h2>
           <p className="text-[#E8D5D5] text-lg">Everything you need to manage your PDF files efficiently.</p>
+          {hasPremiumAccess && timeLeft !== null && (
+            <div className="mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--color-brand-red)]/15 border border-[var(--color-brand-red)]/40 text-sm text-white">
+              <span className="font-semibold">Time left:</span>
+              <span className="font-mono">{formatTime(timeLeft)}</span>
+            </div>
+          )}
           {!hasPremiumAccess && !loading && (
             <div className="mt-6 inline-block bg-[var(--color-brand-red)]/20 border border-[var(--color-brand-red)] rounded-lg px-4 py-2 text-white">
               <LockKeyhole className="inline text-[var(--color-brand-red)] mr-2" size={18} />

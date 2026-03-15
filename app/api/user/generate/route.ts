@@ -15,9 +15,7 @@ export async function POST(req: Request) {
       select: { 
         role: true, 
         subscriptionStatus: true, 
-        subscriptionEnd: true,
-        dailyGeneratesCount: true,
-        lastGenerateDate: true
+        subscriptionEnd: true
       }
     });
 
@@ -33,9 +31,7 @@ export async function POST(req: Request) {
         select: {
           role: true,
           subscriptionStatus: true,
-          subscriptionEnd: true,
-          dailyGeneratesCount: true,
-          lastGenerateDate: true
+          subscriptionEnd: true
         }
       });
     }
@@ -48,43 +44,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: true, allowed: true, message: 'Subscriber access granted' });
     }
 
-    // --- Free Tier Logic: Limit to 2 per day ---
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    let isNewDay = true;
-    if (user.lastGenerateDate) {
-      const lastGen = new Date(user.lastGenerateDate);
-      lastGen.setHours(0, 0, 0, 0);
-      if (lastGen.getTime() === today.getTime()) {
-        isNewDay = false;
-      }
-    }
-
-    // If it's a new day, reset count to 0. Otherwise, keep current count.
-    const currentCount = isNewDay ? 0 : user.dailyGeneratesCount;
-
-    if (currentCount >= 2) {
-      return NextResponse.json(
-        { error: 'Daily limit reached. Free users can only generate 2 certificates per day. Please subscribe to remove limits.' },
-        { status: 403 }
-      );
-    }
-
-    // Increment count and update lastGenerateDate
-    await prisma.user.update({
-      where: { clerkId: userId },
-      data: {
-        dailyGeneratesCount: currentCount + 1,
-        lastGenerateDate: new Date()
-      }
-    });
-
+    // Free tier: no per-day limit enforced
     return NextResponse.json({ 
       success: true, 
-      allowed: true, 
-      remainingFreeGenerates: 2 - (currentCount + 1),
-      message: 'Free generate access granted' 
+      allowed: true,
+      message: 'Access granted'
     });
 
   } catch (error: unknown) {
