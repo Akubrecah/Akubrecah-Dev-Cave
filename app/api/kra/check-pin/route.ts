@@ -3,7 +3,7 @@ import { getAccessToken } from '@/lib/kra-client';
 
 export async function POST(req: Request) {
     try {
-        const { taxpayerType, taxpayerID } = await req.json();
+        const { idType, idNumber } = await req.json();
         const token = await getAccessToken('pinByID');
         const BASE_URL = process.env.KRA_API_BASE_URL || 'https://sbx.kra.go.ke';
         const endpoint = `${BASE_URL}/checker/v1/pin`;
@@ -22,8 +22,8 @@ export async function POST(req: Request) {
                         'Accept': 'application/json'
                     },
                     body: JSON.stringify({
-                        TaxpayerType: taxpayerType,
-                        TaxpayerID: taxpayerID
+                        TaxpayerType: idType || 'NATIONAL_ID',
+                        TaxpayerID: idNumber
                     }),
                     signal: controller.signal
                 });

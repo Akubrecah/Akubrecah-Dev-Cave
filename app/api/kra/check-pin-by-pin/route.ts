@@ -3,7 +3,7 @@ import { getAccessToken } from '@/lib/kra-client';
 
 export async function POST(req: Request) {
     try {
-        const { kraPIN } = await req.json();
+        const { pin } = await req.json();
         const token = await getAccessToken('pinByPIN');
         const BASE_URL = process.env.KRA_API_BASE_URL || 'https://sbx.kra.go.ke';
         const endpoint = `${BASE_URL}/checker/v1/pinbypin`;
@@ -22,7 +22,7 @@ export async function POST(req: Request) {
                         'Accept': 'application/json'
                     },
                     body: JSON.stringify({
-                        KRAPIN: kraPIN
+                        KRAPIN: pin
                     }),
                     signal: controller.signal
                 });
@@ -33,7 +33,7 @@ export async function POST(req: Request) {
                 let data;
                 try {
                     data = JSON.parse(rawText);
-                } catch (e) {
+                } catch {
                     throw new Error('Invalid JSON response from KRA');
                 }
 

@@ -16,12 +16,13 @@ export default function Dashboard() {
   // Dashboard routing
   const [selectedService, setSelectedService] = useState<'selection' | 'kra'>('selection');
   const [feature, setFeature] = useState<'generator' | 'viewer'>('generator');
+  const [verifyMode, setVerifyMode] = useState<'id' | 'pin'>('pin');
   
   // KRA Wizard stats
   const [stats, setStats] = useState({ verifications: 0, certificates: 0, credits: 5 });
   
   // Viewer state
-  const [viewerPin, setViewerPin] = useState('');
+  const [viewerInput, setViewerInput] = useState('');
   const [viewerLoading, setViewerLoading] = useState(false);
   const [viewerResult, setViewerResult] = useState<Record<string, string> | null>(null);
   
@@ -96,21 +97,24 @@ export default function Dashboard() {
   };
 
   const verifyAndAutofill = async () => {
-    if (!formData.kraPin && !formData.idNumber) {
-      showStatus('Please enter a KRA PIN or ID Number', true);
+    const isPinMode = verifyMode === 'pin';
+    const inputValue = isPinMode ? formData.kraPin : formData.idNumber;
+
+    if (!inputValue) {
+      showStatus(`Please enter a ${isPinMode ? 'KRA PIN' : 'ID Number'}`, true);
       return;
     }
 
     showStatus('Verifying with KRA...', false, true);
 
     try {
-      const endpoint = formData.kraPin 
+      const endpoint = isPinMode 
         ? '/api/kra/check-pin-by-pin' 
         : '/api/kra/check-pin';
       
-      const body = formData.kraPin 
-        ? { pin: formData.kraPin.toUpperCase() } 
-        : { idType: 'NATIONAL_ID', idNumber: formData.idNumber };
+      const body = isPinMode 
+        ? { pin: inputValue.toUpperCase() } 
+        : { idType: 'NATIONAL_ID', idNumber: inputValue };
 
       const res = await fetch(endpoint, {
         method: 'POST',
@@ -118,7 +122,7 @@ export default function Dashboard() {
         body: JSON.stringify(body)
       });
       
-      if (!res.ok) throw new Error('Failed to verify PIN. Make sure keys are valid or try a mocked PIN like A123456789Z.');
+      if (!res.ok) throw new Error('Verification failed. Use sample ID/PIN if you are in the sandbox.');
 
       const result = await res.json();
       
@@ -135,7 +139,7 @@ export default function Dashboard() {
       setStats(newStats);
       localStorage.setItem('userStats', JSON.stringify(newStats));
 
-      showStatus('PIN verified! Proceed to edit and generate certificate.');
+      showStatus('Verification successful! Details updated.');
     } catch (error: Error | unknown) {
       console.error(error);
       const msg = error instanceof Error ? error.message : 'Error occurred during verification';
@@ -144,17 +148,25 @@ export default function Dashboard() {
   };
 
   const handleQuickView = async () => {
-    if (!viewerPin) {
-      alert("Please enter a PIN");
+    if (!viewerInput) {
+      alert(`Please enter a ${verifyMode === 'pin' ? 'PIN' : 'ID Number'}`);
       return;
     }
     setViewerLoading(true);
     setViewerResult(null);
     try {
-      const res = await fetch('/api/kra/check-pin-by-pin', {
+      const endpoint = verifyMode === 'pin' 
+        ? '/api/kra/check-pin-by-pin' 
+        : '/api/kra/check-pin';
+      
+      const body = verifyMode === 'pin' 
+        ? { pin: viewerInput.toUpperCase() } 
+        : { idType: 'NATIONAL_ID', idNumber: viewerInput };
+
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pin: viewerPin })
+        body: JSON.stringify(body)
       });
       if (!res.ok) throw new Error('Verification failed.');
       const data = await res.json();
@@ -320,26 +332,37 @@ export default function Dashboard() {
         {/* View mode block */}
         {feature === 'viewer' && (
           <div className="bg-[#111111] border border-white/10 rounded-3xl p-8 max-w-3xl mx-auto">
-            <h2 className="text-xl font-bold text-white flex items-center gap-2 mb-6">
-              <Search className="text-[#F5C200]" /> QUICK PIN LOOKUP
-            </h2>
+            <div className="flex gap-4 mb-6">
+              <button 
+                onClick={() => setVerifyMode('pin')}
+                className={`flex-1 py-3 rounded-xl font-bold border-2 transition-all ${verifyMode === 'pin' ? 'border-[var(--color-brand-red)] bg-[var(--color-brand-red)]/10 text-white' : 'border-white/10 text-white/40 hover:border-white/20'}`}
+              >
+                PIN VERIFICATION
+              </button>
+              <button 
+                onClick={() => setVerifyMode('id')}
+                className={`flex-1 py-3 rounded-xl font-bold border-2 transition-all ${verifyMode === 'id' ? 'border-[#34D399] bg-[#34D399]/10 text-white' : 'border-white/10 text-white/40 hover:border-white/20'}`}
+              >
+                ID VERIFICATION
+              </button>
+            </div>
             <div className="flex gap-4">
               <div className="relative flex-1">
-                <Hash className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" size={20} />
+                {verifyMode === 'pin' ? <Hash className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" size={20} /> : <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" size={20} />}
                 <input 
                   type="text" 
-                  value={viewerPin}
-                  onChange={e => setViewerPin(e.target.value.toUpperCase())}
-                  placeholder="Enter KRA PIN (e.g., A001234567Z)"
+                  value={viewerInput}
+                  onChange={e => setViewerInput(verifyMode === 'pin' ? e.target.value.toUpperCase() : e.target.value)}
+                  placeholder={verifyMode === 'pin' ? "Enter KRA PIN (e.g., A001234567Z)" : "Enter National ID Number"}
                   className="w-full bg-black/50 border border-white/10 rounded-xl py-4 pl-12 pr-4 text-white uppercase"
                 />
               </div>
               <button 
                 onClick={handleQuickView}
                 disabled={viewerLoading}
-                className="bg-[#F5C200] text-black font-bold px-8 rounded-xl hover:bg-[#F5C200]/90 transition-colors disabled:opacity-50"
+                className={`font-bold px-8 rounded-xl transition-colors disabled:opacity-50 ${verifyMode === 'pin' ? 'bg-[#F5C200] text-black hover:bg-[#F5C200]/90' : 'bg-[#34D399] text-black hover:bg-[#34D399]/90'}`}
               >
-                {viewerLoading ? 'SEARCHING...' : 'SEARCH'}
+                {viewerLoading ? 'VERIFYING...' : 'VERIFY'}
               </button>
             </div>
 
@@ -349,7 +372,7 @@ export default function Dashboard() {
                   <p className="text-[var(--color-brand-red)]">{viewerResult.error}</p>
                 ) : (
                   <div className="text-white space-y-2">
-                    <p><strong>PIN:</strong> {viewerResult.TaxpayerPIN || viewerPin}</p>
+                    <p><strong>Result:</strong> {viewerResult.TaxpayerPIN || viewerInput}</p>
                     <p><strong>Name:</strong> {viewerResult.TaxpayerName || 'N/A'}</p>
                     <p><strong>Type:</strong> {viewerResult.Type || 'N/A'}</p>
                     <p><strong>Status:</strong> {viewerResult.Status || 'N/A'}</p>
@@ -420,34 +443,54 @@ export default function Dashboard() {
                 <div className="space-y-6">
                   {currentStep === 1 && (
                     <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-                      <h3 className="text-xl font-bold text-white mb-6">VERIFY PIN</h3>
+                      <h3 className="text-xl font-bold text-white mb-6">VERIFICATION STEP</h3>
+                      
+                      <div className="flex gap-4 mb-6">
+                        <button 
+                          onClick={() => setVerifyMode('pin')}
+                          className={`flex-1 py-3 rounded-xl font-bold border-2 transition-all ${verifyMode === 'pin' ? 'border-[var(--color-brand-red)] bg-[var(--color-brand-red)]/10 text-white' : 'border-white/10 text-white/40 hover:border-white/20'}`}
+                        >
+                          PIN VERIFICATION
+                        </button>
+                        <button 
+                          onClick={() => setVerifyMode('id')}
+                          className={`flex-1 py-3 rounded-xl font-bold border-2 transition-all ${verifyMode === 'id' ? 'border-[#34D399] bg-[#34D399]/10 text-white' : 'border-white/10 text-white/40 hover:border-white/20'}`}
+                        >
+                          ID VERIFICATION
+                        </button>
+                      </div>
+
                       <div className="bg-black/40 rounded-2xl p-6 border border-white/5 space-y-4">
-                        <div>
-                          <label className="block text-xs font-bold text-white/50 uppercase mb-2">KRA PIN</label>
-                          <input 
-                            type="text" 
-                            className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white uppercase focus:border-[var(--color-brand-red)] focus:outline-none transition-colors"
-                            placeholder="e.g., A012345678Z"
-                            value={formData.kraPin}
-                            onChange={(e) => updateForm('kraPin', e.target.value.toUpperCase())}
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-bold text-white/50 uppercase mb-2">ID Number</label>
-                          <input 
-                            type="text" 
-                            className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white focus:border-[var(--color-brand-red)] focus:outline-none transition-colors"
-                            placeholder="e.g., 12345678"
-                            value={formData.idNumber}
-                            onChange={(e) => updateForm('idNumber', e.target.value)}
-                          />
-                        </div>
+                        {verifyMode === 'pin' ? (
+                          <div>
+                            <label className="block text-xs font-bold text-white/50 uppercase mb-2">KRA PIN</label>
+                            <input 
+                              type="text" 
+                              className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white uppercase focus:border-[var(--color-brand-red)] focus:outline-none transition-colors"
+                              placeholder="e.g., A012345678Z"
+                              value={formData.kraPin}
+                              onChange={(e) => updateForm('kraPin', e.target.value.toUpperCase())}
+                            />
+                          </div>
+                        ) : (
+                          <div>
+                            <label className="block text-xs font-bold text-white/50 uppercase mb-2">National ID Number</label>
+                            <input 
+                              type="text" 
+                              className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white focus:border-[#34D399] focus:outline-none transition-colors"
+                              placeholder="e.g., 12345678"
+                              value={formData.idNumber}
+                              onChange={(e) => updateForm('idNumber', e.target.value)}
+                            />
+                          </div>
+                        )}
+                        
                         <button 
                           onClick={verifyAndAutofill}
                           disabled={isStatusPending}
-                          className="w-full py-4 bg-white/5 border border-white/10 text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-white/10 transition-colors disabled:opacity-50"
+                          className={`w-full py-4 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-colors disabled:opacity-50 ${verifyMode === 'pin' ? 'bg-[var(--color-brand-red)]/20 border border-[var(--color-brand-red)]/30 hover:bg-[var(--color-brand-red)]/30' : 'bg-[#34D399]/20 border border-[#34D399]/30 hover:bg-[#34D399]/30'}`}
                         >
-                          <Search size={18} /> VERIFY & AUTO-FILL
+                          <Search size={18} /> {isStatusPending ? 'VERIFYING...' : 'VERIFY & AUTO-FILL'}
                         </button>
                       </div>
                       <div className="flex justify-end mt-8">
