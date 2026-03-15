@@ -258,6 +258,13 @@ export default function Dashboard() {
     } catch (error: Error | unknown) {
       console.error(error);
       const msg = error instanceof Error ? error.message : 'Error occurred during verification';
+      
+      if (msg.includes('429') || msg.toLowerCase().includes('limit reached')) {
+        showStatus('Daily limit reached. Redirecting to upgrade...', true);
+        setTimeout(() => router.push('/pricing?reason=kra_limit_reached'), 1500);
+        return;
+      }
+      
       showStatus(msg, true);
     }
   };
@@ -291,7 +298,12 @@ export default function Dashboard() {
       setViewerResult(data);
     } catch (err: Error | unknown) {
       const msg = err instanceof Error ? err.message : 'Unknown error';
-      setViewerResult({ error: msg });
+      if (msg.includes('429') || msg.toLowerCase().includes('limit reached')) {
+        setViewerResult({ error: 'Daily limit reached. Please upgrade for unlimited access.' });
+        setTimeout(() => router.push('/pricing?reason=kra_limit_reached'), 2000);
+      } else {
+        setViewerResult({ error: msg });
+      }
     } finally {
       setViewerLoading(false);
     }
@@ -320,7 +332,8 @@ export default function Dashboard() {
       
       if (!limitRes.ok) {
          showStatus((limitData.error as string) || 'Failed to authorize generation', true);
-         alert((limitData.error as string) || 'Failed to authorize generation. Please upgrade.');
+         // Redirect to pricing with context
+         router.push('/pricing?reason=kra_limit_reached');
          return;
       }
 
@@ -563,7 +576,7 @@ export default function Dashboard() {
                     {timeLeft !== null ? formatTime(timeLeft) : 'No Active Plan'}
                   </div>
                   <div className="text-[10px] text-white/60 uppercase tracking-widest font-semibold mt-1">
-                    {subscription?.tier ? getTierLabel(subscription.tier) : 'Free Tier'}
+                    {subscription?.tier ? getTierLabel(subscription.tier) : 'Free Tier (2/day)'}
                   </div>
                 </div>
               </div>

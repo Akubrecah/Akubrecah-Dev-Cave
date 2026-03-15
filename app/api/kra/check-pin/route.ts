@@ -15,13 +15,13 @@ import { checkUsageLimit, incrementUsage } from '@/lib/pdf/usage';
 export async function POST(req: Request) {
     try {
         // Enforce daily usage limit
-        const { allowed, count, remaining } = await checkUsageLimit('KRA');
-        if (!allowed) {
+        const limit = await checkUsageLimit('KRA');
+        if (!limit.allowed) {
             return NextResponse.json({ 
                 errorMessage: 'Daily limit reached. Please upgrade to premium for unlimited verifications.',
                 limitReached: true,
-                count 
-            }, { status: 403 });
+                count: limit.count 
+            }, { status: 429 });
         }
 
         const { idType = 'KE', idNumber } = await req.json();

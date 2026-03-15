@@ -15,10 +15,27 @@
 }
 
 .logo {
-  position: relative;
-  height: 40px;
-  width: 140px;
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.logo:hover {
+  opacity: 0.8;
+}
+
+.logoText {
+  color: #fff;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  white-space: nowrap;
+}
+
+.brandYellow {
+  color: #ffaa00; /* Matching the brand yellow */
 }
 
 .links {

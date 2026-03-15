@@ -19,10 +19,14 @@ export const Header: React.FC = () => {
         <NextImage
           alt="logo"
           src="/logo.png"
-          fill
+          width={40}
+          height={40}
           style={{ objectFit: 'contain' }}
           priority
         />
+        <span className={styles.logoText}>
+          Akubrecah <span className={styles.brandYellow}>Dev Cave</span>
+        </span>
       </Link>
 
       <ul className={styles.links}>
@@ -54,7 +58,7 @@ export const Header: React.FC = () => {
             </div>
           </div>
         </li>
-        <Link href={`/${locale}#contact`} className={`${styles.button} ${styles.mainButton}`}>
+        <Link href={`/${locale}/contact`} className={`${styles.button} ${styles.mainButton}`}>
           <span className={styles.bg}></span>
           Get in Touch
         </Link>

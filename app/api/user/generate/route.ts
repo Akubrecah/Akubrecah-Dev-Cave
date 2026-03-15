@@ -1,58 +1,33 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
-import prisma from '@/lib/prisma';
+import { checkUsageLimit, incrementUsage } from '@/lib/pdf/usage';
 
 export async function POST(req: Request) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // Enforcement: Check daily limit for KRA Certificate Generation
+    const { allowed, remaining, isPremium } = await checkUsageLimit('KRA');
+    
+    if (!allowed) {
+      return NextResponse.json({ 
+        error: 'Daily generation limit reached. Please upgrade to Cyber Pro for unlimited certificates.',
+        remaining 
+      }, { status: 429 });
     }
 
-    // Get the user from DB to check role and subscription status
-    let user = await prisma.user.findUnique({
-      where: { clerkId: userId },
-      select: { 
-        role: true, 
-        subscriptionStatus: true, 
-        subscriptionEnd: true
-      }
-    });
+    // Since generation logic is handled on the client (html2pdf), 
+    // this API acts as a gatekeeper and incrementer.
+    
+    // Increment usage
+    await incrementUsage('KRA');
 
-    // If user not in DB, auto-create them (happens on first login before webhook syncs)
-    if (!user) {
-      user = await prisma.user.create({
-        data: {
-          clerkId: userId,
-          email: 'unknown@example.com', // Will be updated by webhook later
-          name: 'User',
-          role: 'free'
-        },
-        select: {
-          role: true,
-          subscriptionStatus: true,
-          subscriptionEnd: true
-        }
-      });
-    }
-
-    const subscriptionActive = user.subscriptionStatus === 'active' && 
-      user.subscriptionEnd && new Date(user.subscriptionEnd) > new Date();
-
-    // Subscribers bypass the 2-per-day limit
-    if (user.role === 'cyber' && subscriptionActive) {
-      return NextResponse.json({ success: true, allowed: true, message: 'Subscriber access granted' });
-    }
-
-    // Free tier: no per-day limit enforced
     return NextResponse.json({ 
       success: true, 
       allowed: true,
-      message: 'Access granted'
+      remaining: isPremium ? 9999 : remaining - 1,
+      message: isPremium ? 'Premium access granted' : 'Generation authorized'
     });
 
   } catch (error: unknown) {
-    console.error('Generation Error:', error);
+    console.error('Generation Authorization Error:', error);
     if (error instanceof Error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }

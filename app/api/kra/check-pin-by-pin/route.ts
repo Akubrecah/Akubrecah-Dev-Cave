@@ -1,9 +1,20 @@
 import { NextResponse } from 'next/server';
 import { getAccessToken } from '@/lib/kra-client';
+import { checkUsageLimit, incrementUsage } from '@/lib/pdf/usage';
 
 export async function POST(req: Request) {
     try {
         const { pin } = await req.json();
+
+        // Enforcement: Check daily limit
+        const { allowed, remaining } = await checkUsageLimit('KRA');
+        if (!allowed) {
+            return NextResponse.json({ 
+                errorMessage: 'Daily limit reached. Please upgrade to Cyber Pro for unlimited verifications.',
+                remaining 
+            }, { status: 429 });
+        }
+
         const token = await getAccessToken('pinByPIN');
         const BASE_URL = process.env.KRA_API_BASE_URL || 'https://sbx.kra.go.ke';
         const endpoint = `${BASE_URL}/checker/v1/pinbypin`;
@@ -44,6 +55,10 @@ export async function POST(req: Request) {
                     const errorBody = data?.errorMessage || data?.error || data?.message || `KRA API error ${response.status}`;
                     return NextResponse.json({ errorMessage: errorBody }, { status: response.status });
                 }
+
+                // Increment usage upon success
+                await incrementUsage('KRA');
+
                 return NextResponse.json(data);
             } catch (error: unknown) {
                 clearTimeout(timeout);

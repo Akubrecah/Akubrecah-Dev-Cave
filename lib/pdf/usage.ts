@@ -29,8 +29,26 @@ export async function checkUsageLimit(type: UsageType): Promise<{
     return { allowed: false, count: 0, remaining: 0, isPremium: false };
   }
 
-  const isPremium = dbUser.subscriptionStatus === 'active';
-  if (isPremium) {
+  const now = new Date();
+  
+  // Check if user is Cyber Pro or has active PDF premium
+  const isCyberPro = (
+    dbUser.role === 'cyber' || 
+    dbUser.subscriptionTier?.startsWith('premium') || 
+    dbUser.subscriptionTier === 'weekly' || 
+    dbUser.subscriptionTier === 'monthly'
+  ) && 
+  dbUser.subscriptionStatus === 'active' && 
+  dbUser.subscriptionEnd && 
+  new Date(dbUser.subscriptionEnd) > now;
+
+  const hasPdfPremium = isCyberPro || 
+                        (dbUser.pdfPremiumEnd && new Date(dbUser.pdfPremiumEnd) > now) === true;
+
+  // Determine if the user is considered premium for the requested type
+  const isPremiumForType = type === 'KRA' ? isCyberPro : hasPdfPremium;
+
+  if (isPremiumForType) {
     return { allowed: true, count: 0, remaining: 9999, isPremium: true };
   }
 
