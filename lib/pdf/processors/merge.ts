@@ -64,7 +64,8 @@ export class MergePDFProcessor extends BasePDFProcessor {
       this.updateProgress(90, 'Generating final PDF...', onProgress);
       
       const mergedPdfBytes = await mergedPdf.save();
-      const resultBlob = new Blob([mergedPdfBytes], { type: 'application/pdf' });
+      // Ensure Blob receives an ArrayBuffer to satisfy TS DOM typings
+      const resultBlob = new Blob([mergedPdfBytes.buffer as ArrayBuffer], { type: 'application/pdf' });
       
       this.updateProgress(100, 'Merging complete!', onProgress);
       
