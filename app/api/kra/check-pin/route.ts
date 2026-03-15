@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getAccessToken } from '@/lib/kra-client';
+import { checkUsageLimit, incrementUsage } from '@/lib/pdf/usage';
 
 /**
  * KRA PIN Checker by ID API
@@ -13,6 +14,16 @@ import { getAccessToken } from '@/lib/kra-client';
  */
 export async function POST(req: Request) {
     try {
+        // Enforce daily usage limit
+        const { allowed, count, remaining } = await checkUsageLimit('KRA');
+        if (!allowed) {
+            return NextResponse.json({ 
+                errorMessage: 'Daily limit reached. Please upgrade to premium for unlimited verifications.',
+                limitReached: true,
+                count 
+            }, { status: 403 });
+        }
+
         const { idType = 'KE', idNumber } = await req.json();
         const token = await getAccessToken('pinByID');
         const BASE_URL = process.env.KRA_API_BASE_URL || 'https://sbx.kra.go.ke';
@@ -55,6 +66,10 @@ export async function POST(req: Request) {
                     const errorBody = data?.ErrorMessage || data?.errorMessage || data?.error || data?.message || `KRA API error ${response.status}`;
                     return NextResponse.json({ errorMessage: errorBody }, { status: response.status });
                 }
+
+                // Increment usage on success
+                await incrementUsage('KRA');
+                
                 return NextResponse.json(data);
             } catch (error: unknown) {
                 clearTimeout(timeout);

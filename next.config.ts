@@ -1,7 +1,69 @@
 import type { NextConfig } from "next";
+import createNextIntlPlugin from 'next-intl/plugin';
+
+const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  transpilePackages: ['lucide-react'],
+  webpack: (config, { isServer, webpack }) => {
+    // Add polyfills for client-side PDF processing
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        path: false,
+        crypto: false,
+        stream: false,
+        http: false,
+        https: false,
+        zlib: false,
+        canvas: false,
+        module: false,
+      };
+    } else {
+      // Mark canvas as external for server-side builds
+      config.externals = config.externals || [];
+      config.externals.push({
+        canvas: 'commonjs canvas',
+      });
+    }
+
+    // Ignore problematic modules that are not needed in browser
+    config.plugins.push(
+      new webpack.IgnorePlugin({
+        resourceRegExp: /^module$/
+      }),
+      new webpack.IgnorePlugin({
+        resourceRegExp: /^canvas$/,
+        contextRegExp: /pdfjs-dist-legacy/
+      })
+    );
+
+    // Enable WebAssembly
+    config.experiments = {
+      ...config.experiments,
+      asyncWebAssembly: true,
+      layers: true,
+    };
+
+    return config;
+  },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+    ],
+    unoptimized: true,
+  },
+  turbopack: {
+    resolveAlias: {
+      canvas: './lib/mocks/canvas.js',
+    },
+  },
+  // Note: App-wide headers are now consolidated in proxy.ts 
+  // for consistent behavior with next-intl and clerk.
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);

@@ -50,20 +50,35 @@ export async function POST(req: Request) {
       }
     }
 
-    const { userId, type, tier } = subMetadata;
+    const session = event.data.object as Stripe.Checkout.Session;
+    const { userId: clerkId, type, tier } = subMetadata;
+    const clientRefId = session.client_reference_id;
+    const finalClerkId = clerkId || clientRefId;
+    
     const finalType = tier || type; // Support both naming conventions
-    console.log('Processing event for user:', userId, 'type:', finalType);
+    console.log('Processing event for user:', finalClerkId, 'type:', finalType);
 
-    if (!userId) {
-      console.error('User ID missing in metadata for event:', event.id);
-      return new NextResponse('User ID missing in metadata', { status: 400 });
+    if (!finalClerkId) {
+      console.error('User ID missing in metadata and client_reference_id for event:', event.id);
+      return new NextResponse('User ID missing', { status: 400 });
     }
 
-    // Save transaction
+    // Find the internal user record to get the UUID (id)
+    const user = await prisma.user.findUnique({
+      where: { clerkId: finalClerkId },
+      select: { id: true, email: true }
+    });
+
+    if (!user) {
+      console.error('User not found in DB for clerkId:', clerkId);
+      return new NextResponse('User not found', { status: 404 });
+    }
+
+    // Save transaction using the internal UUID
     await prisma.transaction.create({
       data: {
-        userId,
-        amount: Math.floor(parseInt(amount) / 100), // Store in major units if that's what the DB expects, check schema
+        userId: user.id,
+        amount: Math.floor(parseInt(amount) / 100), // Stripe gives amount in cents
         type: finalType || 'unknown',
         status: 'completed',
         stripeSessionId: sessionId,
@@ -74,35 +89,40 @@ export async function POST(req: Request) {
     if (finalType === 'credit_purchase') {
        const creditsToAdd = Math.floor(parseInt(amount) / 100);
        await prisma.user.update({
-         where: { clerkId: userId },
+         where: { clerkId: finalClerkId },
          data: { credits: { increment: creditsToAdd } }
        });
     } else {
       // Handles 'daily', 'weekly', 'monthly', 'premium_weekly', 'premium_monthly'
       const isPremium = finalType.includes('premium');
-      const isPro = finalType.includes('pro') || finalType === 'weekly' || finalType === 'monthly';
-      const isCyberTier = isPremium || isPro;
+      const isWeekly = finalType.includes('weekly');
+      const isMonthly = finalType.includes('monthly');
+      const isDaily = finalType === 'daily';
+      
+      const isCyberTier = isPremium || isWeekly || isMonthly;
       
       const endDate = new Date();
-      if (finalType === 'daily') {
+      if (isDaily) {
         endDate.setHours(endDate.getHours() + 24);
-      } else if (finalType.includes('monthly')) {
+      } else if (isMonthly) {
         endDate.setMonth(endDate.getMonth() + 1);
+      } else if (isWeekly) {
+        endDate.setDate(endDate.getDate() + 7);
       } else {
-        // Weekly
+        // Default to a week if unknown but subscription-like
         endDate.setDate(endDate.getDate() + 7);
       }
 
       await prisma.user.update({
-        where: { clerkId: userId },
+        where: { clerkId: finalClerkId },
         data: {
           subscriptionStatus: 'active',
           subscriptionTier: finalType,
           role: isCyberTier ? 'cyber' : 'personal',
-          [finalType === 'daily' ? 'pdfPremiumEnd' : 'subscriptionEnd']: endDate
+          [isDaily ? 'pdfPremiumEnd' : 'subscriptionEnd']: endDate
         }
       });
-      console.log('User subscription updated successfully:', userId, 'tier:', finalType, 'role:', isCyberTier ? 'cyber' : 'personal');
+      console.log('User subscription updated successfully:', finalClerkId, 'tier:', finalType, 'role:', isCyberTier ? 'cyber' : 'personal');
     }
   }
 

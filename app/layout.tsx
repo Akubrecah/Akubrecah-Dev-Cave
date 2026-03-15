@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
-import Navbar from "@/components/Navbar";
-import AppFooter from "@/components/AppFooter";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -26,7 +24,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark scroll-smooth">
+    <ClerkProvider>
+      <html lang="en" className="dark scroll-smooth">
         <head>
           <link
             href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=optional"
@@ -34,16 +33,11 @@ export default function RootLayout({
           />
         </head>
         <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
+          className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen`}
         >
-          <ClerkProvider>
-            <Navbar />
-            <main className="flex-1 pt-16">
-              {children}
-            </main>
-            <AppFooter />
-          </ClerkProvider>
+          {children}
         </body>
       </html>
+    </ClerkProvider>
   );
 }

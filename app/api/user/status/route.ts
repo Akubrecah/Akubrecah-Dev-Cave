@@ -43,9 +43,9 @@ export async function GET() {
     new Date(user.subscriptionEnd) > now;
 
     // Check Daily PDF Premium - Cyber Pro/Premium also have PDF access
+    // We check both pdfPremiumEnd (for daily/one-off) and isCyberPro
     const hasPdfPremium = isCyberPro || 
-                          user.subscriptionTier === 'daily' || 
-                          (user.pdfPremiumEnd && new Date(user.pdfPremiumEnd) > now);
+                          (user.pdfPremiumEnd && new Date(user.pdfPremiumEnd) > now) === true;
 
     return NextResponse.json({ 
         isCyberPro,
