@@ -39,7 +39,8 @@ export async function POST(req: Request) {
                 }
 
                 if (!response.ok) {
-                    return NextResponse.json(data, { status: response.status });
+                    const errorBody = data?.errorMessage || data?.error || data?.message || `KRA API error ${response.status}`;
+                    return NextResponse.json({ errorMessage: errorBody }, { status: response.status });
                 }
                 return NextResponse.json(data);
             } catch (error: unknown) {

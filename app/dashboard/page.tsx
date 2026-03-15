@@ -122,7 +122,10 @@ export default function Dashboard() {
         body: JSON.stringify(body)
       });
       
-      if (!res.ok) throw new Error('Verification failed. Use sample ID/PIN if you are in the sandbox.');
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.errorMessage || `KRA API returned ${res.status}`);
+      }
 
       const result = await res.json();
       
@@ -168,7 +171,10 @@ export default function Dashboard() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
       });
-      if (!res.ok) throw new Error('Verification failed.');
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.errorMessage || `KRA API returned ${res.status}`);
+      }
       const data = await res.json();
       setViewerResult(data);
     } catch (err: Error | unknown) {
