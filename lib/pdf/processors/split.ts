@@ -62,7 +62,8 @@ export class SplitPDFProcessor extends BasePDFProcessor {
         copiedPages.forEach((page) => newPdf.addPage(page));
         
         const pdfBytes = await newPdf.save();
-        results.push(new Blob([pdfBytes], { type: 'application/pdf' }));
+        // Ensure Blob receives an ArrayBuffer to satisfy TS DOM typings
+        results.push(new Blob([pdfBytes.buffer as ArrayBuffer], { type: 'application/pdf' }));
         currentRange++;
       }
       
