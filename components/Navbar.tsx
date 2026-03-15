@@ -31,9 +31,9 @@ export default function Navbar() {
       <nav className="max-w-[1280px] mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
         
         <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <Image src="/logo.png" alt="KRA Pro" width={144} height={144} className="h-9 w-auto" quality={100} priority unoptimized />
+          <Image src="/logo.png" alt="Akubrecah Dev Cave" width={144} height={144} className="h-9 w-auto" quality={100} priority unoptimized />
           <span className="text-xl font-bold tracking-tight text-white hidden sm:block">
-            KRA <span className="text-[var(--color-brand-yellow)]">Pro</span>
+            Akubrecah <span className="text-[var(--color-brand-yellow)]">Dev Cave</span>
           </span>
         </Link>
 

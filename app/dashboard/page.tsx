@@ -7,11 +7,20 @@ import {
   Download, Activity 
 } from 'lucide-react';
 import { KENYA_DATA } from '@/lib/kenya-data';
-import { useAuth } from '@clerk/nextjs';
 
 export default function Dashboard() {
   const router = useRouter();
-  const { isLoaded } = useAuth();
+  
+  // Define showStatus early so it can be used in useEffect
+  const showStatus = (message: string, isError = false, isPending = false) => {
+    setStatusMessage(message);
+    setIsStatusError(isError);
+    setIsStatusPending(isPending);
+    
+    if (!isPending) {
+      setTimeout(() => setStatusMessage(''), 5000);
+    }
+  };
   
   // Dashboard routing
   const [selectedService, setSelectedService] = useState<'selection' | 'kra'>('selection');
@@ -23,6 +32,7 @@ export default function Dashboard() {
   
   // Viewer state
   const [viewerInput, setViewerInput] = useState('');
+  const [viewerIdType, setViewerIdType] = useState('KE'); // Used in Quick View
   const [viewerLoading, setViewerLoading] = useState(false);
   const [viewerResult, setViewerResult] = useState<Record<string, string> | null>(null);
   
@@ -36,6 +46,7 @@ export default function Dashboard() {
   const [formData, setFormData] = useState({
     kraPin: '',
     idNumber: '',
+    idType: 'KE',
     taxpayerName: '',
     email: '',
     building: '',
@@ -57,19 +68,130 @@ export default function Dashboard() {
 
   const certContainerRef = useRef<HTMLDivElement>(null);
 
-  // Initialize dates and stats
+  // Subscription state
+  const [subscription, setSubscription] = useState<{
+    tier: string;
+    end?: string;
+    pdfEnd?: string;
+    isCyberPro: boolean;
+    hasPdfPremium: boolean;
+    role: string;
+  } | null>(null);
+  const [timeLeft, setTimeLeft] = useState<number | null>(null);
+
+  // Initialize and fetch user status
   useEffect(() => {
-    const today = new Date().toISOString().split('T')[0];
-    setFormData(prev => ({ ...prev, fromDate: prev.fromDate || today }));
+    const fetchStatus = async () => {
+      try {
+        const res = await fetch('/api/user/status');
+        if (res.ok) {
+          const data = await res.json();
+          setSubscription({
+            tier: data.subscriptionTier,
+            end: data.subscriptionEnd,
+            pdfEnd: data.pdfPremiumEnd,
+            isCyberPro: data.isCyberPro,
+            hasPdfPremium: data.hasPdfPremium,
+            role: data.role
+          });
+          setStats(prev => ({ ...prev, credits: data.credits ?? prev.credits }));
+        }
+      } catch (err) {
+        console.error('Failed to fetch user status:', err);
+      }
+    };
+
+    fetchStatus();
     
-    // In a real app, fetch stats from your DB route /api/user/credits
+    // Check for successful payment and poll if necessary
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('payment') === 'success') {
+      showStatus('Payment successful! Syncing your subscription...', false, true);
+      let attempts = 0;
+      const pollInterval = setInterval(async () => {
+        attempts++;
+        const res = await fetch('/api/user/status');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.subscriptionStatus === 'active') {
+             setSubscription({
+               tier: data.subscriptionTier,
+               end: data.subscriptionEnd,
+               pdfEnd: data.pdfPremiumEnd,
+               isCyberPro: data.isCyberPro,
+               hasPdfPremium: data.hasPdfPremium,
+               role: data.role
+             });
+             setStats(prev => ({ ...prev, credits: data.credits ?? prev.credits }));
+             showStatus('Subscription activated successfully!');
+             clearInterval(pollInterval);
+             // Remove query params
+             router.replace('/dashboard');
+          }
+        }
+        if (attempts >= 10) {
+          clearInterval(pollInterval);
+          showStatus('Subscription update is taking a moment. Please refresh in a few seconds.', false, false);
+        }
+      }, 2000);
+      return () => clearInterval(pollInterval);
+    }
+
     const storedStats = localStorage.getItem('userStats');
     if (storedStats) {
       setStats(JSON.parse(storedStats));
     } else {
       setStats({ verifications: 0, certificates: 0, credits: 5 });
     }
-  }, []);
+  }, [router]);
+
+  // Timer logic
+  useEffect(() => {
+    if (!subscription) return;
+
+    const targetDate = subscription.tier === 'daily' 
+      ? subscription.pdfEnd 
+      : subscription.end;
+
+    if (!targetDate) {
+      setTimeLeft(null);
+      return;
+    }
+
+    const interval = setInterval(() => {
+      const now = new Date().getTime();
+      const end = new Date(targetDate).getTime();
+      const distance = end - now;
+
+      if (distance < 0) {
+        setTimeLeft(0);
+        clearInterval(interval);
+      } else {
+        setTimeLeft(Math.floor(distance / 1000));
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [subscription]);
+
+  const formatTime = (seconds: number) => {
+    if (seconds <= 0) return 'Expired';
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    return `${h}h ${m}m ${s}s`;
+  };
+
+  const getTierLabel = (tier: string) => {
+    const labels: Record<string, string> = {
+      'daily': 'Daily PDF Premium',
+      'weekly': 'Cyber Pro (Weekly)',
+      'monthly': 'Cyber Pro (Monthly)',
+      'premium_weekly': 'Cyber Premium (Weekly)',
+      'premium_monthly': 'Cyber Premium (Monthly)'
+    };
+    return labels[tier] || 'Selection Mode';
+  };
 
   // Update formData helpers
   const updateForm = (field: keyof typeof formData, value: string) => {
@@ -84,16 +206,6 @@ export default function Dashboard() {
       district: '',
       postal: countyData ? countyData.postalCode : ''
     }));
-  };
-
-  const showStatus = (message: string, isError = false, isPending = false) => {
-    setStatusMessage(message);
-    setIsStatusError(isError);
-    setIsStatusPending(isPending);
-    
-    if (!isPending) {
-      setTimeout(() => setStatusMessage(''), 5000);
-    }
   };
 
   const verifyAndAutofill = async () => {
@@ -114,7 +226,7 @@ export default function Dashboard() {
       
       const body = isPinMode 
         ? { pin: inputValue.toUpperCase() } 
-        : { idType: 'NATIONAL_ID', idNumber: inputValue };
+        : { idType: formData.idType, idNumber: inputValue };
 
       const res = await fetch(endpoint, {
         method: 'POST',
@@ -164,7 +276,7 @@ export default function Dashboard() {
       
       const body = verifyMode === 'pin' 
         ? { pin: viewerInput.toUpperCase() } 
-        : { idType: 'NATIONAL_ID', idNumber: viewerInput };
+        : { idType: viewerIdType, idNumber: viewerInput };
 
       const res = await fetch(endpoint, {
         method: 'POST',
@@ -194,13 +306,21 @@ export default function Dashboard() {
     showStatus('Checking user limits...', false, true);
 
     try {
-      // 1. Check permissions server-side
       const limitRes = await fetch('/api/user/generate', { method: 'POST' });
-      const limitData = await limitRes.json();
+      
+      const contentType = limitRes.headers.get('content-type');
+      let limitData: Record<string, unknown> = {};
+      
+      if (contentType && contentType.includes('application/json')) {
+        limitData = await limitRes.json() as Record<string, unknown>;
+      } else {
+        const text = await limitRes.text();
+        throw new Error(`Unexpected non-JSON response from server (Status: ${limitRes.status}). ${text.substring(0, 50)}...`);
+      }
       
       if (!limitRes.ok) {
-         showStatus(limitData.error || 'Failed to authorize generation', true);
-         alert(limitData.error || 'Failed to authorize generation. Please upgrade.');
+         showStatus((limitData.error as string) || 'Failed to authorize generation', true);
+         alert((limitData.error as string) || 'Failed to authorize generation. Please upgrade.');
          return;
       }
 
@@ -213,7 +333,7 @@ export default function Dashboard() {
       if (!element) throw new Error('Certificate container not found');
 
       // Unhide the ref temporarily for generation
-      element.style.display = 'block';
+      element.style.display = 'flex';
 
       const filename = formData.kraPin 
         ? `KRA_PIN_Certificate_${formData.kraPin}.pdf` 
@@ -242,9 +362,12 @@ export default function Dashboard() {
       }
       showStatus(successMsg);
 
-    } catch (err) {
+    } catch (err: unknown) {
       console.error(err);
-      showStatus('Failed to generate PDF. Make sure "html2pdf.js" is functioning.', true);
+      let errorDetail = 'Unknown error';
+      if (err instanceof Error) errorDetail = err.message;
+      else if (typeof err === 'string') errorDetail = err;
+      showStatus(`Failed to generate PDF: ${errorDetail}`, true);
       if (certContainerRef.current) certContainerRef.current.style.display = 'none';
     }
   };
@@ -353,15 +476,29 @@ export default function Dashboard() {
               </button>
             </div>
             <div className="flex gap-4">
-              <div className="relative flex-1">
-                {verifyMode === 'pin' ? <Hash className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" size={20} /> : <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" size={20} />}
-                <input 
-                  type="text" 
-                  value={viewerInput}
-                  onChange={e => setViewerInput(verifyMode === 'pin' ? e.target.value.toUpperCase() : e.target.value)}
-                  placeholder={verifyMode === 'pin' ? "Enter KRA PIN (e.g., A001234567Z)" : "Enter National ID Number"}
-                  className="w-full bg-black/50 border border-white/10 rounded-xl py-4 pl-12 pr-4 text-white uppercase"
-                />
+              <div className="relative flex-1 flex gap-2">
+                {verifyMode === 'id' && (
+                  <select
+                    value={viewerIdType}
+                    onChange={e => setViewerIdType(e.target.value)}
+                    className="bg-black/50 border border-white/10 rounded-xl px-4 text-white focus:border-[#34D399] focus:outline-none transition-colors max-w-[130px]"
+                  >
+                    <option value="KE">Resident (KE)</option>
+                    <option value="NKE">Non-Resident (NKE)</option>
+                    <option value="NKENR">Non-Kenyan (NKENR)</option>
+                    <option value="COMP">Company (COMP)</option>
+                  </select>
+                )}
+                <div className="relative flex-1">
+                  {verifyMode === 'pin' ? <Hash className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" size={20} /> : <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" size={20} />}
+                  <input 
+                    type="text" 
+                    value={viewerInput}
+                    onChange={e => setViewerInput(verifyMode === 'pin' ? e.target.value.toUpperCase() : e.target.value)}
+                    placeholder={verifyMode === 'pin' ? "Enter KRA PIN (e.g., A001234567Z)" : "Enter National ID Number"}
+                    className="w-full bg-black/50 border border-white/10 rounded-xl py-4 pl-12 pr-4 text-white uppercase focus:outline-none focus:border-[#34D399]"
+                  />
+                </div>
               </div>
               <button 
                 onClick={handleQuickView}
@@ -392,27 +529,42 @@ export default function Dashboard() {
         {/* Generator mode block */}
         {feature === 'generator' && (
           <>
-            {/* Stats */}
-            <div className="grid grid-cols-3 gap-6 mb-8">
+            {/* Stats & Subscription Timer */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
               <div className="bg-[#111111] rounded-2xl p-6 border border-white/5 flex items-center gap-4">
                 <div className="bg-white/5 p-3 rounded-lg text-white/50"><CheckCircle /></div>
                 <div>
                   <div className="text-2xl font-bold text-white">{stats.verifications}</div>
-                  <div className="text-sm text-white/40">Verifications Today</div>
+                  <div className="text-sm text-white/40">Verifications</div>
                 </div>
               </div>
               <div className="bg-[#111111] rounded-2xl p-6 border border-white/5 flex items-center gap-4">
                 <div className="bg-white/5 p-3 rounded-lg text-white/50"><FileText /></div>
                 <div>
                   <div className="text-2xl font-bold text-white">{stats.certificates}</div>
-                  <div className="text-sm text-white/40">Certificates Generated</div>
+                  <div className="text-sm text-white/40">Certificates</div>
                 </div>
               </div>
               <div className="bg-[#111111] rounded-2xl p-6 border border-white/5 flex items-center gap-4">
                 <div className="bg-[var(--color-brand-red)]/10 p-3 rounded-lg text-[var(--color-brand-red)]"><Coins /></div>
                 <div>
                   <div className="text-2xl font-bold text-white">{stats.credits}</div>
-                  <div className="text-sm text-[var(--color-brand-red)]">Credits Remaining</div>
+                  <div className="text-sm text-[var(--color-brand-red)]">Credits</div>
+                </div>
+              </div>
+              
+              {/* Timer Block */}
+              <div className={`rounded-2xl p-6 border transition-all flex items-center gap-4 ${timeLeft !== null && timeLeft > 0 ? 'bg-[var(--color-brand-red)]/20 border-[var(--color-brand-red)]/30' : 'bg-[#111111] border-white/5'}`}>
+                <div className={`p-3 rounded-lg ${timeLeft !== null && timeLeft > 0 ? 'bg-[var(--color-brand-red)] text-white' : 'bg-white/5 text-white/50 animate-pulse'}`}>
+                  <Activity size={20} />
+                </div>
+                <div>
+                  <div className="text-lg font-bold text-white leading-tight">
+                    {timeLeft !== null ? formatTime(timeLeft) : 'No Active Plan'}
+                  </div>
+                  <div className="text-[10px] text-white/60 uppercase tracking-widest font-semibold mt-1">
+                    {subscription?.tier ? getTierLabel(subscription.tier) : 'Free Tier'}
+                  </div>
                 </div>
               </div>
             </div>
@@ -480,14 +632,26 @@ export default function Dashboard() {
                           </div>
                         ) : (
                           <div>
-                            <label className="block text-xs font-bold text-white/50 uppercase mb-2">National ID Number</label>
-                            <input 
-                              type="text" 
-                              className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white focus:border-[#34D399] focus:outline-none transition-colors"
-                              placeholder="e.g., 12345678"
-                              value={formData.idNumber}
-                              onChange={(e) => updateForm('idNumber', e.target.value)}
-                            />
+                            <label className="block text-xs font-bold text-white/50 uppercase mb-2">Resident Type & ID Number</label>
+                            <div className="flex gap-2">
+                              <select
+                                value={formData.idType}
+                                onChange={e => updateForm('idType', e.target.value)}
+                                className="bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white focus:border-[#34D399] focus:outline-none transition-colors max-w-[150px]"
+                              >
+                                <option value="KE">Kenyan Resident</option>
+                                <option value="NKE">Non-Resident</option>
+                                <option value="NKENR">Non-Kenyan</option>
+                                <option value="COMP">Company</option>
+                              </select>
+                              <input 
+                                type="text" 
+                                className="flex-1 w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white focus:border-[#34D399] focus:outline-none transition-colors"
+                                placeholder="e.g., 12345678"
+                                value={formData.idNumber}
+                                onChange={(e) => updateForm('idNumber', e.target.value)}
+                              />
+                            </div>
                           </div>
                         )}
                         
@@ -643,16 +807,19 @@ export default function Dashboard() {
       {/* Hidden Certificate Container for html2pdf */}
       <div 
         ref={certContainerRef} 
-        style={{ display: 'none', width: '210mm', minHeight: '297mm', background: 'white', padding: '20mm', boxSizing: 'border-box', fontFamily: 'system-ui, -apple-system, sans-serif', color: 'black' }}
+        style={{ display: 'none', width: '210mm', minHeight: '297mm', background: 'white', padding: '20mm', boxSizing: 'border-box', fontFamily: '"Inter", system-ui, -apple-system, sans-serif', color: 'black', flexDirection: 'column', position: 'relative' }}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '2px solid black', paddingBottom: '10px', marginBottom: '15px', position: 'relative' }}>
-          <div><h2 style={{ fontSize: '18px', margin: 0 }}>KRA LOGO PLACEHOLDER</h2></div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid black', paddingBottom: '10px', marginBottom: '15px', position: 'relative' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <img src="/kra-logo.jpeg" alt="KRA Logo" style={{ height: '50px' }} />
+          </div>
           <div style={{ background: '#e5e7eb', padding: '10px 40px', fontWeight: 900, fontSize: '18px', border: '1px solid #d1d5db', position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>
             PIN Certificate
           </div>
           <div style={{ textAlign: 'right', fontSize: '9px', lineHeight: 1.4 }}>
             <strong>For General Tax Questions<br/>Contact KRA Call Centre</strong><br/>
             Tel: +254 (020) 4999 999<br/>
+            Cell: +254(0711)099 999<br/>
             Email: callcentre@kra.go.ke
           </div>
         </div>
@@ -731,7 +898,7 @@ export default function Dashboard() {
           </tbody>
         </table>
 
-        <div style={{ fontSize: '10px', lineHeight: 1.5, marginTop: '100px', paddingTop: '20px' }}>
+        <div style={{ fontSize: '10px', lineHeight: 1.5, marginTop: 'auto', paddingTop: '20px' }}>
           The above PIN must appear on all your tax invoices and correspondences with Kenya Revenue Authority. 
           Your accounting end date is 31st December as per the provisions stated in the Income Tax Act unless 
           a change has been approved by the Commissioner-Domestic Taxes Department.

@@ -1,12 +1,23 @@
 import { NextResponse } from 'next/server';
 import { getAccessToken } from '@/lib/kra-client';
 
+/**
+ * KRA PIN Checker by ID API
+ * Endpoint: POST /checker/v1/pin
+ * 
+ * TaxpayerType values:
+ *   KE    - Kenyan Resident
+ *   NKE   - Non-Kenyan Resident  
+ *   NKENR - Non-Kenyan Non-Resident
+ *   COMP  - Company / Non-Individual
+ */
 export async function POST(req: Request) {
     try {
-        const { idType, idNumber } = await req.json();
+        const { idType = 'KE', idNumber } = await req.json();
         const token = await getAccessToken('pinByID');
         const BASE_URL = process.env.KRA_API_BASE_URL || 'https://sbx.kra.go.ke';
         const endpoint = `${BASE_URL}/checker/v1/pin`;
+        console.log(`[KRA-ID] Calling ${endpoint} with TaxpayerType=${idType}, TaxpayerID=${idNumber}`);
 
         for (let i = 0; i <= 2; i++) {
             const controller = new AbortController();
@@ -22,7 +33,7 @@ export async function POST(req: Request) {
                         'Accept': 'application/json'
                     },
                     body: JSON.stringify({
-                        TaxpayerType: idType || 'NATIONAL_ID',
+                        TaxpayerType: idType,
                         TaxpayerID: idNumber
                     }),
                     signal: controller.signal
@@ -31,15 +42,17 @@ export async function POST(req: Request) {
                 clearTimeout(timeout);
                 
                 const rawText = await response.text();
+                console.log(`[KRA-ID] Response status: ${response.status}, body: ${rawText.substring(0, 300)}`);
+
                 let data;
                 try {
                     data = JSON.parse(rawText);
                 } catch {
-                    throw new Error('Invalid JSON response from KRA');
+                    throw new Error(`KRA returned non-JSON response (${response.status}): ${rawText.substring(0, 100)}`);
                 }
 
                 if (!response.ok) {
-                    const errorBody = data?.errorMessage || data?.error || data?.message || `KRA API error ${response.status}`;
+                    const errorBody = data?.ErrorMessage || data?.errorMessage || data?.error || data?.message || `KRA API error ${response.status}`;
                     return NextResponse.json({ errorMessage: errorBody }, { status: response.status });
                 }
                 return NextResponse.json(data);

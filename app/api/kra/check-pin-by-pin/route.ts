@@ -7,6 +7,7 @@ export async function POST(req: Request) {
         const token = await getAccessToken('pinByPIN');
         const BASE_URL = process.env.KRA_API_BASE_URL || 'https://sbx.kra.go.ke';
         const endpoint = `${BASE_URL}/checker/v1/pinbypin`;
+        console.log(`[KRA-PIN] Calling ${endpoint} with KRAPIN=${pin}`);
 
         for (let i = 0; i <= 2; i++) {
             const controller = new AbortController();
@@ -36,6 +37,8 @@ export async function POST(req: Request) {
                 } catch {
                     throw new Error('Invalid JSON response from KRA');
                 }
+
+                console.log(`[KRA-PIN] Response status: ${response.status}, body: ${rawText.substring(0, 300)}`);
 
                 if (!response.ok) {
                     const errorBody = data?.errorMessage || data?.error || data?.message || `KRA API error ${response.status}`;

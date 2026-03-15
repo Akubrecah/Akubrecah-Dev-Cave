@@ -99,7 +99,7 @@ export const KENYA_DATA: Record<string, { postalCode: string, subCounties: strin
     },
     "WEST POKOT": {
         postalCode: "30600",
-        subCounties: ["KACHELIBA", "KAPENGURIA", "POKOT SOUTH", "SIGOR"]
+        subCounties: ["KIPKOMO", "POKOT CENTRAL", "POKOT NORTH", "POKOT SOUTH", "WEST POKOT"]
     },
     "SAMBURU": {
         postalCode: "20600",

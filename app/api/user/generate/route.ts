@@ -6,11 +6,11 @@ export async function POST(req: Request) {
   try {
     const { userId } = await auth();
     if (!userId) {
-      return new NextResponse('Unauthorized', { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Get the user from DB to check role and subscription status
-    const user = await prisma.user.findUnique({
+    let user = await prisma.user.findUnique({
       where: { clerkId: userId },
       select: { 
         role: true, 
@@ -21,8 +21,23 @@ export async function POST(req: Request) {
       }
     });
 
+    // If user not in DB, auto-create them (happens on first login before webhook syncs)
     if (!user) {
-      return new NextResponse('User not found', { status: 404 });
+      user = await prisma.user.create({
+        data: {
+          clerkId: userId,
+          email: 'unknown@example.com', // Will be updated by webhook later
+          name: 'User',
+          role: 'free'
+        },
+        select: {
+          role: true,
+          subscriptionStatus: true,
+          subscriptionEnd: true,
+          dailyGeneratesCount: true,
+          lastGenerateDate: true
+        }
+      });
     }
 
     const subscriptionActive = user.subscriptionStatus === 'active' && 
