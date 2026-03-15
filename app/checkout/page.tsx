@@ -12,7 +12,7 @@ import StripeCheckoutForm from '@/components/StripeCheckoutForm';
 // recreating the Stripe object on every render.
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
-export default function CheckoutPage() {
+function CheckoutContent() {
   const [clientSecret, setClientSecret] = useState('');
   const [error, setError] = useState<string | null>(null);
   const searchParams = useSearchParams();
@@ -140,3 +140,16 @@ export default function CheckoutPage() {
     </div>
   );
 }
+
+export default function CheckoutPage() {
+  return (
+    <React.Suspense fallback={
+      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#e30613]"></div>
+      </div>
+    }>
+      <CheckoutContent />
+    </React.Suspense>
+  );
+}
+
