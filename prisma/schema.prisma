@@ -18,6 +18,8 @@ model User {
   subscriptionTier   String    @default("none") // none, daily, pro_weekly, pro_monthly, premium_weekly, premium_monthly
   subscriptionEnd    DateTime?
   pdfPremiumEnd      DateTime? // 24-hr unlock for premium PDF tools
+  dailyGeneratesCount Int       @default(0)
+  lastGenerateDate    DateTime?
 
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
