@@ -12,6 +12,7 @@ export async function GET() {
     const user = await prisma.user.findUnique({
       where: { clerkId: userId },
       select: {
+        id: true,
         role: true,
         subscriptionStatus: true,
         subscriptionTier: true,
@@ -57,8 +58,8 @@ export async function GET() {
 
     const usageLimits = await prisma.usageLimit.findMany({
       where: {
-        userId,
-        lastUsed: {
+        userId: user.id, // Using dbUser.id or userId (clerkId)
+        date: {
           gte: todayStart,
           lt: tomorrow
         }

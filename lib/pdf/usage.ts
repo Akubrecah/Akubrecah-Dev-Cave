@@ -1,7 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import prisma from '@/lib/prisma';
 import { currentUser } from '@clerk/nextjs/server';
-
-const prisma = new PrismaClient();
 
 export type UsageType = 'KRA' | 'PDF';
 
