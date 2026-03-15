@@ -77,6 +77,7 @@ export default function Dashboard() {
     hasPdfPremium: boolean;
     role: string;
   } | null>(null);
+  const [usage, setUsage] = useState<{ KRA: number; PDF: number; limit: number } | null>(null);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
 
   // Initialize and fetch user status
@@ -94,6 +95,7 @@ export default function Dashboard() {
             hasPdfPremium: data.hasPdfPremium,
             role: data.role
           });
+          setUsage(data.usage || null);
           setStats(prev => ({ ...prev, credits: data.credits ?? prev.credits }));
         }
       } catch (err) {
@@ -122,6 +124,7 @@ export default function Dashboard() {
                hasPdfPremium: data.hasPdfPremium,
                role: data.role
              });
+             setUsage(data.usage || null);
              setStats(prev => ({ ...prev, credits: data.credits ?? prev.credits }));
              showStatus('Subscription activated successfully!');
              clearInterval(pollInterval);
@@ -567,18 +570,29 @@ export default function Dashboard() {
               </div>
               
               {/* Timer Block */}
-              <div className={`rounded-2xl p-6 border transition-all flex items-center gap-4 ${timeLeft !== null && timeLeft > 0 ? 'bg-[var(--color-brand-red)]/20 border-[var(--color-brand-red)]/30' : 'bg-[#111111] border-white/5'}`}>
-                <div className={`p-3 rounded-lg ${timeLeft !== null && timeLeft > 0 ? 'bg-[var(--color-brand-red)] text-white' : 'bg-white/5 text-white/50 animate-pulse'}`}>
-                  <Activity size={20} />
-                </div>
-                <div>
-                  <div className="text-lg font-bold text-white leading-tight">
-                    {timeLeft !== null ? formatTime(timeLeft) : 'No Active Plan'}
+              <div className={`rounded-2xl p-6 border transition-all flex items-center justify-between gap-4 ${timeLeft !== null && timeLeft > 0 ? 'bg-[var(--color-brand-red)]/20 border-[var(--color-brand-red)]/30' : 'bg-[#111111] border-white/5'}`}>
+                <div className="flex items-center gap-4">
+                  <div className={`p-3 rounded-lg ${timeLeft !== null && timeLeft > 0 ? 'bg-[var(--color-brand-red)] text-white' : 'bg-white/5 text-white/50 animate-pulse'}`}>
+                    <Activity size={20} />
                   </div>
-                  <div className="text-[10px] text-white/60 uppercase tracking-widest font-semibold mt-1">
-                    {subscription?.tier ? getTierLabel(subscription.tier) : 'Free Tier (2/day)'}
+                  <div>
+                    <div className="text-lg font-bold text-white leading-tight">
+                      {timeLeft !== null ? formatTime(timeLeft) : 'No Active Plan'}
+                    </div>
+                    <div className="text-[10px] text-white/60 uppercase tracking-widest font-semibold mt-1">
+                      {subscription?.tier ? getTierLabel(subscription.tier) : (usage ? `Free Tier (${usage.KRA}/${usage.limit})` : 'Free Tier')}
+                    </div>
                   </div>
                 </div>
+                
+                {(!subscription?.isCyberPro && usage && usage.KRA >= usage.limit) && (
+                  <button 
+                    onClick={() => router.push('/pricing')}
+                    className="px-4 py-2 bg-[var(--color-brand-red)] text-white text-xs font-bold rounded-lg hover:bg-[var(--color-deep-crimson)] transition-colors shadow-[0_0_15px_rgba(227,6,19,0.4)] animate-bounce"
+                  >
+                    UPGRADE NOW
+                  </button>
+                )}
               </div>
             </div>
 

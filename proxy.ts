@@ -17,10 +17,22 @@ const isPublicRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
-  // 1. Check if the route is public
   const publicRoute = isPublicRoute(req);
+  const isApiRoute = req.nextUrl.pathname.startsWith('/api');
 
-  // 2. Run next-intl middleware for all routes to handle localization
+  // 1. Handle API routes - Skip localization
+  if (isApiRoute) {
+    if (!publicRoute) {
+      await auth.protect();
+    }
+    const response = NextResponse.next();
+    // Apply security headers
+    response.headers.set('Cross-Origin-Opener-Policy', 'same-origin');
+    response.headers.set('Cross-Origin-Embedder-Policy', 'require-corp');
+    return response;
+  }
+
+  // 2. Run next-intl middleware for all other routes
   const response = await intlMiddleware(req);
 
   // 3. Apply authentication protection for non-public routes
@@ -28,8 +40,7 @@ export default clerkMiddleware(async (auth, req) => {
     await auth.protect();
   }
 
-  // 4. Set security headers for WebAssembly (COOP & COEP)
-  // These are set here to ensure they persist across the unified response
+  // 4. Set security headers
   response.headers.set('Cross-Origin-Opener-Policy', 'same-origin');
   response.headers.set('Cross-Origin-Embedder-Policy', 'require-corp');
   

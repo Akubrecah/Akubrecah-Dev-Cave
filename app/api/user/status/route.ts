@@ -47,6 +47,27 @@ export async function GET() {
     const hasPdfPremium = isCyberPro || 
                           (user.pdfPremiumEnd && new Date(user.pdfPremiumEnd) > now) === true;
 
+    // Fetch usage counts for today
+    const tomorrow = new Date(now);
+    tomorrow.setHours(0, 0, 0, 0);
+    tomorrow.setDate(now.getDate() + 1);
+    
+    const todayStart = new Date(now);
+    todayStart.setHours(0, 0, 0, 0);
+
+    const usageLimits = await prisma.usageLimit.findMany({
+      where: {
+        userId,
+        lastUsed: {
+          gte: todayStart,
+          lt: tomorrow
+        }
+      }
+    });
+
+    const kraUsage = usageLimits.find(u => u.type === 'KRA')?.count || 0;
+    const pdfUsage = usageLimits.find(u => u.type === 'PDF')?.count || 0;
+
     return NextResponse.json({ 
         isCyberPro,
         hasPdfPremium,
@@ -54,7 +75,12 @@ export async function GET() {
         subscriptionStatus: user.subscriptionStatus,
         subscriptionEnd: user.subscriptionEnd,
         pdfPremiumEnd: user.pdfPremiumEnd,
-        role: user.role
+        role: user.role,
+        usage: {
+          KRA: kraUsage,
+          PDF: pdfUsage,
+          limit: 2
+        }
     });
 
   } catch (error) {
