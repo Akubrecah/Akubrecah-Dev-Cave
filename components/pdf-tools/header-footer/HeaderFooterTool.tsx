@@ -63,50 +63,8 @@ export function HeaderFooterTool({ className = '' }: HeaderFooterToolProps) {
   const cancelledRef = useRef(false);
   const previewCanvasRef = useRef<HTMLCanvasElement>(null);
 
-  // Load PDF and generate preview
-  const loadPdfPreview = useCallback(async (pdfFile: File) => {
-    try {
-      const pdfjsLib = await loadPdfjsLib();
-      const arrayBuffer = await pdfFile.arrayBuffer();
-      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-      setTotalPages(pdf.numPages);
-      renderPagePreview(pdf, 1);
-    } catch (err) {
-      console.error('Failed to load PDF preview:', err);
-    }
-  }, []);
-
-  // Render page preview with header/footer overlay
-  const renderPagePreview = async (pdf: any, pageNum: number) => {
-    if (!previewCanvasRef.current) return;
-
-    try {
-      const page = await pdf.getPage(pageNum);
-      const scale = 0.6;
-      const viewport = page.getViewport({ scale });
-
-      const canvas = previewCanvasRef.current;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-
-      canvas.width = viewport.width;
-      canvas.height = viewport.height;
-
-      await page.render({ canvasContext: ctx, viewport }).promise;
-
-      // Check if page should show header/footer
-      const shouldShowContent = isPageInRange(pageNum) && !(skipFirstPage && pageNum === 1);
-      if (shouldShowContent) {
-        drawHeaderFooterOverlay(ctx, viewport.width, viewport.height, pageNum, pdf.numPages);
-      }
-
-    } catch (err) {
-      console.error('Failed to render page:', err);
-    }
-  };
-
   // Check if page is in range
-  const isPageInRange = (pageNum: number): boolean => {
+  const isPageInRange = useCallback((pageNum: number): boolean => {
     if (!pageRange || pageRange.toLowerCase() === 'all' || pageRange.trim() === '') {
       return true;
     }
@@ -125,10 +83,10 @@ export function HeaderFooterTool({ className = '' }: HeaderFooterToolProps) {
       }
     }
     return false;
-  };
+  }, [pageRange]);
 
   // Draw header and footer text on canvas
-  const drawHeaderFooterOverlay = (
+  const drawHeaderFooterOverlay = useCallback((
     ctx: CanvasRenderingContext2D,
     width: number,
     height: number,
@@ -177,7 +135,54 @@ export function HeaderFooterTool({ className = '' }: HeaderFooterToolProps) {
       ctx.textAlign = 'right';
       ctx.fillText(replaceVars(footerRight), width - scaledMargin, height - scaledMargin);
     }
-  };
+  }, [headerLeft, headerCenter, headerRight, footerLeft, footerCenter, footerRight, fontSize, fontColor, margin]);
+
+  // Render page preview with header/footer overlay
+  const renderPagePreview = useCallback(async (pdf: any, pageNum: number) => {
+    if (!previewCanvasRef.current) return;
+
+    try {
+      const page = await pdf.getPage(pageNum);
+      const scale = 0.6;
+      const viewport = page.getViewport({ scale });
+
+      const canvas = previewCanvasRef.current;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+
+      await page.render({ canvasContext: ctx, viewport, canvas }).promise;
+
+      // Check if page should show header/footer
+      const shouldShowContent = isPageInRange(pageNum) && !(skipFirstPage && pageNum === 1);
+      if (shouldShowContent) {
+        drawHeaderFooterOverlay(ctx, viewport.width, viewport.height, pageNum, pdf.numPages);
+      }
+
+    } catch (err) {
+      console.error('Failed to render page:', err);
+    }
+  }, [pageRange, skipFirstPage, drawHeaderFooterOverlay]);
+
+  // Load PDF and generate preview
+  const loadPdfPreview = useCallback(async (pdfFile: File) => {
+    try {
+      const pdfjsLib = await loadPdfjsLib();
+      const arrayBuffer = await pdfFile.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      setTotalPages(pdf.numPages);
+      renderPagePreview(pdf, 1);
+    } catch (err) {
+      console.error('Failed to load PDF preview:', err);
+    }
+  }, [renderPagePreview]);
+
+
+
+
+
 
   // Re-render preview when options change
   useEffect(() => {

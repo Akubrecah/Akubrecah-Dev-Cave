@@ -12,7 +12,7 @@ export default function Footer() {
       <div className="max-w-[1400px] mx-auto px-6">
         <div className="flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="text-gray-400 text-sm">
-            &copy; {new Date().getFullYear()} Akubrecah Technologies. All rights reserved.
+            &copy; {new Date().getFullYear()} Akubrecah Technologies. Developed in 2023. All rights reserved.
           </div>
           
           <div className="flex flex-wrap items-center justify-center gap-6 text-sm">

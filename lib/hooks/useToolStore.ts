@@ -75,6 +75,7 @@ export const useToolStore = create<ToolStore>((set) => ({
   })),
 
   resetState: () => set({
+    files: [],
     state: {
       status: 'idle',
       progress: 0,

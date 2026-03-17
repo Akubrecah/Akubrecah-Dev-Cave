@@ -195,7 +195,8 @@ export function CropPDFTool({ className = '' }: CropPDFToolProps) {
 
       await page.render({
         canvasContext: context,
-        viewport: viewport
+        viewport: viewport,
+        canvas: canvas,
       }).promise;
 
       setState(prev => ({

@@ -35,7 +35,7 @@ export default async function LocaleLayout({
   return (
     <NextIntlClientProvider messages={messages}>
       <div lang={locale} dir={direction} className="flex flex-col min-h-screen">
-        <Header />
+        <Header locale={locale as Locale} />
         <main className="flex-1 pt-16">
           {children}
         </main>

@@ -117,6 +117,7 @@ export function FindAndRedactTool({ className = '' }: FindAndRedactToolProps) {
                     await page.render({
                         canvasContext: context,
                         viewport: viewport,
+                        canvas: canvas,
                     }).promise;
 
                     // Draw match highlights
@@ -167,6 +168,7 @@ export function FindAndRedactTool({ className = '' }: FindAndRedactToolProps) {
             await page.render({
                 canvasContext: context,
                 viewport: viewport,
+                canvas: canvas,
             }).promise;
 
             // Draw match highlights

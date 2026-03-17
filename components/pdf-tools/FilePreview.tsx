@@ -151,6 +151,7 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
         const renderContext = {
           canvasContext: context,
           viewport: scaledViewport,
+          canvas,
         };
 
         await page.render(renderContext).promise;

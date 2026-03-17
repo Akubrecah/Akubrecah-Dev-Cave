@@ -126,6 +126,7 @@ export function PDFMultiTool({ className = '' }: PDFMultiToolProps) {
               await page.render({
                 canvasContext: context,
                 viewport: viewport,
+                canvas: canvas,
               }).promise;
 
               thumbnail = canvas.toDataURL('image/jpeg', 0.7);

@@ -171,6 +171,7 @@ export function BookmarkTool({ className = '' }: BookmarkToolProps) {
       await page.render({
         canvasContext: ctx,
         viewport: scaledViewport,
+        canvas: canvasRef.current!,
       }).promise;
 
     } catch (err) {

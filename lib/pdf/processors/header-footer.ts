@@ -132,7 +132,13 @@ export class HeaderFooterProcessor extends BasePDFProcessor {
           if (hfOptions.header.center) {
             const text = replacePlaceholders(hfOptions.header.center);
             const textWidth = font.widthOfTextAtSize(text, fontSize);
-            page.drawText(text, { x: (width - textWidth) / 2, y: headerY, size: fontSize, font, color });
+            page.drawText(text, { 
+              x: (width / 2) - (textWidth / 2), 
+              y: headerY, 
+              size: fontSize, 
+              font, 
+              color 
+            });
           }
           if (hfOptions.header.right) {
             const text = replacePlaceholders(hfOptions.header.right);
@@ -152,7 +158,13 @@ export class HeaderFooterProcessor extends BasePDFProcessor {
           if (hfOptions.footer.center) {
             const text = replacePlaceholders(hfOptions.footer.center);
             const textWidth = font.widthOfTextAtSize(text, fontSize);
-            page.drawText(text, { x: (width - textWidth) / 2, y: footerY, size: fontSize, font, color });
+            page.drawText(text, { 
+              x: (width / 2) - (textWidth / 2), 
+              y: footerY, 
+              size: fontSize, 
+              font, 
+              color 
+            });
           }
           if (hfOptions.footer.right) {
             const text = replacePlaceholders(hfOptions.footer.right);

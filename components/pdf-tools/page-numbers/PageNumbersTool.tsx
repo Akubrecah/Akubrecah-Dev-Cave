@@ -111,7 +111,7 @@ export function PageNumbersTool({ className = '' }: PageNumbersToolProps) {
       canvas.width = viewport.width;
       canvas.height = viewport.height;
 
-      const renderTask = page.render({ canvasContext: ctx, viewport });
+      const renderTask = page.render({ canvasContext: ctx, viewport, canvas });
       renderTaskRef.current = renderTask;
 
       await renderTask.promise;

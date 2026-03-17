@@ -6,12 +6,18 @@ import NextImage from 'next/image';
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import { SignInButton, UserButton, Show } from '@clerk/nextjs';
+import { type Locale } from '@/lib/i18n/config';
 import styles from './Header.module.css';
 
-export const Header: React.FC = () => {
+export interface HeaderProps {
+  locale: Locale;
+  showSearch?: boolean;
+}
+
+export const Header: React.FC<HeaderProps> = ({ locale: propLocale }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const params = useParams();
-  const locale = (params?.locale as string) || 'en';
+  const locale = propLocale || (params?.locale as string) || 'en';
 
   return (
     <header className={`${styles.header} ${isMenuOpen ? styles.menuOpen : ''}`}>

@@ -97,8 +97,8 @@ export const DownloadButton: React.FC<DownloadButtonProps> = ({
     setIsDownloading(true);
     onDownloadStart?.();
 
-    // Sanitize filename to prevent path traversal
-    const safeFilename = sanitizeFilename(filename, 'download.pdf');
+    // Sanitize filename to prevent path traversal and force uppercase
+    const safeFilename = sanitizeFilename(filename, 'download.pdf').toUpperCase();
 
     // Create a temporary anchor element
     const link = document.createElement('a');
