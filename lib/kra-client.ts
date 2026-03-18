@@ -43,43 +43,63 @@ export async function getAccessToken(apiType: 'pinByID' | 'pinByPIN', retries = 
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 15000);
 
-        try {
-            console.log(`[AUTH] Attempt ${i + 1} for ${apiType}: Fetching token from ${config.tokenEndpoint}...`);
-            const response = await fetch(config.tokenEndpoint, {
-                method: 'GET',
-                headers: { 
-                    'Authorization': `Basic ${credentials}`,
-                    'User-Agent': 'Mozilla/5.0 (Node.js/KRA-Checker)',
-                    'Accept': 'application/json'
-                },
-                signal: controller.signal
-            });
+        // Try GET first (standard KRA), then POST (standard OAuth2)
+        const methods: ('GET' | 'POST')[] = ['GET', 'POST'];
+        
+        for (const method of methods) {
+            try {
+                console.log(`[AUTH] Attempt ${i + 1} for ${apiType}: Fetching token from ${config.tokenEndpoint} using ${method}...`);
+                
+                const fetchOptions: RequestInit = {
+                    method,
+                    headers: { 
+                        'Authorization': `Basic ${credentials}`,
+                        'User-Agent': 'Mozilla/5.0 (Node.js/KRA-Checker)',
+                        'Accept': 'application/json'
+                    },
+                    signal: controller.signal
+                };
 
-            clearTimeout(timeout);
+                // If POST, move query params to body if needed? 
+                // Actually, most APIs allow query params with POST too.
+                // But let's keep it simple first.
 
-            const contentType = response.headers.get('content-type');
-            if (!contentType || !contentType.includes('application/json')) {
-                const text = await response.text();
-                const errorMessage = `KRA Endpoint Verification Failed: Server returned ${response.status} ${response.statusText}. Content received: ${text.substring(0, 100)}`;
-                console.error(`[AUTH] ${errorMessage}`);
-                throw new Error(errorMessage);
+                const response = await fetch(config.tokenEndpoint, { ...fetchOptions });
+
+                // If we get 405 Method Not Allowed or 400 (and we haven't tried POST yet), try the next method
+                if ((response.status === 405 || response.status === 400) && method === 'GET') {
+                    console.warn(`[AUTH] ${method} failed with ${response.status}. Retrying with POST...`);
+                    continue; 
+                }
+
+                clearTimeout(timeout);
+
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    const text = await response.text();
+                    const errorMessage = `KRA Endpoint Verification Failed: Server returned ${response.status} ${response.statusText}. Content received: ${text.substring(0, 500)}`;
+                    console.error(`[AUTH] ${errorMessage}`);
+                    throw new Error(errorMessage);
+                }
+
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.errorMessage || `Auth failed with status ${response.status}`);
+
+                cache.token = data.access_token;
+                cache.expiry = now + parseInt(data.expires_in || '3600') - 60;
+                console.log(`[AUTH] Token retrieved successfully for ${apiType}.`);
+                return cache.token;
+            } catch (error: unknown) {
+                if (error instanceof Error && error.message.includes('Retrying with POST')) continue;
+                
+                clearTimeout(timeout);
+                if (error instanceof Error) {
+                    const isTimeout = error.name === 'AbortError';
+                    console.error(`[AUTH] Attempt ${i + 1} for ${apiType} failed (${method}): ${isTimeout ? 'Request Timed Out' : error.message}`);
+                }
+                if (i === retries && method === 'POST') throw error;
             }
-
-            const data = await response.json();
-            if (!response.ok) throw new Error(data.errorMessage || `Auth failed with status ${response.status}`);
-
-            cache.token = data.access_token;
-            cache.expiry = now + parseInt(data.expires_in) - 60;
-            console.log(`[AUTH] Token retrieved successfully for ${apiType}.`);
-            return cache.token;
-        } catch (error: unknown) {
-            clearTimeout(timeout);
-            if (error instanceof Error) {
-                const isTimeout = error.name === 'AbortError';
-                console.error(`[AUTH] Attempt ${i + 1} for ${apiType} failed: ${isTimeout ? 'Request Timed Out' : error.message}`);
-            }
-            if (i === retries) throw error;
-            await new Promise(resolve => setTimeout(resolve, i * 1000 + 500));
         }
+        await new Promise(resolve => setTimeout(resolve, i * 1000 + 500));
     }
 }
