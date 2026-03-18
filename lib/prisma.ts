@@ -6,7 +6,11 @@ import ws from 'ws'
 neonConfig.webSocketConstructor = ws
 
 // Clean connection string for Neon serverless adapter
-const connectionString = (process.env.DATABASE_URL || '').split('?')[0] + '?sslmode=require'
+// Adding pgbouncer=true is critical when using Neon's connection pooler with Prisma
+const rawUrl = process.env.DATABASE_URL || ''
+const baseUrl = rawUrl.split('?')[0]
+const connectionString = `${baseUrl}?sslmode=require&pgbouncer=true`
+
 const adapter = new PrismaNeon({ connectionString })
 
 const prismaClientSingleton = () => {
