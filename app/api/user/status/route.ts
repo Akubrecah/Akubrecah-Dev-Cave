@@ -86,6 +86,11 @@ export async function GET() {
 
   } catch (error) {
     console.error('Error fetching user status:', error);
+    if (error instanceof Error) {
+      console.error('Message:', error.message);
+      // @ts-ignore - Prisma error codes are sometimes dynamic
+      if (error.code) console.error('Code:', error.code);
+    }
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
