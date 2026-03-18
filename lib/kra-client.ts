@@ -75,10 +75,27 @@ export async function getAccessToken(apiType: 'pinByID' | 'pinByPIN', retries = 
                 clearTimeout(timeout);
 
                 const contentType = response.headers.get('content-type');
+                const allHeaders = Object.fromEntries(response.headers.entries());
+                // Remove sensitive headers if any
+                delete allHeaders['set-cookie'];
+
                 if (!contentType || !contentType.includes('application/json')) {
                     const text = await response.text();
-                    const errorMessage = `KRA Endpoint Verification Failed: Server returned ${response.status} ${response.statusText}. Content received: ${text.substring(0, 500)}`;
+                    const errorMessage = `KRA Endpoint Verification Failed: Status ${response.status} ${response.statusText}, CT: ${contentType || 'missing'}. Headers: ${JSON.stringify(allHeaders)}. Content: ${text.substring(0, 500)}`;
                     console.error(`[AUTH] ${errorMessage}`);
+
+                    // If it's 200, maybe we can still try to parse it if it looks like JSON?
+                    if (response.status === 200 && text.trim().startsWith('{')) {
+                        try {
+                            const data = JSON.parse(text);
+                            cache.token = data.access_token;
+                            cache.expiry = now + parseInt(data.expires_in || '3600') - 60;
+                            console.log(`[AUTH] Token retrieved (ignoring context-type) for ${apiType}.`);
+                            return cache.token;
+                        } catch {
+                            console.error(`[AUTH] Failed to parse despite starting with {`);
+                        }
+                    }
                     throw new Error(errorMessage);
                 }
 
