@@ -4,6 +4,7 @@ import { PrismaClient } from '@prisma/client'
 import ws from 'ws'
 
 neonConfig.webSocketConstructor = ws
+neonConfig.pipelineConnect = false
 
 // Clean connection string for Neon serverless adapter
 // Adding pgbouncer=true is critical when using Neon's connection pooler with Prisma
