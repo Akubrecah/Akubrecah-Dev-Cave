@@ -28,7 +28,7 @@
 
 import { WorkerBrowserConverter } from '@matbee/libreoffice-converter/browser';
 
-const LIBREOFFICE_PATH = '/libreoffice-wasm/';
+const LIBREOFFICE_PATH = '/pdfcraft/libreoffice-wasm/';
 const ASSET_VERSION = '20240212-3';
 // Request uncompressed names. In production, nginx gzip_static serves the .gz variant
 // with correct Content-Encoding and MIME headers (required for WebAssembly streaming).
