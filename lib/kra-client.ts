@@ -1,15 +1,15 @@
-const BASE_URL = process.env.KRA_API_BASE_URL || 'https://sbx.kra.go.ke';
+const BASE_URL = (process.env.KRA_API_BASE_URL || 'https://sbx.kra.go.ke').replace(/\/+$/, '');
 
 const KRA_CONFIG = {
     pinByID: {
-        consumerKey: process.env.KRA_ID_CONSUMER_KEY!,
-        consumerSecret: process.env.KRA_ID_CONSUMER_SECRET!,
+        consumerKey: (process.env.KRA_ID_CONSUMER_KEY || '').trim(),
+        consumerSecret: (process.env.KRA_ID_CONSUMER_SECRET || '').trim(),
         tokenEndpoint: `${BASE_URL}/v1/token/generate?grant_type=client_credentials`,
         pinCheckerEndpoint: `${BASE_URL}/checker/v1/pin`
     },
     pinByPIN: {
-        consumerKey: process.env.KRA_PIN_CONSUMER_KEY!,
-        consumerSecret: process.env.KRA_PIN_CONSUMER_SECRET!,
+        consumerKey: (process.env.KRA_PIN_CONSUMER_KEY || '').trim(),
+        consumerSecret: (process.env.KRA_PIN_CONSUMER_SECRET || '').trim(),
         tokenEndpoint: `${BASE_URL}/v1/token/generate?grant_type=client_credentials`,
         pinCheckerEndpoint: `${BASE_URL}/checker/v1/pinbypin`
     }
@@ -27,6 +27,10 @@ export async function getAccessToken(apiType: 'pinByID' | 'pinByPIN', retries = 
     const config = KRA_CONFIG[apiType];
     const cache = tokenCache[apiType];
     const now = Math.floor(Date.now() / 1000);
+
+    if (!config.consumerKey || !config.consumerSecret) {
+        throw new Error(`KRA Configuration Error: Missing credentials for ${apiType}. Please check your environment variables.`);
+    }
 
     if (cache.token && now < cache.expiry) {
         console.log(`[AUTH] Using cached token for ${apiType}`);
@@ -55,12 +59,14 @@ export async function getAccessToken(apiType: 'pinByID' | 'pinByPIN', retries = 
 
             const contentType = response.headers.get('content-type');
             if (!contentType || !contentType.includes('application/json')) {
-                await response.text();
-                throw new Error(`KRA Endpoint Verification Failed: Server returned ${response.status} ${response.statusText}`);
+                const text = await response.text();
+                const errorMessage = `KRA Endpoint Verification Failed: Server returned ${response.status} ${response.statusText}. Content received: ${text.substring(0, 100)}`;
+                console.error(`[AUTH] ${errorMessage}`);
+                throw new Error(errorMessage);
             }
 
             const data = await response.json();
-            if (!response.ok) throw new Error(data.errorMessage || 'Auth failed');
+            if (!response.ok) throw new Error(data.errorMessage || `Auth failed with status ${response.status}`);
 
             cache.token = data.access_token;
             cache.expiry = now + parseInt(data.expires_in) - 60;
