@@ -1,4 +1,4 @@
-import { neonConfig } from '@neondatabase/serverless'
+import { Pool, neonConfig } from '@neondatabase/serverless'
 import { PrismaNeon } from '@prisma/adapter-neon'
 import { PrismaClient } from '@prisma/client'
 import ws from 'ws'
@@ -12,7 +12,10 @@ const rawUrl = process.env.DATABASE_URL || ''
 const baseUrl = rawUrl.split('?')[0]
 const connectionString = `${baseUrl}?sslmode=require&pgbouncer=true`
 
-const adapter = new PrismaNeon({ connectionString })
+const pool = new Pool({ connectionString })
+// @ts-ignore - PrismaNeon constructor expects a slightly different Pool type from older versions
+const adapter = new PrismaNeon(pool)
+
 
 const prismaClientSingleton = () => {
   return new PrismaClient({ adapter })

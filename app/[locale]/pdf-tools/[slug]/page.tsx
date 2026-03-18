@@ -44,13 +44,16 @@ export default function ToolPage() {
     // Check user subscription and daily usage limits
     try {
       const response = await fetch('/api/user/status');
-      const status = await response.json();
       
+      if (response.status === 401) {
+        setError('Please sign in to process files. Guest users are currently restricted.');
+        return;
+      }
+
+      const status = await response.json();
       const isPaidUser = status.hasPdfPremium || status.isCyberPro;
       
       if (!isPaidUser) {
-        // Enforce 2-per-day limit via API or client-side check linked to server
-        // Since this is a client component, we'll call a usage endpoint
         const usageRes = await fetch('/api/pdf/usage-status');
         const usageData = await usageRes.json();
         
@@ -60,6 +63,7 @@ export default function ToolPage() {
         }
       }
     } catch (err) {
+
       console.error('Error checking usage limits:', err);
       setError('Unable to verify usage status. Please try again.');
       return;

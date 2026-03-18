@@ -4,8 +4,9 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   FileCheck2, FileText, ArrowLeft, Eye, CheckCircle, Coins, Search, Hash, 
-  Download, Activity 
+  Download, Activity, Zap 
 } from 'lucide-react';
+
 import { KENYA_DATA } from '@/lib/kenya-data';
 
 export default function Dashboard() {
@@ -546,55 +547,55 @@ export default function Dashboard() {
         {feature === 'generator' && (
           <>
             {/* Stats & Subscription Timer */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-              <div className="bg-[#111111] rounded-2xl p-6 border border-white/5 flex items-center gap-4">
-                <div className="bg-white/5 p-3 rounded-lg text-white/50"><CheckCircle /></div>
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+              <div className="bg-[#111111] rounded-2xl p-6 border border-white/5 flex items-center gap-3">
+                <div className="bg-white/5 p-2 rounded-lg text-white/50"><CheckCircle size={20} /></div>
                 <div>
-                  <div className="text-2xl font-bold text-white">{stats.verifications}</div>
-                  <div className="text-sm text-white/40">Verifications</div>
+                  <div className="text-xl font-bold text-white">{stats.verifications}</div>
+                  <div className="text-[10px] text-white/40 uppercase">Verifications</div>
                 </div>
               </div>
-              <div className="bg-[#111111] rounded-2xl p-6 border border-white/5 flex items-center gap-4">
-                <div className="bg-white/5 p-3 rounded-lg text-white/50"><FileText /></div>
+              <div className="bg-[#111111] rounded-2xl p-6 border border-white/5 flex items-center gap-3">
+                <div className="bg-white/5 p-2 rounded-lg text-white/50"><FileText size={20} /></div>
                 <div>
-                  <div className="text-2xl font-bold text-white">{stats.certificates}</div>
-                  <div className="text-sm text-white/40">Certificates</div>
+                  <div className="text-xl font-bold text-white">{stats.certificates}</div>
+                  <div className="text-[10px] text-white/40 uppercase">Certificates</div>
                 </div>
               </div>
-              <div className="bg-[#111111] rounded-2xl p-6 border border-white/5 flex items-center gap-4">
-                <div className="bg-[var(--color-brand-red)]/10 p-3 rounded-lg text-[var(--color-brand-red)]"><Coins /></div>
+              <div className="bg-[#111111] rounded-2xl p-6 border border-white/5 flex items-center gap-3">
+                <div className="bg-blue-500/10 p-2 rounded-lg text-blue-400"><Zap size={20} /></div>
                 <div>
-                  <div className="text-2xl font-bold text-white">{stats.credits}</div>
-                  <div className="text-sm text-[var(--color-brand-red)]">Credits</div>
+                  <div className="text-xl font-bold text-white">{usage?.PDF || 0}</div>
+                  <div className="text-[10px] text-blue-400 uppercase">PDF Tools</div>
+                </div>
+              </div>
+
+              <div className="bg-[#111111] rounded-2xl p-6 border border-white/5 flex items-center gap-3">
+                <div className="bg-[var(--color-brand-red)]/10 p-2 rounded-lg text-[var(--color-brand-red)]"><Coins size={20} /></div>
+                <div>
+                  <div className="text-xl font-bold text-white">{stats.credits}</div>
+                  <div className="text-[10px] text-[var(--color-brand-red)] uppercase">Credits</div>
                 </div>
               </div>
               
               {/* Timer Block */}
-              <div className={`rounded-2xl p-6 border transition-all flex items-center justify-between gap-4 ${timeLeft !== null && timeLeft > 0 ? 'bg-[var(--color-brand-red)]/20 border-[var(--color-brand-red)]/30' : 'bg-[#111111] border-white/5'}`}>
-                <div className="flex items-center gap-4">
-                  <div className={`p-3 rounded-lg ${timeLeft !== null && timeLeft > 0 ? 'bg-[var(--color-brand-red)] text-white' : 'bg-white/5 text-white/50 animate-pulse'}`}>
-                    <Activity size={20} />
+              <div className={`rounded-2xl p-4 border transition-all flex items-center justify-between gap-3 ${timeLeft !== null && timeLeft > 0 ? 'bg-[var(--color-brand-red)]/20 border-[var(--color-brand-red)]/30' : 'bg-[#111111] border-white/5'}`}>
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-lg ${timeLeft !== null && timeLeft > 0 ? 'bg-[var(--color-brand-red)] text-white' : 'bg-white/5 text-white/50 animate-pulse'}`}>
+                    <Activity size={18} />
                   </div>
                   <div>
-                    <div className="text-lg font-bold text-white leading-tight">
-                      {timeLeft !== null ? formatTime(timeLeft) : 'No Active Plan'}
+                    <div className="text-sm font-bold text-white leading-tight">
+                      {timeLeft !== null ? formatTime(timeLeft) : 'No Plan'}
                     </div>
-                    <div className="text-[10px] text-white/60 uppercase tracking-widest font-semibold mt-1">
-                      {subscription?.tier ? getTierLabel(subscription.tier) : (usage ? `Free Tier (${usage.KRA}/${usage.limit})` : 'Free Tier')}
+                    <div className="text-[9px] text-white/60 uppercase tracking-widest font-semibold mt-1">
+                      {subscription?.tier ? getTierLabel(subscription.tier) : (usage ? `KRA ${usage.KRA}/${usage.limit} | PDF ${usage.PDF}/${usage.limit}` : 'Free Tier')}
                     </div>
                   </div>
                 </div>
-                
-                {(!subscription?.isCyberPro && usage && usage.KRA >= usage.limit) && (
-                  <button 
-                    onClick={() => router.push('/pricing')}
-                    className="px-4 py-2 bg-[var(--color-brand-red)] text-white text-xs font-bold rounded-lg hover:bg-[var(--color-deep-crimson)] transition-colors shadow-[0_0_15px_rgba(227,6,19,0.4)] animate-bounce"
-                  >
-                    UPGRADE NOW
-                  </button>
-                )}
               </div>
             </div>
+
 
             <div className="grid lg:grid-cols-5 gap-8">
               {/* Wizard Form */}
