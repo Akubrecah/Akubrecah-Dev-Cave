@@ -14,14 +14,18 @@ import { checkUsageLimit, incrementUsage } from '@/lib/pdf/usage';
  */
 export async function POST(req: Request) {
     try {
-        // Enforce daily usage limit
-        const limit = await checkUsageLimit('KRA');
-        if (!limit.allowed) {
+        // Enforce daily usage limit (best-effort, don't block KRA on DB failure)
+        try {
+          const limit = await checkUsageLimit('KRA');
+          if (!limit.allowed) {
             return NextResponse.json({ 
                 errorMessage: 'Daily limit reached. Please upgrade to premium for unlimited verifications.',
                 limitReached: true,
                 count: limit.count 
             }, { status: 429 });
+          }
+        } catch (usageErr) {
+          console.warn('[KRA-ID] Usage check failed, allowing request:', usageErr);
         }
 
         const { idType = 'KE', idNumber } = await req.json();
@@ -67,8 +71,8 @@ export async function POST(req: Request) {
                     return NextResponse.json({ errorMessage: errorBody }, { status: response.status });
                 }
 
-                // Increment usage on success
-                await incrementUsage('KRA');
+                // Increment usage on success (best-effort)
+                try { await incrementUsage('KRA'); } catch (e) { console.warn('[KRA-ID] incrementUsage failed:', e); }
                 
                 return NextResponse.json(data);
             } catch (error: unknown) {

@@ -6,13 +6,17 @@ export async function POST(req: Request) {
     try {
         const { pin } = await req.json();
 
-        // Enforcement: Check daily limit
-        const { allowed, remaining } = await checkUsageLimit('KRA');
-        if (!allowed) {
+        // Enforcement: Check daily limit (best-effort, don't block KRA on DB failure)
+        try {
+          const { allowed, remaining } = await checkUsageLimit('KRA');
+          if (!allowed) {
             return NextResponse.json({ 
                 errorMessage: 'Daily limit reached. Please upgrade to Cyber Pro for unlimited verifications.',
                 remaining 
             }, { status: 429 });
+          }
+        } catch (usageErr) {
+          console.warn('[KRA-PIN] Usage check failed, allowing request:', usageErr);
         }
 
         const token = await getAccessToken('pinByPIN');
@@ -56,8 +60,8 @@ export async function POST(req: Request) {
                     return NextResponse.json({ errorMessage: errorBody }, { status: response.status });
                 }
 
-                // Increment usage upon success
-                await incrementUsage('KRA');
+                // Increment usage upon success (best-effort)
+                try { await incrementUsage('KRA'); } catch (e) { console.warn('[KRA-PIN] incrementUsage failed:', e); }
 
                 return NextResponse.json(data);
             } catch (error: unknown) {

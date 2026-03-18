@@ -28,7 +28,9 @@ export default function ToolPage() {
     updateProgress, 
     setError, 
     resetState,
-    setFiles
+    setFiles,
+    addFiles,
+    removeFile
   } = useToolStore();
 
   useEffect(() => {
@@ -41,32 +43,37 @@ export default function ToolPage() {
   const handleProcess = async () => {
     if (!tool || files.length === 0) return;
     
-    // Check user subscription and daily usage limits
+    // Check user subscription and daily usage limits (best-effort, don't block on failure)
     try {
       const response = await fetch('/api/user/status');
       
       if (response.status === 401) {
-        setError('Please sign in to process files. Guest users are currently restricted.');
-        return;
-      }
-
-      const status = await response.json();
-      const isPaidUser = status.hasPdfPremium || status.isCyberPro;
-      
-      if (!isPaidUser) {
-        const usageRes = await fetch('/api/pdf/usage-status');
-        const usageData = await usageRes.json();
+        // User is not signed in — allow processing but skip usage tracking
+        console.warn('User not authenticated, skipping usage check.');
+      } else if (response.ok) {
+        const status = await response.json();
+        const isPaidUser = status.hasPdfPremium || status.isCyberPro;
         
-        if (!usageData.allowed) {
-          setError('Daily limit reached (2 tools/day). Please upgrade to premium for unlimited access.');
-          return;
+        if (!isPaidUser) {
+          try {
+            const usageRes = await fetch('/api/pdf/usage-status');
+            const usageData = await usageRes.json();
+            
+            if (!usageData.allowed) {
+              setError('Daily limit reached (2 tools/day). Please upgrade to premium for unlimited access.');
+              return;
+            }
+          } catch (usageErr) {
+            console.warn('Usage check failed, allowing processing:', usageErr);
+          }
         }
+      } else {
+        // API returned an error (e.g. 500) — allow processing anyway
+        console.warn('User status API error, skipping usage check:', response.status);
       }
     } catch (err) {
-
-      console.error('Error checking usage limits:', err);
-      setError('Unable to verify usage status. Please try again.');
-      return;
+      // Network error or other failure — allow processing anyway
+      console.warn('Error checking usage limits, allowing processing:', err);
     }
 
     setProcessingStatus('processing');
@@ -108,8 +115,8 @@ export default function ToolPage() {
 
     const processor = new ProcessorClass();
     
-    // Default options logic
-    const options: Record<string, unknown> = { ...tool.features }; 
+    // Default options - let each processor use its own defaults
+    const options: Record<string, unknown> = {}; 
     if (tool.id === 'split-pdf') options.ranges = [{ start: 1, end: 1 }];
 
     try {
@@ -179,12 +186,65 @@ export default function ToolPage() {
               <div className="animate-in fade-in zoom-in duration-500">
                 <FileUploader 
                   maxFiles={tool.maxFiles}
+                  multiple={tool.maxFiles > 1}
                   accept={tool.acceptedFormats}
                   onFilesSelected={(selectedFiles) => {
-                    setFiles(selectedFiles);
+                    if (tool.maxFiles > 1) {
+                      addFiles(selectedFiles);
+                    } else {
+                      setFiles(selectedFiles);
+                    }
                   }}
                   className="bg-black/20 border-white/5 hover:border-[var(--color-brand-red)]/50"
                 />
+
+                {files.length > 0 && (
+                  <div className="mt-8 space-y-4 animate-in fade-in slide-in-from-top-4 duration-300">
+                    <div className="flex items-center justify-between px-2">
+                      <h3 className="text-white font-bold flex items-center gap-2">
+                        <Icons.Files size={18} className="text-[var(--color-brand-red)]" />
+                        Selected Files ({files.length})
+                      </h3>
+                      {tool.maxFiles > 1 && (
+                        <button 
+                          onClick={() => resetState()}
+                          className="text-xs text-[#BEA0A0] hover:text-[var(--color-brand-red)] transition-colors"
+                        >
+                          Clear All
+                        </button>
+                      )}
+                    </div>
+                    <div className="grid gap-3">
+                      {files.map((fileObj) => (
+                        <div 
+                          key={fileObj.id}
+                          className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-xl group hover:border-[var(--color-brand-red)]/30 transition-all"
+                        >
+                          <div className="flex items-center gap-3 overflow-hidden">
+                            <div className="p-2 bg-[var(--color-brand-red)]/10 rounded-lg text-[var(--color-brand-red)]">
+                              <Icons.FileText size={20} />
+                            </div>
+                            <div className="overflow-hidden">
+                              <p className="text-white font-medium truncate text-sm">
+                                {fileObj.file.name}
+                              </p>
+                              <p className="text-[#BEA0A0] text-xs">
+                                {(fileObj.file.size / 1024 / 1024).toFixed(2)} MB
+                              </p>
+                            </div>
+                          </div>
+                          <button 
+                            onClick={() => removeFile(fileObj.id)}
+                            className="p-2 text-[#BEA0A0] hover:text-[var(--color-brand-red)] hover:bg-[var(--color-brand-red)]/10 rounded-lg transition-all"
+                            title="Remove file"
+                          >
+                            <Icons.Trash2 size={18} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 
                 <div className="flex justify-center mt-10">
                   <button
