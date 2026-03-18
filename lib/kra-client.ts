@@ -50,38 +50,46 @@ export async function getAccessToken(apiType: 'pinByID' | 'pinByPIN', retries = 
             try {
                 console.log(`[AUTH] Attempt ${i + 1} for ${apiType}: Fetching token from ${config.tokenEndpoint} using ${method}...`);
                 
-                const fetchOptions: RequestInit = {
-                    method,
-                    headers: { 
-                        'Authorization': `Basic ${credentials}`,
-                        'User-Agent': 'Mozilla/5.0 (Node.js/KRA-Checker)',
-                        'Accept': 'application/json'
-                    },
-                    signal: controller.signal
+                const headers: Record<string, string> = { 
+                    'Authorization': `Basic ${credentials}`,
+                    'User-Agent': 'Mozilla/5.0 (Node.js/KRA-Checker)',
+                    'Accept': 'application/json'
                 };
 
-                // If POST, move query params to body if needed? 
-                // Actually, most APIs allow query params with POST too.
-                // But let's keep it simple first.
+                let body: string | undefined = undefined;
+                let endpoint = config.tokenEndpoint;
 
-                const response = await fetch(config.tokenEndpoint, { ...fetchOptions });
-
-                // If we get 405 Method Not Allowed or 400 (and we haven't tried POST yet), try the next method
-                if ((response.status === 405 || response.status === 400) && method === 'GET') {
-                    console.warn(`[AUTH] ${method} failed with ${response.status}. Retrying with POST...`);
-                    continue; 
+                if (method === 'POST') {
+                    headers['Content-Type'] = 'application/x-www-form-urlencoded';
+                    // Some APIs prefer grant_type in the body for POST
+                    body = 'grant_type=client_credentials';
+                    // Remove query params from endpoint if they are in the body
+                    endpoint = endpoint.split('?')[0];
                 }
 
-                clearTimeout(timeout);
+                const response = await fetch(endpoint, {
+                    method,
+                    headers,
+                    body,
+                    signal: controller.signal
+                });
 
                 const contentType = response.headers.get('content-type');
                 const allHeaders = Object.fromEntries(response.headers.entries());
+                const contentLength = response.headers.get('content-length');
                 // Remove sensitive headers if any
                 delete allHeaders['set-cookie'];
 
+                const text = await response.text();
+
+                // If we get 200 OK but empty body, and we're on GET, try POST
+                if (response.status === 200 && (!text || text.trim().length === 0) && method === 'GET') {
+                    console.warn(`[AUTH] GET returned 200 OK but empty body. Retrying with POST...`);
+                    continue;
+                }
+
                 if (!contentType || !contentType.includes('application/json')) {
-                    const text = await response.text();
-                    const errorMessage = `KRA Endpoint Verification Failed: Status ${response.status} ${response.statusText}, CT: ${contentType || 'missing'}. Headers: ${JSON.stringify(allHeaders)}. Content: ${text.substring(0, 500)}`;
+                    const errorMessage = `KRA Auth Failed: Status ${response.status} ${response.statusText}, CT: ${contentType || 'missing'}, Len: ${contentLength || '0'}. Content: ${text.substring(0, 200)}`;
                     console.error(`[AUTH] ${errorMessage}`);
 
                     // If it's 200, maybe we can still try to parse it if it looks like JSON?
@@ -96,10 +104,12 @@ export async function getAccessToken(apiType: 'pinByID' | 'pinByPIN', retries = 
                             console.error(`[AUTH] Failed to parse despite starting with {`);
                         }
                     }
+                    
+                    if (method === 'GET') continue; // Try POST
                     throw new Error(errorMessage);
                 }
 
-                const data = await response.json();
+                const data = JSON.parse(text);
                 if (!response.ok) throw new Error(data.errorMessage || `Auth failed with status ${response.status}`);
 
                 cache.token = data.access_token;
