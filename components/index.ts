@@ -8,7 +8,7 @@ export * from './ui';
 export * from './layout';
 
 // Tool Components
-export * from './tools';
+export * from './pdf-tools';
 
 // SEO Components
 export * from './seo';

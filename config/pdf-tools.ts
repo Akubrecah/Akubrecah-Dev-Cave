@@ -4,7 +4,7 @@
  * Migrated from BentoPDF and enhanced for PDFCraft
  */
 
-import { Tool } from '@/types/pdf';
+import { Tool, ToolCategory } from '@/types/tool';
 
 /**
  * Default file size limits - No restrictions
@@ -1235,49 +1235,49 @@ export const PDF_TOOLS: Tool[] = [
  * Get all tools (excluding disabled tools)
  */
 export function getAllTools(): Tool[] {
-  return tools.filter(tool => !tool.disabled);
+  return PDF_TOOLS.filter(tool => !tool.disabled);
 }
 
 /**
  * Get all tools including disabled ones (for admin)
  */
 export function getAllToolsIncludingDisabled(): Tool[] {
-  return tools;
+  return PDF_TOOLS;
 }
 
 /**
  * Get tool by ID
  */
 export function getToolById(id: string): Tool | undefined {
-  return tools.find((tool) => tool.id === id && !tool.disabled);
+  return PDF_TOOLS.find((tool) => tool.id === id && !tool.disabled);
 }
 
 /**
  * Get tool by slug
  */
 export function getToolBySlug(slug: string): Tool | undefined {
-  return tools.find((tool) => tool.slug === slug && !tool.disabled);
+  return PDF_TOOLS.find((tool) => tool.slug === slug && !tool.disabled);
 }
 
 /**
  * Get tools by category (excluding disabled tools)
  */
 export function getToolsByCategory(category: ToolCategory): Tool[] {
-  return tools.filter((tool) => tool.category === category && !tool.disabled);
+  return PDF_TOOLS.filter((tool) => tool.category === category && !tool.disabled);
 }
 
 /**
  * Get all tool IDs
  */
 export function getAllToolIds(): string[] {
-  return tools.map((tool) => tool.id);
+  return PDF_TOOLS.map((tool) => tool.id);
 }
 
 /**
  * Check if a tool ID exists
  */
 export function toolExists(id: string): boolean {
-  return tools.some((tool) => tool.id === id);
+  return PDF_TOOLS.some((tool) => tool.id === id);
 }
 
 /**

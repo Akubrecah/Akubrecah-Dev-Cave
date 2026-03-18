@@ -315,7 +315,8 @@ export class PDFToSVGProcessor extends BasePDFProcessor {
         // Render PDF page to canvas
         await page.render({
             canvasContext: ctx,
-            viewport: viewport,
+          canvas: canvas,
+          viewport: viewport,
         }).promise;
 
         // Get text content for vector text layer

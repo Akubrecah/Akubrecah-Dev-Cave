@@ -57,30 +57,30 @@ export function ToolCard({ tool, locale, className = '', localizedContent }: Too
   return (
     <Link
       href={toolUrl}
-      className={`block focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--color-ring))] focus-visible:ring-offset-2 rounded-[var(--radius-lg)] group ${className}`}
+      className={`block focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand-red)] focus-visible:ring-offset-2 rounded-2xl group ${className}`}
       data-testid="tool-card"
     >
-      <Card
-        className="h-full glass-card hover:bg-[hsl(var(--color-card))/0.8] transition-all duration-300 hover:shadow-xl hover:-translate-y-1 relative overflow-hidden border-[hsl(var(--color-border))/0.6]"
+      <div
+        className="h-full glass-panel p-8 hover:bg-white/5 transition-all duration-300 hover:shadow-[0_0_30px_rgba(227,6,19,0.15)] hover:border-[var(--color-brand-red)]/50 relative overflow-hidden flex flex-col"
         data-testid="tool-card-container"
       >
         <div className="absolute top-0 right-0 p-3 z-10">
           <FavoriteButton toolId={tool.id} size="sm" />
         </div>
         <div className="absolute top-0 right-10 p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <ArrowUpRight className="w-5 h-5 text-[hsl(var(--color-primary))]" />
+          <ArrowUpRight className="w-5 h-5 text-[var(--color-brand-red)]" />
         </div>
 
         <div className="flex flex-col h-full">
-          <div className="flex items-start gap-4 mb-4">
+          <div className="flex items-start gap-4 mb-6">
             {/* Tool Icon */}
             <div
-              className="flex-shrink-0 w-14 h-14 rounded-2xl bg-gradient-to-br from-[hsl(var(--color-primary)/0.1)] to-[hsl(var(--color-accent)/0.1)] flex items-center justify-center group-hover:scale-110 transition-transform duration-300"
+              className="flex-shrink-0 w-14 h-14 rounded-2xl bg-[var(--color-brand-red)]/10 text-[var(--color-brand-red)] flex items-center justify-center group-hover:scale-110 group-hover:bg-[var(--color-brand-red)]/20 transition-all duration-300"
               data-testid="tool-card-icon"
               aria-hidden="true"
             >
               {React.createElement(getToolIcon(tool.icon), {
-                className: "w-7 h-7 text-[hsl(var(--color-primary))]"
+                className: "w-7 h-7"
               })}
             </div>
           </div>
@@ -88,31 +88,32 @@ export function ToolCard({ tool, locale, className = '', localizedContent }: Too
           {/* Tool Info */}
           <div className="flex-1 min-w-0">
             <h3
-              className="text-lg font-bold text-[hsl(var(--color-card-foreground))] truncate mb-2 group-hover:text-[hsl(var(--color-primary))] transition-colors"
+              className="text-xl font-bold text-white truncate mb-2 group-hover:text-[var(--color-brand-red)] transition-colors"
               data-testid="tool-card-name"
             >
               {toolName}
             </h3>
             <p
-              className="text-sm text-[hsl(var(--color-muted-foreground))] line-clamp-2 leading-relaxed"
+              className="text-[#BEA0A0] text-sm line-clamp-2 leading-relaxed"
               data-testid="tool-card-description"
             >
               {description}
             </p>
           </div>
 
-          <div className="mt-4 pt-4 border-t border-[hsl(var(--color-border)/0.5)] flex items-center justify-between text-xs text-[hsl(var(--color-muted-foreground))]">
-            <span className="font-medium bg-[hsl(var(--color-secondary)/0.5)] px-2 py-1 rounded-md">
+          <div className="mt-6 pt-6 border-t border-white/5 flex items-center justify-between text-xs text-[#BEA0A0]">
+            <span className="font-semibold bg-white/5 px-3 py-1 rounded-full text-[var(--color-brand-yellow)]">
               {categoryName}
             </span>
-            <span className="group-hover:translate-x-1 transition-transform duration-300 text-[hsl(var(--color-primary))] font-medium opacity-0 group-hover:opacity-100">
-              {t('common.buttons.next') || 'Try now'} {/* Using Next as dummy or keep Try now if no key */}
+            <span className="group-hover:translate-x-1 transition-all duration-300 text-[var(--color-brand-red)] font-bold opacity-0 group-hover:opacity-100 flex items-center gap-1">
+              Try now →
             </span>
           </div>
         </div>
-      </Card>
+      </div>
     </Link>
   );
 }
+
 
 export default ToolCard;

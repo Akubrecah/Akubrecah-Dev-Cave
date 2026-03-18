@@ -16,10 +16,7 @@ export class UnlockPDFProcessor extends BasePDFProcessor {
     const password = options.password as string;
     
     if (files.length === 0) {
-      return {
-        success: false,
-        error: this.createErrorOutput(PDFErrorCode.FILE_EMPTY, 'No files provided for unlocking.'),
-      };
+      return this.createErrorOutput(PDFErrorCode.FILE_EMPTY, 'No files provided for unlocking.');
     }
 
     try {
@@ -42,13 +39,10 @@ export class UnlockPDFProcessor extends BasePDFProcessor {
         pdfDoc = await PDFDocument.load(fileContent, { password } as any);
       } catch (error: unknown) {
         if (error instanceof Error && error.message?.includes('password')) {
-          return {
-            success: false,
-            error: this.createErrorOutput(
+          return this.createErrorOutput(
               PDFErrorCode.INVALID_PASSWORD, 
               'Incorrect password provided.'
-            ),
-          };
+            );
         }
         throw error;
       }
@@ -70,22 +64,16 @@ export class UnlockPDFProcessor extends BasePDFProcessor {
       };
     } catch (error: unknown) {
       if (error instanceof Error && error.message === 'PROCESSING_CANCELLED') {
-        return {
-          success: false,
-          error: this.createErrorOutput(PDFErrorCode.PROCESSING_CANCELLED, 'Processing was cancelled.'),
-        };
+        return this.createErrorOutput(PDFErrorCode.PROCESSING_CANCELLED, 'Processing was cancelled.');
       }
       
       const message = error instanceof Error ? error.message : 'Unknown error';
       console.error('Unlock error:', error);
-      return {
-        success: false,
-        error: this.createErrorOutput(
+      return this.createErrorOutput(
           PDFErrorCode.PROCESSING_FAILED, 
           'Failed to unlock PDF file.',
           message
-        ),
-      };
+        );
     }
   }
 }

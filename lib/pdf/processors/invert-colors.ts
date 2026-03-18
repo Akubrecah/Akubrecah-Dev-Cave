@@ -79,6 +79,7 @@ export class InvertColorsProcessor extends BasePDFProcessor {
 
         await page.render({
           canvasContext: ctx,
+          canvas: canvas,
           viewport: renderViewport,
         }).promise;
 

@@ -10,6 +10,7 @@ import { DownloadButton } from '@/components/pdf-tools/DownloadButton';
 import { PDFProcessor, UploadedFile, PDFError } from '@/types/pdf';
 import { ProcessingStatus } from '@/types/tool';
 import * as Processors from '@/lib/pdf/processors';
+import Link from 'next/link';
 import * as Icons from 'lucide-react';
 
 type ProcessorConstructor = new () => PDFProcessor;
@@ -137,84 +138,112 @@ export default function ToolPage() {
   if (!tool) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto space-y-8">
-        <div className="flex items-center gap-4">
-          <button 
-            onClick={() => router.push('/pdf-tools')}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-          >
-            <Icons.ChevronLeft size={24} />
-          </button>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 text-capitalize">
-              {tool.id.replace(/-/g, ' ')}
-            </h1>
-            <p className="text-gray-500">
-              {tool.features[0]}
-            </p>
+    <div className="min-h-screen bg-[#111111] py-32 px-4 sm:px-6 lg:px-8">
+      {/* Background illumination */}
+      <div className="absolute top-[-200px] left-1/2 -translate-x-1/2 w-[600px] h-[400px] pointer-events-none z-0 opacity-30" 
+           style={{ background: 'radial-gradient(ellipse at center, rgba(227, 6, 19, 0.4) 0%, transparent 70%)' }}></div>
+
+      <div className="max-w-4xl mx-auto space-y-8 relative z-10">
+        <div className="flex flex-col gap-6">
+          <nav className="flex items-center gap-2 text-[#BEA0A0] text-sm">
+            <Link href="/pdf-tools" className="hover:text-[var(--color-brand-red)] transition-colors">PDF Suite</Link>
+            <Icons.ChevronRight size={14} />
+            <span className="text-white capitalize">{tool.id.replace(/-/g, ' ')}</span>
+          </nav>
+
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => router.push('/pdf-tools')}
+              className="p-3 bg-white/5 hover:bg-[var(--color-brand-red)]/20 rounded-full transition-all text-[#BEA0A0] hover:text-[var(--color-brand-red)] border border-white/10"
+            >
+              <Icons.ChevronLeft size={24} />
+            </button>
+            <div>
+              <h1 className="text-4xl font-bold text-white capitalize">
+                {tool.id.replace(/-/g, ' ')}
+              </h1>
+              <p className="text-[#BEA0A0] text-lg mt-1 italic">
+                {tool.features[0]}
+              </p>
+            </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="p-8 space-y-8">
+        <div className="glass-panel overflow-hidden border-[var(--color-brand-red)]/20 shadow-2xl shadow-red-900/5">
+          <div className="p-10 space-y-10">
             {state.status === 'idle' && (
-              <>
+              <div className="animate-in fade-in zoom-in duration-500">
                 <FileUploader 
                   maxFiles={tool.maxFiles}
                   accept={tool.acceptedFormats}
                   onFilesSelected={(selectedFiles) => {
                     setFiles(selectedFiles);
                   }}
+                  className="bg-black/20 border-white/5 hover:border-[var(--color-brand-red)]/50"
                 />
                 
-                <div className="flex justify-center">
+                <div className="flex justify-center mt-10">
                   <button
                     disabled={files.length === 0}
                     onClick={handleProcess}
-                    className="px-10 py-4 bg-blue-600 text-white font-bold rounded-2xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95 shadow-lg shadow-blue-200"
+                    className="btn-primary px-12 py-5 text-xl font-bold disabled:opacity-30 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(227,6,19,0.3)]"
                   >
                     Start Processing
                   </button>
                 </div>
-              </>
+              </div>
             )}
 
             {(state.status === 'processing' || state.status === 'error' || (state.status === 'complete' && !result)) && (
-              <ProcessingProgress 
-                progress={state.progress} 
-                status={state.status} 
-                message={state.currentStep}
-              />
+              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <ProcessingProgress 
+                  progress={state.progress} 
+                  status={state.status} 
+                  message={state.currentStep}
+                />
+              </div>
             )}
 
             {state.status === 'complete' && result && (
-              <div className="text-center space-y-6 py-8">
-                <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Icons.CheckCircle2 size={40} />
+              <div className="text-center space-y-8 py-10 animate-in fade-in zoom-in duration-700">
+                <div className="w-24 h-24 bg-[var(--color-brand-red)]/10 text-[var(--color-brand-red)] rounded-full flex items-center justify-center mx-auto mb-6 border border-[var(--color-brand-red)]/20">
+                  <Icons.CheckCircle2 size={48} />
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900">Success!</h2>
-                <p className="text-gray-600">Your PDF has been processed and is ready for download.</p>
-                <DownloadButton 
-                  file={Array.isArray(result) ? result[0] : result} 
-                  filename={`${tool.id}_result.pdf`} 
-                />
                 <div>
+                  <h2 className="text-3xl font-bold text-white mb-2">Success!</h2>
+                  <p className="text-[#BEA0A0] text-lg">Your PDF has been processed and is ready for download.</p>
+                </div>
+                
+                <div className="flex flex-col items-center gap-6">
+                  <DownloadButton 
+                    file={Array.isArray(result) ? result[0] : result} 
+                    filename={`${tool.id.toUpperCase()}_RESULT.PDF`} 
+                  />
+                  
                   <button 
                     onClick={() => {
                       resetState();
                       setResult(null);
                     }}
-                    className="text-blue-600 font-medium hover:underline"
+                    className="text-[var(--color-brand-yellow)] font-bold hover:underline py-2"
                   >
-                    Process another file
+                    ← Process another file
                   </button>
                 </div>
               </div>
             )}
           </div>
         </div>
+
+        {/* Info Box */}
+        {state.status === 'idle' && (
+           <div className="p-6 rounded-2xl bg-[#1A1A1A] border border-white/5 flex items-start gap-4 text-[#BEA0A0] text-sm italic">
+             <Icons.ShieldCheck className="text-[var(--color-brand-red)] shrink-0 mt-0.5" size={18} />
+             <p>Your files are processed locally in your browser and are never uploaded to our servers. No one can see your documents.</p>
+           </div>
+        )}
       </div>
     </div>
   );
 }
+

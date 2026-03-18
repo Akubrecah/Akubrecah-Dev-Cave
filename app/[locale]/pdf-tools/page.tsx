@@ -5,15 +5,21 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
 import { 
-  Scissors, Combine, FileArchive, Zap, ShieldCheck, Lock, 
-  FileCode2, LockKeyhole, Image as ImageIcon, Layers, FileSearch, FileStack
+  ShieldCheck, Zap, Lock, FileCode2, Search, X
 } from 'lucide-react';
+import { useParams } from 'next/navigation';
+import { ToolGrid } from '@/components/pdf-tools/ToolGrid';
+import { PDF_TOOLS } from '@/config/pdf-tools';
 
 export default function PdfTools() {
   const { isSignedIn } = useAuth();
   const router = useRouter();
+  const params = useParams();
+  const locale = params.locale as string;
+
   const [hasPremiumAccess, setHasPremiumAccess] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
   const [subscriptionInfo, setSubscriptionInfo] = useState<{
     tier?: string;
     subscriptionEnd?: string | null;
@@ -86,20 +92,8 @@ export default function PdfTools() {
     return `${h}h ${m}m ${s}s`;
   };
 
-  const handlePremiumClick = (e: React.MouseEvent) => {
-    if (loading) {
-      e.preventDefault();
-      return;
-    }
-    
-    if (!hasPremiumAccess) {
-      e.preventDefault();
-      router.push('/pricing?reason=pdf_premium_required');
-    }
-  };
-
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-[#111111]">
       
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 px-6 overflow-hidden flex flex-col items-center justify-center text-center">
@@ -146,7 +140,7 @@ export default function PdfTools() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <Link href="/dashboard" className="group glass-panel p-10 hover:border-[var(--color-brand-yellow)] transition-all duration-300">
              <div className="w-16 h-16 bg-[var(--color-brand-yellow)]/10 text-[var(--color-brand-yellow)] rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
-                <FileSearch size={32} />
+                <Search size={32} />
              </div>
              <h3 className="text-2xl font-bold text-white mb-4">KRA PIN Verification</h3>
              <p className="text-[#BEA0A0] leading-relaxed mb-6">Instantly verify the status of any KRA PIN. Get full taxpayer details including obligation and station information.</p>
@@ -201,154 +195,51 @@ export default function PdfTools() {
         </div>
       </section>
 
-      {/* Tools Grid */}
+      {/* Tools Section */}
       <section id="tools" className="py-24 px-6 max-w-[1200px] mx-auto w-full">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold text-white mb-4">Powerful Utilities</h2>
-          <p className="text-[#E8D5D5] text-lg">Everything you need to manage your PDF files efficiently.</p>
-          {hasPremiumAccess && timeLeft !== null && (
-            <div className="mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--color-brand-red)]/15 border border-[var(--color-brand-red)]/40 text-sm text-white">
-              <span className="font-semibold">Time left:</span>
-              <span className="font-mono">{formatTime(timeLeft)}</span>
+        <div className="flex flex-col md:flex-row items-center justify-between mb-16 gap-8">
+          <div className="text-center md:text-left">
+            <h2 className="text-4xl font-bold text-white mb-4">Professional PDF Toolkit</h2>
+            <p className="text-[#E8D5D5] text-lg max-w-md">Everything you need to manage your PDF files efficiently.</p>
+            {hasPremiumAccess && timeLeft !== null && (
+              <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--color-brand-red)]/15 border border-[var(--color-brand-red)]/40 text-sm text-white">
+                <span className="font-semibold">Access ends in:</span>
+                <span className="font-mono">{formatTime(timeLeft)}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Search Bar */}
+          <div className="w-full md:w-96 relative group">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <Search className="h-5 w-5 text-[#BEA0A0] group-focus-within:text-[var(--color-brand-red)] transition-colors" />
             </div>
-          )}
-          {!hasPremiumAccess && !loading && (
-            <div className="mt-6 inline-block bg-[var(--color-brand-red)]/20 border border-[var(--color-brand-red)] rounded-lg px-4 py-2 text-white">
-              <LockKeyhole className="inline text-[var(--color-brand-red)] mr-2" size={18} />
-              Unlock Premium tools for 50 KES/day or subscribe to Cyber Pro.
-            </div>
-          )}
+            <input
+              type="text"
+              placeholder="Search 67+ tools..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="block w-full pl-12 pr-12 py-4 bg-[#1A1A1A] border border-white/10 rounded-2xl text-white placeholder-[#BEA0A0] focus:ring-2 focus:ring-[var(--color-brand-red)]/50 focus:border-[var(--color-brand-red)] transition-all outline-none"
+            />
+            {searchQuery && (
+              <button 
+                onClick={() => setSearchQuery('')}
+                className="absolute inset-y-0 right-0 pr-4 flex items-center text-[#BEA0A0] hover:text-white"
+              >
+                <X size={18} />
+              </button>
+            )}
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          
-          {/* Tool 1 */}
-          <Link 
-            href="/pdf-tools/merge-pdf" 
-            onClick={handlePremiumClick}
-            className={`group bg-[#111111] border border-white/10 rounded-2xl p-8 transition-all duration-300 flex flex-col relative ${!hasPremiumAccess && !loading ? 'opacity-70 grayscale' : 'hover:-translate-y-2 hover:border-[var(--color-brand-red)] hover:shadow-[0_0_30px_rgba(227,6,19,0.2)]'}`}
-          >
-            {!hasPremiumAccess && !loading && (
-               <div className="absolute top-4 right-4 bg-white/10 p-2 rounded-full backdrop-blur-md">
-                 <Lock size={16} className="text-[#BEA0A0]" />
-               </div>
-            )}
-            <div className="w-14 h-14 bg-[var(--color-brand-red)]/10 text-[var(--color-brand-red)] rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-              <Combine size={28} />
-            </div>
-            <h3 className="text-xl font-bold text-white mb-2 group-hover:text-[var(--color-brand-red)] transition-colors">Merge PDF</h3>
-            <p className="text-[#BEA0A0] text-sm mb-6 flex-grow">Combine multiple PDF files into a single document in seconds. Preserve formatting.</p>
-            <div className="text-[var(--color-brand-red)] text-sm font-semibold opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all flex items-center gap-1">
-              {hasPremiumAccess ? 'Open Tool →' : 'Unlock Tool →'}
-            </div>
-          </Link>
-
-          {/* Tool 2 */}
-          <Link 
-            href="/pdf-tools/split-pdf" 
-            onClick={handlePremiumClick}
-            className={`group bg-[#111111] border border-white/10 rounded-2xl p-8 transition-all duration-300 flex flex-col relative ${!hasPremiumAccess && !loading ? 'opacity-70 grayscale' : 'hover:-translate-y-2 hover:border-[var(--color-brand-red)] hover:shadow-[0_0_30px_rgba(227,6,19,0.2)]'}`}
-          >
-            {!hasPremiumAccess && !loading && (
-               <div className="absolute top-4 right-4 bg-white/10 p-2 rounded-full backdrop-blur-md">
-                 <Lock size={16} className="text-[#BEA0A0]" />
-               </div>
-            )}
-            <div className="w-14 h-14 bg-[var(--color-brand-red)]/10 text-[var(--color-brand-red)] rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-              <Scissors size={28} />
-            </div>
-            <h3 className="text-xl font-bold text-white mb-2 group-hover:text-[var(--color-brand-red)] transition-colors">Split PDF</h3>
-            <p className="text-[#BEA0A0] text-sm mb-6 flex-grow">Extract specific pages, separate by ranges, or burst a large PDF into individual files.</p>
-            <div className="text-[var(--color-brand-red)] text-sm font-semibold opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all flex items-center gap-1">
-              {hasPremiumAccess ? 'Open Tool →' : 'Unlock Tool →'}
-            </div>
-          </Link>
-
-          {/* Tool 3 */}
-          <Link 
-            href="/pdf-tools/compress" 
-            onClick={handlePremiumClick}
-            className={`group bg-[#111111] border border-white/10 rounded-2xl p-8 transition-all duration-300 flex flex-col relative ${!hasPremiumAccess && !loading ? 'opacity-70 grayscale' : 'hover:-translate-y-2 hover:border-[var(--color-brand-red)] hover:shadow-[0_0_30px_rgba(227,6,19,0.2)]'}`}
-          >
-            {!hasPremiumAccess && !loading && (
-               <div className="absolute top-4 right-4 bg-white/10 p-2 rounded-full backdrop-blur-md">
-                 <Lock size={16} className="text-[#BEA0A0]" />
-               </div>
-            )}
-            <div className="w-14 h-14 bg-[var(--color-brand-red)]/10 text-[var(--color-brand-red)] rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-              <FileArchive size={28} />
-            </div>
-            <h3 className="text-xl font-bold text-white mb-2 group-hover:text-[var(--color-brand-red)] transition-colors">Compress PDF</h3>
-            <p className="text-[#BEA0A0] text-sm mb-6 flex-grow">Reduce file size dramatically while maintaining visual quality for email sharing.</p>
-            <div className="text-[var(--color-brand-red)] text-sm font-semibold opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all flex items-center gap-1">
-              {hasPremiumAccess ? 'Open Tool →' : 'Unlock Tool →'}
-            </div>
-          </Link>
-
-          {/* Tool 4 - PDF to PNG */}
-          <Link 
-            href="/pdf-tools/pdf-to-image" 
-            onClick={handlePremiumClick}
-            className={`group bg-[#111111] border border-white/10 rounded-2xl p-8 transition-all duration-300 flex flex-col relative ${!hasPremiumAccess && !loading ? 'opacity-70 grayscale' : 'hover:-translate-y-2 hover:border-[var(--color-brand-red)] hover:shadow-[0_0_30px_rgba(227,6,19,0.2)]'}`}
-          >
-            {!hasPremiumAccess && !loading && (
-               <div className="absolute top-4 right-4 bg-white/10 p-2 rounded-full backdrop-blur-md">
-                 <Lock size={16} className="text-[#BEA0A0]" />
-               </div>
-            )}
-            <div className="w-14 h-14 bg-[var(--color-brand-red)]/10 text-[var(--color-brand-red)] rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-              <ImageIcon size={28} />
-            </div>
-            <h3 className="text-xl font-bold text-white mb-2 group-hover:text-[var(--color-brand-red)] transition-colors">PDF to Image</h3>
-            <p className="text-[#BEA0A0] text-sm mb-6 flex-grow">Convert PDF pages into high-quality PNG or JPG images with ease.</p>
-            <div className="text-[var(--color-brand-red)] text-sm font-semibold opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all flex items-center gap-1">
-              {hasPremiumAccess ? 'Open Tool →' : 'Unlock Tool →'}
-            </div>
-          </Link>
-
-          {/* Tool 5 - Flatten PDF */}
-          <Link 
-            href="/pdf-tools/flatten" 
-            onClick={handlePremiumClick}
-            className={`group bg-[#111111] border border-white/10 rounded-2xl p-8 transition-all duration-300 flex flex-col relative ${!hasPremiumAccess && !loading ? 'opacity-70 grayscale' : 'hover:-translate-y-2 hover:border-[var(--color-brand-red)] hover:shadow-[0_0_30px_rgba(227,6,19,0.2)]'}`}
-          >
-            {!hasPremiumAccess && !loading && (
-               <div className="absolute top-4 right-4 bg-white/10 p-2 rounded-full backdrop-blur-md">
-                 <Lock size={16} className="text-[#BEA0A0]" />
-               </div>
-            )}
-            <div className="w-14 h-14 bg-[var(--color-brand-red)]/10 text-[var(--color-brand-red)] rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-              <Layers size={28} />
-            </div>
-            <h3 className="text-xl font-bold text-white mb-2 group-hover:text-[var(--color-brand-red)] transition-colors">Flatten PDF</h3>
-            <p className="text-[#BEA0A0] text-sm mb-6 flex-grow">Merge layers and make form fields uneditable for secure document sharing.</p>
-            <div className="text-[var(--color-brand-red)] text-sm font-semibold opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all flex items-center gap-1">
-              {hasPremiumAccess ? 'Open Tool →' : 'Unlock Tool →'}
-            </div>
-          </Link>
-
-          {/* Tool 6 - Alternate Merge */}
-          <Link 
-            href="/pdf-tools/alternate-merge" 
-            onClick={handlePremiumClick}
-            className={`group bg-[#111111] border border-white/10 rounded-2xl p-8 transition-all duration-300 flex flex-col relative ${!hasPremiumAccess && !loading ? 'opacity-70 grayscale' : 'hover:-translate-y-2 hover:border-[var(--color-brand-red)] hover:shadow-[0_0_30px_rgba(227,6,19,0.2)]'}`}
-          >
-            {!hasPremiumAccess && !loading && (
-               <div className="absolute top-4 right-4 bg-white/10 p-2 rounded-full backdrop-blur-md">
-                 <Lock size={16} className="text-[#BEA0A0]" />
-               </div>
-            )}
-            <div className="w-14 h-14 bg-[var(--color-brand-red)]/10 text-[var(--color-brand-red)] rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-              <FileStack size={28} />
-            </div>
-            <h3 className="text-xl font-bold text-white mb-2 group-hover:text-[var(--color-brand-red)] transition-colors">Alternate Merge</h3>
-            <p className="text-[#BEA0A0] text-sm mb-6 flex-grow">Interleave pages from two PDFs in alternating order - perfect for scanned documents.</p>
-            <div className="text-[var(--color-brand-red)] text-sm font-semibold opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all flex items-center gap-1">
-              {hasPremiumAccess ? 'Open Tool →' : 'Unlock Tool →'}
-            </div>
-          </Link>
-
-        </div>
+        {/* Dynamic Tool Grid */}
+        <ToolGrid 
+          tools={PDF_TOOLS} 
+          locale={locale} 
+          searchQuery={searchQuery}
+          showCategoryHeaders={!searchQuery}
+          className="animate-in fade-in duration-1000"
+        />
       </section>
 
       {/* CTA */}
@@ -359,7 +250,7 @@ export default function PdfTools() {
           <p className="text-[#E8D5D5] mb-8 max-w-2xl mx-auto">
             Upgrade to KRA Checker Pro for bulk processing, API access, and priority support.
           </p>
-          <Link href="/pricing" className="btn-primary px-8 py-4">
+          <Link href="/pricing" className="btn-primary px-8 py-4 inline-block">
             View Pricing Plans
           </Link>
         </div>
@@ -368,3 +259,4 @@ export default function PdfTools() {
     </div>
   );
 }
+

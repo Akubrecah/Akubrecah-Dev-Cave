@@ -16,17 +16,11 @@ export class ProtectPDFProcessor extends BasePDFProcessor {
     const password = options.password as string;
     
     if (!password) {
-      return {
-        success: false,
-        error: this.createErrorOutput(PDFErrorCode.INVALID_OPTIONS, 'Password is required to protect the PDF.'),
-      };
+      return this.createErrorOutput(PDFErrorCode.INVALID_OPTIONS, 'Password is required to protect the PDF.');
     }
 
     if (files.length === 0) {
-      return {
-        success: false,
-        error: this.createErrorOutput(PDFErrorCode.FILE_EMPTY, 'No files provided for protection.'),
-      };
+      return this.createErrorOutput(PDFErrorCode.FILE_EMPTY, 'No files provided for protection.');
     }
 
     try {
@@ -75,22 +69,16 @@ export class ProtectPDFProcessor extends BasePDFProcessor {
       };
     } catch (error: unknown) {
       if (error instanceof Error && error.message === 'PROCESSING_CANCELLED') {
-        return {
-          success: false,
-          error: this.createErrorOutput(PDFErrorCode.PROCESSING_CANCELLED, 'Processing was cancelled.'),
-        };
+        return this.createErrorOutput(PDFErrorCode.PROCESSING_CANCELLED, 'Processing was cancelled.');
       }
       
       const message = error instanceof Error ? error.message : 'Unknown error';
       console.error('Protection error:', error);
-      return {
-        success: false,
-        error: this.createErrorOutput(
+      return this.createErrorOutput(
           PDFErrorCode.PROCESSING_FAILED, 
           'Failed to protect PDF file.',
           message
-        ),
-      };
+        );
     }
   }
 }

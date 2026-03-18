@@ -78,6 +78,7 @@ export function WorkflowPreview({ nodes, edges, inputFiles, isVisible, onToggle 
                             await page.render({
                                 canvasContext: context,
                                 viewport: viewport,
+                                canvas: canvas,
                             }).promise;
 
                             // Apply visual effects based on workflow nodes

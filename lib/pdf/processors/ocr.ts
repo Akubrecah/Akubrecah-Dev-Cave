@@ -273,7 +273,8 @@ export class OCRProcessor extends BasePDFProcessor {
     // Render PDF page to canvas
     await page.render({
       canvasContext: ctx,
-      viewport: viewport,
+          canvas: canvas,
+          viewport: viewport,
     }).promise;
 
     // Perform OCR
