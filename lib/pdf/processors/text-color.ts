@@ -81,24 +81,37 @@ export class TextColorProcessor extends BasePDFProcessor {
         const originalHeight = originalViewport.height;
 
         // Render at higher scale for better quality
-        const renderScale = textOptions.scale || 3;
+        // Render at higher scale for better quality, limit to 2 to avoid memory crashes
+        const renderScale = textOptions.scale || 2;
         const renderViewport = page.getViewport({ scale: renderScale });
 
         const canvas = document.createElement('canvas');
         const width = renderViewport.width;
         const height = renderViewport.height;
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d')!;
+        
+        // Prevent extremely large canvas creation which fails in most browsers
+        if (width * height > 16777216) { // ~16 Megapixels max
+            const ratio = Math.sqrt(16777216 / (width * height));
+            canvas.width = Math.floor(width * ratio);
+            canvas.height = Math.floor(height * ratio);
+        } else {
+            canvas.width = width;
+            canvas.height = height;
+        }
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+            throw new Error('Failed to acquire 2d canvas context');
+        }
 
         await page.render({
           canvasContext: ctx,
-          viewport: renderViewport,
+          viewport: canvas.width === width ? renderViewport : page.getViewport({ scale: renderScale * (canvas.width / width) }),
           canvas: canvas,
         }).promise;
 
         // Get image data and change colors
-        const imageData = ctx.getImageData(0, 0, width, height);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const data = imageData.data;
 
         for (let j = 0; j < data.length; j += 4) {
@@ -136,6 +149,9 @@ export class TextColorProcessor extends BasePDFProcessor {
           width: originalWidth,
           height: originalHeight,
         });
+
+        // Cleanup page
+        page.cleanup();
       }
 
       this.updateProgress(95, 'Saving PDF...');
@@ -146,7 +162,12 @@ export class TextColorProcessor extends BasePDFProcessor {
       return this.createSuccessOutput(blob, file.name.replace('.pdf', '_textcolor.pdf'), { pageCount: pagesToProcess.length });
 
     } catch (error) {
-      return this.createErrorOutput(PDFErrorCode.PROCESSING_FAILED, 'Failed to change text color.', error instanceof Error ? error.message : 'Unknown error');
+      console.error('Text Color Error:', error);
+      return this.createErrorOutput(
+        PDFErrorCode.PROCESSING_FAILED, 
+        'Failed to change text color.', 
+        error instanceof Error ? error.stack || error.message : String(error)
+      );
     }
   }
 
@@ -157,10 +178,9 @@ export class TextColorProcessor extends BasePDFProcessor {
           reject(new Error('Failed to convert canvas to blob'));
           return;
         }
-        const reader = new FileReader();
-        reader.onload = () => resolve(new Uint8Array(reader.result as ArrayBuffer));
-        reader.onerror = () => reject(new Error('Failed to read blob'));
-        reader.readAsArrayBuffer(blob);
+        blob.arrayBuffer()
+           .then(buffer => resolve(new Uint8Array(buffer)))
+           .catch(err => reject(new Error('Failed to get array buffer: ' + err.message)));
       }, 'image/png');
     });
   }

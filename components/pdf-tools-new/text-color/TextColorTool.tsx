@@ -43,8 +43,8 @@ export function TextColorTool({ className = '' }: TextColorToolProps) {
         threshold,
       }, (prog) => { if (!cancelledRef.current) setProgress(prog); });
       if (output.success && output.result) { setResult(output.result as Blob); setStatus('complete'); }
-      else { setError(output.error?.message || 'Failed.'); setStatus('error'); }
-    } catch (err) { setError(err instanceof Error ? err.message : 'Error'); setStatus('error'); }
+      else { setError(`${output.error?.message || 'Failed.'} ${output.error?.details || ''}`); setStatus('error'); }
+    } catch (err) { setError(err instanceof Error ? err.stack || err.message : String(err)); setStatus('error'); }
   }, [file, color, mode, threshold]);
 
   const isProcessing = status === 'processing';
