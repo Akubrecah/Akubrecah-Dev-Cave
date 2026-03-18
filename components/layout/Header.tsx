@@ -37,8 +37,8 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale }) => {
 
       <ul className={styles.links}>
         <li className={styles.links_item}>
-          <Link href={`/${locale}/pdf-tools`} className={styles.link}>
-            Services
+          <Link href={`/${locale}/dashboard`} className={styles.link}>
+            KRA Checker
           </Link>
         </li>
         <li className={styles.links_item}>
@@ -107,7 +107,7 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale }) => {
         <div className={styles.mobileOverlay}>
           <ul className={styles.mobileLinks}>
             {/* Repeat links for mobile or refactor to a shared list */}
-            <li><Link href={`/${locale}/pdf-tools`} onClick={() => setIsMenuOpen(false)}>Services</Link></li>
+            <li><Link href={`/${locale}/dashboard`} onClick={() => setIsMenuOpen(false)}>KRA Checker</Link></li>
             <li><Link href={`/${locale}/pricing`} onClick={() => setIsMenuOpen(false)}>Pricing</Link></li>
             <li><Link href={`/${locale}#contact`} onClick={() => setIsMenuOpen(false)}>Contact</Link></li>
           </ul>

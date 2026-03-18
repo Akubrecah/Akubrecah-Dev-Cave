@@ -397,10 +397,10 @@ export default function Dashboard() {
           <h1 className="text-4xl font-bold text-white mb-2">Welcome Back!</h1>
           <p className="text-[var(--color-text-secondary)] text-lg mb-12">Choose a service to get started</p>
           
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="max-w-2xl mx-auto">
             <div 
               onClick={() => setSelectedService('kra')}
-              className="bg-[#111111] border border-white/10 p-12 rounded-3xl cursor-pointer hover:-translate-y-2 hover:border-[var(--color-brand-red)] transition-all duration-300"
+              className="bg-[#111111] border border-white/10 p-12 rounded-3xl cursor-pointer hover:-translate-y-2 hover:border-[var(--color-brand-red)] transition-all duration-300 text-center"
             >
               <div className="w-20 h-20 bg-[var(--color-brand-red)]/10 text-[var(--color-brand-red)] rounded-2xl flex items-center justify-center mx-auto mb-6">
                 <FileCheck2 size={40} />
@@ -409,20 +409,6 @@ export default function Dashboard() {
               <p className="text-[var(--color-text-secondary)] mb-6">Verify KRA PINs and generate professional PDF certificates with full taxpayer details.</p>
               <button className="w-full py-3 rounded-xl bg-[var(--color-brand-red)] text-white font-bold hover:bg-[var(--color-deep-crimson)] transition-colors">
                 ENTER KRA DASHBOARD →
-              </button>
-            </div>
-
-            <div 
-              onClick={() => router.push('/pdf-tools')}
-              className="bg-[#111111] border border-white/10 p-12 rounded-3xl cursor-pointer hover:-translate-y-2 hover:border-[#F5C200] transition-all duration-300"
-            >
-              <div className="w-20 h-20 bg-[#F5C200]/10 text-[#F5C200] rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <FileText size={40} />
-              </div>
-              <h2 className="text-2xl font-bold text-white mb-4">PDF PRO TOOLS</h2>
-              <p className="text-[var(--color-text-secondary)] mb-6">Complete PDF toolkit – merge, split, compress, and more. All processing in-browser.</p>
-              <button className="w-full py-3 rounded-xl border border-[#F5C200] text-[#F5C200] font-bold hover:bg-[#F5C200]/10 transition-colors">
-                ENTER PDF TOOLS →
               </button>
             </div>
           </div>
@@ -562,13 +548,7 @@ export default function Dashboard() {
                   <div className="text-[10px] text-white/40 uppercase">Certificates</div>
                 </div>
               </div>
-              <div className="bg-[#111111] rounded-2xl p-6 border border-white/5 flex items-center gap-3">
-                <div className="bg-blue-500/10 p-2 rounded-lg text-blue-400"><Zap size={20} /></div>
-                <div>
-                  <div className="text-xl font-bold text-white">{usage?.PDF || 0}</div>
-                  <div className="text-[10px] text-blue-400 uppercase">PDF Tools</div>
-                </div>
-              </div>
+
 
               <div className="bg-[#111111] rounded-2xl p-6 border border-white/5 flex items-center gap-3">
                 <div className="bg-[var(--color-brand-red)]/10 p-2 rounded-lg text-[var(--color-brand-red)]"><Coins size={20} /></div>
@@ -589,7 +569,7 @@ export default function Dashboard() {
                       {timeLeft !== null ? formatTime(timeLeft) : 'No Plan'}
                     </div>
                     <div className="text-[9px] text-white/60 uppercase tracking-widest font-semibold mt-1">
-                      {subscription?.tier ? getTierLabel(subscription.tier) : (usage ? `KRA ${usage.KRA}/${usage.limit} | PDF ${usage.PDF}/${usage.limit}` : 'Free Tier')}
+                      {subscription?.tier ? getTierLabel(subscription.tier) : (usage ? `KRA ${usage.KRA}/${usage.limit}` : 'Free Tier')}
                     </div>
                   </div>
                 </div>
