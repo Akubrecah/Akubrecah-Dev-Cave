@@ -222,8 +222,8 @@ export class RasterizePDFProcessor extends BasePDFProcessor {
                         // Render page
                         await page.render({
                             canvasContext: ctx,
-                            canvas: canvas,
                             viewport,
+                            canvas: canvas,
                         }).promise;
 
                         // Get image data URL
@@ -311,8 +311,8 @@ export class RasterizePDFProcessor extends BasePDFProcessor {
                     // Render page
                     await page.render({
                         canvasContext: ctx,
-                        canvas: canvas,
                         viewport,
+                        canvas: canvas,
                     }).promise;
 
                     // Convert to blob

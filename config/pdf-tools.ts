@@ -1,7 +1,7 @@
 /**
  * Tools configuration file
- * Contains all 67 PDF tools with their properties, categories, and related tools
- * Migrated from BentoPDF and enhanced for PDFCraft
+ * Contains all 67 PDF PDF_TOOLS with their properties, categories, and related PDF_TOOLS
+ * Migrated from BentoPDF and enhanced for Akubrecah Dev Cave PDF
  */
 
 import { Tool, ToolCategory } from '@/types/tool';
@@ -13,13 +13,26 @@ const DEFAULT_MAX_FILE_SIZE = Infinity; // No limit
 const LARGE_FILE_SIZE = Infinity; // No limit
 
 /**
- * All tools configuration
+ * All PDF_TOOLS configuration
  * Each tool must have:
  * - Unique id and slug
  * - Exactly one category from the 6 defined categories
- * - At least 2 related tools
+ * - At least 2 related PDF_TOOLS
  */
 export const PDF_TOOLS: Tool[] = [
+  // ==================== KRA COMPLIANCE ====================
+  {
+    id: 'kra-verify',
+    slug: 'dashboard', // Links to the KRA dashboard
+    icon: 'search',
+    category: 'secure-pdf',
+    acceptedFormats: ['none'], // Internal tool
+    outputFormat: 'html',
+    maxFileSize: 0,
+    maxFiles: 0,
+    features: ['pin-verification', 'certificate-generation', 'compliance-check'],
+    relatedTools: ['sign-pdf', 'encrypt-pdf', 'edit-pdf'],
+  },
   // ==================== ORGANIZE & MANAGE ====================
   {
     id: 'pdf-multi-tool',
@@ -1232,14 +1245,14 @@ export const PDF_TOOLS: Tool[] = [
 ];
 
 /**
- * Get all tools (excluding disabled tools)
+ * Get all PDF_TOOLS (excluding disabled PDF_TOOLS)
  */
 export function getAllTools(): Tool[] {
   return PDF_TOOLS.filter(tool => !tool.disabled);
 }
 
 /**
- * Get all tools including disabled ones (for admin)
+ * Get all PDF_TOOLS including disabled ones (for admin)
  */
 export function getAllToolsIncludingDisabled(): Tool[] {
   return PDF_TOOLS;
@@ -1260,7 +1273,7 @@ export function getToolBySlug(slug: string): Tool | undefined {
 }
 
 /**
- * Get tools by category (excluding disabled tools)
+ * Get PDF_TOOLS by category (excluding disabled PDF_TOOLS)
  */
 export function getToolsByCategory(category: ToolCategory): Tool[] {
   return PDF_TOOLS.filter((tool) => tool.category === category && !tool.disabled);
@@ -1281,10 +1294,11 @@ export function toolExists(id: string): boolean {
 }
 
 /**
- * Popular tool IDs - curated list of commonly used tools
- * These tools remain in their original categories
+ * Popular tool IDs - curated list of commonly used PDF_TOOLS
+ * These PDF_TOOLS remain in their original categories
  */
 export const POPULAR_TOOL_IDS = [
+  'kra-verify',
   'merge-pdf',
   'split-pdf',
   'compress-pdf',
@@ -1295,9 +1309,11 @@ export const POPULAR_TOOL_IDS = [
   'encrypt-pdf',
 ];
 
+export const tools = PDF_TOOLS;
+
 /**
- * Get popular tools
- * Returns a curated list of commonly used tools
+ * Get popular PDF_TOOLS
+ * Returns a curated list of commonly used PDF_TOOLS
  */
 export function getPopularTools(): Tool[] {
   return POPULAR_TOOL_IDS

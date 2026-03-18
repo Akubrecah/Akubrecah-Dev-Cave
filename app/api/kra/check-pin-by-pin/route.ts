@@ -63,6 +63,10 @@ export async function POST(req: Request) {
                 // Increment usage upon success (best-effort)
                 try { await incrementUsage('KRA'); } catch (e) { console.warn('[KRA-PIN] incrementUsage failed:', e); }
 
+                if (data && data.TaxpayerName) {
+                    data.TaxpayerName = data.TaxpayerName.toUpperCase();
+                }
+
                 return NextResponse.json(data);
             } catch (error: unknown) {
                 clearTimeout(timeout);

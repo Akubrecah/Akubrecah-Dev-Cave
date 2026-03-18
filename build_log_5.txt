@@ -1,0 +1,35 @@
+
+> kra-next-scaffold@0.1.0 build
+> prisma generate && next build
+
+[dotenv@17.3.1] injecting env (15) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+Loaded Prisma config from prisma.config.ts.
+
+Prisma schema loaded from prisma/schema.prisma.
+warn Preview feature "driverAdapters" is deprecated. The functionality can be used without specifying it as a preview feature.
+
+✔ Generated Prisma Client (v7.5.0) to ./node_modules/@prisma/client in 309ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+
+▲ Next.js 16.1.6 (Turbopack)
+- Environments: .env
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 111s
+  Running TypeScript ...
+Failed to compile.
+
+./components/pdf-lab/WorkflowPreview.tsx:78:47
+Type error: Argument of type '{ canvasContext: CanvasRenderingContext2D; viewport: PageViewport; }' is not assignable to parameter of type 'RenderParameters'.
+  Property 'canvas' is missing in type '{ canvasContext: CanvasRenderingContext2D; viewport: PageViewport; }' but required in type 'RenderParameters'.
+
+[0m [90m 76 |[39m                             canvas[33m.[39mwidth [33m=[39m viewport[33m.[39mwidth[33m;[39m
+ [90m 77 |[39m
+[31m[1m>[22m[39m[90m 78 |[39m                             [36mawait[39m page[33m.[39mrender({
+ [90m    |[39m                                               [31m[1m^[22m[39m
+ [90m 79 |[39m                                 canvasContext[33m:[39m context[33m,[39m
+ [90m 80 |[39m                                 viewport[33m:[39m viewport[33m,[39m
+ [90m 81 |[39m                             })[33m.[39mpromise[33m;[39m[0m
+Next.js build worker exited with code: 1 and signal: null

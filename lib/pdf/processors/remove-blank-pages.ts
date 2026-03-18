@@ -67,8 +67,8 @@ export class RemoveBlankPagesProcessor extends BasePDFProcessor {
 
           await page.render({
             canvasContext: context,
-          canvas: canvas,
-          viewport: viewport,
+            viewport: viewport,
+            canvas: canvas,
           }).promise;
 
           const imageData = context.getImageData(0, 0, canvas.width, canvas.height);

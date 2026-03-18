@@ -14,10 +14,13 @@ const isPublicRoute = createRouteMatcher([
   '/:locale/sign-in(.*)',
   '/:locale/sign-up(.*)',
   '/api/stripe/webhook(.*)',
-  '/api/kra/debug(.*)'
+  '/api/kra/debug(.*)',
+  '/api/kra/check-pin(.*)',
+  '/api/kra/check-pin-by-pin(.*)'
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
+  console.log(`[PROXY] Handling ${req.nextUrl.pathname}`);
   const publicRoute = isPublicRoute(req);
   const isApiRoute = req.nextUrl.pathname.startsWith('/api');
 
@@ -28,8 +31,8 @@ export default clerkMiddleware(async (auth, req) => {
     }
     const response = NextResponse.next();
     // Apply security headers
-    response.headers.set('Cross-Origin-Opener-Policy', 'same-origin');
-    response.headers.set('Cross-Origin-Embedder-Policy', 'require-corp');
+    // response.headers.set('Cross-Origin-Opener-Policy', 'same-origin');
+    // response.headers.set('Cross-Origin-Embedder-Policy', 'require-corp');
     return response;
   }
 
@@ -42,8 +45,8 @@ export default clerkMiddleware(async (auth, req) => {
   }
 
   // 4. Set security headers
-  response.headers.set('Cross-Origin-Opener-Policy', 'same-origin');
-  response.headers.set('Cross-Origin-Embedder-Policy', 'require-corp');
+  // response.headers.set('Cross-Origin-Opener-Policy', 'same-origin');
+  // response.headers.set('Cross-Origin-Embedder-Policy', 'require-corp');
   
   // Standard security headers
   response.headers.set('X-Frame-Options', 'DENY');

@@ -93,8 +93,7 @@ export function GridCombineTool({ className = '' }: GridCombineToolProps) {
 
             await page.render({
                 canvasContext: context,
-                viewport: viewport,
-                canvas: canvas,
+                viewport: viewport,canvas: canvas,
             }).promise;
 
             const thumbnail = canvas.toDataURL('image/jpeg', 0.7);

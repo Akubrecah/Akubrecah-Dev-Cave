@@ -199,7 +199,8 @@ export default function Dashboard() {
 
   // Update formData helpers
   const updateForm = (field: keyof typeof formData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    const finalValue = field === 'taxpayerName' ? value.toUpperCase() : value;
+    setFormData(prev => ({ ...prev, [field]: finalValue }));
   };
 
   const handleCountyChange = (county: string) => {
@@ -248,7 +249,7 @@ export default function Dashboard() {
       setFormData(prev => ({
         ...prev,
         kraPin: result.TaxpayerPIN || prev.kraPin,
-        taxpayerName: result.TaxpayerName || prev.taxpayerName,
+        taxpayerName: (result.TaxpayerName || prev.taxpayerName || '').toUpperCase(),
         obligation: result.Type || prev.obligation,
         status: result.Status || prev.status
       }));
@@ -519,7 +520,7 @@ export default function Dashboard() {
                 ) : (
                   <div className="text-white space-y-2">
                     <p><strong>Result:</strong> {viewerResult.TaxpayerPIN || viewerInput}</p>
-                    <p><strong>Name:</strong> {viewerResult.TaxpayerName || 'N/A'}</p>
+                    <p><strong>Name:</strong> {(viewerResult.TaxpayerName || 'N/A').toUpperCase()}</p>
                     <p><strong>Type:</strong> {viewerResult.Type || 'N/A'}</p>
                     <p><strong>Status:</strong> {viewerResult.Status || 'N/A'}</p>
                   </div>
@@ -782,7 +783,7 @@ export default function Dashboard() {
                       </div>
                       <div className="flex justify-between border-b border-gray-100 pb-2">
                         <span className="font-bold text-gray-500">Taxpayer</span>
-                        <span className="font-bold">{formData.taxpayerName || '-'}</span>
+                        <span className="font-bold">{(formData.taxpayerName || '-').toUpperCase()}</span>
                       </div>
                       <div className="flex justify-between border-b border-gray-100 pb-2">
                         <span className="font-bold text-gray-500">Address</span>
@@ -849,7 +850,7 @@ export default function Dashboard() {
           <tbody>
             <tr>
               <td style={{ border: '1px solid black', padding: '3px 6px', fontWeight: 700, width: '30%' }}>Taxpayer Name</td>
-              <td style={{ border: '1px solid black', padding: '3px 6px' }}>{formData.taxpayerName || 'N/A'}</td>
+              <td style={{ border: '1px solid black', padding: '3px 6px' }}>{(formData.taxpayerName || 'N/A').toUpperCase()}</td>
             </tr>
             <tr>
               <td style={{ border: '1px solid black', padding: '3px 6px', fontWeight: 700, width: '30%' }}>Email Address</td>

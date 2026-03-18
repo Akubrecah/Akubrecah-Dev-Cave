@@ -82,8 +82,7 @@ export function ExtractPagesTool({ className = '' }: ExtractPagesToolProps) {
           
           await page.render({
             canvasContext: context,
-            viewport: viewport,
-            canvas: canvas,
+            viewport: viewport,canvas: canvas,
           }).promise;
           
           previews.push({

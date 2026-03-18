@@ -89,8 +89,7 @@ export function OrganizePDFTool({ className = '' }: OrganizePDFToolProps) {
 
           await page.render({
             canvasContext: context,
-            viewport: viewport,
-            canvas: canvas,
+            viewport: viewport,canvas: canvas,
           }).promise;
 
           previews.push({

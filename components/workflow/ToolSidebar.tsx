@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { tools } from '@/config/tools';
-import { getToolContent } from '@/config/tool-content';
+import { getToolContent } from '@/config/pdf-tool-content';
 import { ToolNodeData } from '@/types/workflow';
 import * as LucideIcons from 'lucide-react';
 import { Search, ChevronDown, ChevronRight, GripVertical, PanelLeftClose, PanelLeftOpen } from 'lucide-react';

@@ -15,6 +15,7 @@ import type {
   PDFError,
 } from '@/types/pdf';
 import { PDFErrorCode, ErrorCategory, ERROR_CODE_CATEGORY } from '@/types/pdf';
+import { validateFile, validatePdfStructure } from './validation';
 
 /**
  * Abstract base class for PDF processors
@@ -36,12 +37,23 @@ export abstract class BasePDFProcessor implements PDFProcessor {
     const errors: PDFError[] = [];
 
     for (const file of files) {
-      if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
-        errors.push(createPDFError(PDFErrorCode.FILE_NOT_PDF, `File ${file.name} is not a PDF.`));
+      // Basic file validation
+      const fileValidation = validateFile(file, {
+        maxSize: this.getMaxFileSize(),
+        acceptedTypes: this.getAcceptedTypes(),
+      });
+
+      if (!fileValidation.valid) {
+        errors.push(...fileValidation.errors);
+        continue;
       }
 
-      if (file.size > this.getMaxFileSize()) {
-        errors.push(createPDFError(PDFErrorCode.FILE_TOO_LARGE, `File ${file.name} is too large.`));
+      // PDF structure validation for PDF files
+      if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
+        const structureValidation = await validatePdfStructure(file);
+        if (!structureValidation.valid) {
+          errors.push(...structureValidation.errors);
+        }
       }
     }
 
@@ -76,11 +88,10 @@ export abstract class BasePDFProcessor implements PDFProcessor {
   /**
    * Update progress and notify callback
    */
-  protected updateProgress(progress: number, message?: string, callback?: ProgressCallback): void {
+  protected updateProgress(progress: number, message?: string): void {
     this.progress = Math.min(100, Math.max(0, progress));
-    const cb = callback || this.onProgress;
-    if (cb) {
-      cb(this.progress, message);
+    if (this.onProgress) {
+      this.onProgress(this.progress, message);
     }
   }
 
@@ -131,7 +142,7 @@ export abstract class BasePDFProcessor implements PDFProcessor {
 }
 
 /**
- * Create a standardized PDF error object
+ * Create a PDF error object
  */
 export function createPDFError(
   code: PDFErrorCode,
@@ -139,13 +150,45 @@ export function createPDFError(
   details?: string,
   suggestedAction?: string
 ): PDFError {
-  const nonRecoverable = [PDFErrorCode.FILE_CORRUPTED, PDFErrorCode.PDF_MALFORMED, PDFErrorCode.BROWSER_NOT_SUPPORTED];
+  const category = ERROR_CODE_CATEGORY[code] || ErrorCategory.PROCESSING_ERROR;
+  const recoverable = isRecoverableError(code);
+
   return {
     code,
-    category: ERROR_CODE_CATEGORY[code] || ErrorCategory.PROCESSING_ERROR,
+    category,
     message,
     details,
-    recoverable: !nonRecoverable.includes(code),
-    suggestedAction,
+    recoverable,
+    suggestedAction: suggestedAction || getDefaultSuggestedAction(code),
   };
 }
+
+/**
+ * Check if an error is recoverable
+ */
+function isRecoverableError(code: PDFErrorCode): boolean {
+  const nonRecoverableErrors: PDFErrorCode[] = [
+    PDFErrorCode.FILE_CORRUPTED,
+    PDFErrorCode.PDF_MALFORMED,
+    PDFErrorCode.BROWSER_NOT_SUPPORTED,
+  ];
+  return !nonRecoverableErrors.includes(code);
+}
+
+/**
+ * Get default suggested action for an error code
+ */
+function getDefaultSuggestedAction(code: PDFErrorCode): string {
+  const actions: Partial<Record<PDFErrorCode, string>> = {
+    [PDFErrorCode.FILE_TOO_LARGE]: 'Try compressing or splitting the file first.',
+    [PDFErrorCode.FILE_TYPE_INVALID]: 'Please upload a valid PDF file.',
+    [PDFErrorCode.FILE_CORRUPTED]: 'The file may be damaged. Try a different file.',
+    [PDFErrorCode.PDF_ENCRYPTED]: 'Please decrypt the PDF first using the Decrypt tool.',
+    [PDFErrorCode.PDF_MALFORMED]: 'Try using the Repair PDF tool first.',
+    [PDFErrorCode.PROCESSING_TIMEOUT]: 'Try with a smaller file or fewer pages.',
+    [PDFErrorCode.MEMORY_EXCEEDED]: 'Close other browser tabs and try again.',
+    [PDFErrorCode.WORKER_FAILED]: 'Refresh the page and try again.',
+  };
+  return actions[code] || 'Please try again.';
+}
+

@@ -1,0 +1,130 @@
+
+> kra-next-scaffold@0.1.0 build
+> prisma generate && next build
+
+[dotenv@17.3.1] injecting env (15) from .env -- tip: ⚙️  suppress all logs with { quiet: true }
+Loaded Prisma config from prisma.config.ts.
+
+Prisma schema loaded from prisma/schema.prisma.
+warn Preview feature "driverAdapters" is deprecated. The functionality can be used without specifying it as a preview feature.
+
+✔ Generated Prisma Client (v7.5.0) to ./node_modules/@prisma/client in 944ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+
+▲ Next.js 16.1.6 (Turbopack)
+- Environments: .env
+
+  Creating an optimized production build ...
+
+> Build error occurred
+Error: Turbopack build failed with 5 errors:
+./components/pdf-lab/ToolSidebar.tsx:5:19
+Parsing ecmascript source code failed
+[0m [90m 3 |[39m [36mimport[39m [33mReact[39m[33m,[39m { useState[33m,[39m useMemo } [36mfrom[39m [32m'react'[39m[33m;[39m
+ [90m 4 |[39m [36mimport[39m { useTranslations[33m,[39m useLocale } [36mfrom[39m [32m'next-intl'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 5 |[39m [36mimport[39m { [33mPDF_TOOLS[39m[33m:[39m tools } [36mfrom[39m [32m'@/config/pdf-tools'[39m[33m;[39m
+ [90m   |[39m                   [31m[1m^[22m[39m
+ [90m 6 |[39m [36mimport[39m { getToolContent } [36mfrom[39m [32m'@/config/pdf-tool-content'[39m[33m;[39m
+ [90m 7 |[39m [36mimport[39m { [33mToolNodeData[39m } [36mfrom[39m [32m'@/types/workflow'[39m[33m;[39m
+ [90m 8 |[39m [36mimport[39m [33m*[39m [36mas[39m [33mLucideIcons[39m [36mfrom[39m [32m'lucide-react'[39m[33m;[39m[0m
+
+Expected ',', got ':'
+
+Import trace:
+  Client Component Browser:
+    ./components/pdf-lab/ToolSidebar.tsx [Client Component Browser]
+    ./components/pdf-lab/WorkflowEditor.tsx [Client Component Browser]
+    ./app/[locale]/pdf-lab/WorkflowPageClient.tsx [Client Component Browser]
+    ./app/[locale]/pdf-lab/WorkflowPageClient.tsx [Server Component]
+    ./app/[locale]/pdf-lab/page.tsx [Server Component]
+
+
+./app/[locale]/pdf-tools/[tool]/page.tsx:94:1
+Module not found: Can't resolve '@/lib/seo/metadata'
+[0m [90m 92 |[39m [36mimport[39m { [33mDigitalSignPDFTool[39m } [36mfrom[39m [32m'@/components/pdf-tools/digital-sign'[39m[33m;[39m
+ [90m 93 |[39m [36mimport[39m { [33mValidateSignatureTool[39m } [36mfrom[39m [32m'@/components/pdf-tools/validate-signature'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 94 |[39m [36mimport[39m { generateToolMetadata } [36mfrom[39m [32m'@/lib/seo/metadata'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 95 |[39m [36mimport[39m { [33mJsonLd[39m } [36mfrom[39m [32m'@/components/seo/JsonLd'[39m[33m;[39m
+ [90m 96 |[39m [36mimport[39m {
+ [90m 97 |[39m   generateSoftwareApplicationSchema[33m,[39m[0m
+
+Import map: aliased to relative './lib/seo/metadata' inside of [project]/
+
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+./app/[locale]/pdf-tools/[tool]/page.tsx:96:1
+Module not found: Can't resolve '@/lib/seo/structured-data'
+[0m [90m  94 |[39m [36mimport[39m { generateToolMetadata } [36mfrom[39m [32m'@/lib/seo/metadata'[39m[33m;[39m
+ [90m  95 |[39m [36mimport[39m { [33mJsonLd[39m } [36mfrom[39m [32m'@/components/seo/JsonLd'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  96 |[39m [36mimport[39m {
+ [90m     |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+[31m[1m>[22m[39m[90m  97 |[39m   generateSoftwareApplicationSchema[33m,[39m
+ [90m     |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+[31m[1m>[22m[39m[90m  98 |[39m   generateFAQPageSchema[33m,[39m
+ [90m     |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+[31m[1m>[22m[39m[90m  99 |[39m   generateHowToSchema[33m,[39m
+ [90m     |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+[31m[1m>[22m[39m[90m 100 |[39m   generateWebPageSchema[33m,[39m
+ [90m     |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+[31m[1m>[22m[39m[90m 101 |[39m   generateBreadcrumbSchema
+ [90m     |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+[31m[1m>[22m[39m[90m 102 |[39m } [36mfrom[39m [32m'@/lib/seo/structured-data'[39m[33m;[39m
+ [90m     |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 103 |[39m [36mimport[39m type { [33mMetadata[39m } [36mfrom[39m [32m'next'[39m[33m;[39m
+ [90m 104 |[39m
+ [90m 105 |[39m [36mconst[39m [33mSUPPORTED_LOCALES[39m[33m:[39m [33mLocale[39m[] [33m=[39m [[32m'en'[39m[33m,[39m [32m'ja'[39m[33m,[39m [32m'ko'[39m[33m,[39m [32m'es'[39m[33m,[39m [32m'fr'[39m[33m,[39m [32m'de'[39m[33m,[39m [32m'zh'[39m[33m,[39m [32m'zh-TW'[39m[33m,[39m [32m'pt'[39m[33m,[39m [32m'ar'[39m[33m,[39m [32m'it'[39m][33m;[39m[0m
+
+Import map: aliased to relative './lib/seo/structured-data' inside of [project]/
+
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+./components/pdf-tools/crop/CropPDFTool.tsx:6:1
+Module not found: Can't resolve 'cropperjs/dist/cropper.css'
+[0m [90m 4 |[39m [36mimport[39m { useTranslations } [36mfrom[39m [32m'next-intl'[39m[33m;[39m
+ [90m 5 |[39m [36mimport[39m [33mCropper[39m[33m,[39m { [33mReactCropperElement[39m } [36mfrom[39m [32m'react-cropper'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 6 |[39m [36mimport[39m [32m'cropperjs/dist/cropper.css'[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 7 |[39m
+ [90m 8 |[39m [36mimport[39m { [33mFileUploader[39m } [36mfrom[39m [32m'../FileUploader'[39m[33m;[39m
+ [90m 9 |[39m [36mimport[39m { [33mProcessingProgress[39m[33m,[39m [33mProcessingStatus[39m } [36mfrom[39m [32m'../ProcessingProgress'[39m[33m;[39m[0m
+
+
+
+Import trace:
+  Server Component:
+    ./components/pdf-tools/crop/CropPDFTool.tsx
+    ./app/[locale]/pdf-tools/[tool]/page.tsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+./app/[locale]/pdf-tools/page.tsx:5:1
+Export generateToolsListMetadata doesn't exist in target module
+[0m [90m 3 |[39m [36mimport[39m { setRequestLocale[33m,[39m getTranslations } [36mfrom[39m [32m'next-intl/server'[39m[33m;[39m
+ [90m 4 |[39m [36mimport[39m { locales[33m,[39m type [33mLocale[39m } [36mfrom[39m [32m'@/lib/i18n/config'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 5 |[39m [36mimport[39m { generateToolsListMetadata } [36mfrom[39m [32m'@/lib/seo'[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 6 |[39m [36mimport[39m [33mToolsPageClient[39m [36mfrom[39m [32m'./ToolsPageClient'[39m[33m;[39m
+ [90m 7 |[39m
+ [90m 8 |[39m [36mexport[39m [36mfunction[39m generateStaticParams() {[0m
+
+The export generateToolsListMetadata was not found in module [project]/lib/seo.ts [app-rsc] (ecmascript).
+Did you mean to import serializeStructuredData?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+
+    at <unknown> (./components/pdf-lab/ToolSidebar.tsx:5:19)
+    at <unknown> (./app/[locale]/pdf-tools/[tool]/page.tsx:94:1)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+    at <unknown> (./app/[locale]/pdf-tools/[tool]/page.tsx:96:1)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+    at <unknown> (./components/pdf-tools/crop/CropPDFTool.tsx:6:1)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+    at <unknown> (./app/[locale]/pdf-tools/page.tsx:5:1)

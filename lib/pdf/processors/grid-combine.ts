@@ -252,8 +252,8 @@ export class GridCombineProcessor extends BasePDFProcessor {
 
                         await page.render({
                             canvasContext: ctx,
-                            canvas: canvas,
                             viewport,
+                            canvas: canvas,
                         }).promise;
 
                         // Convert to PNG bytes

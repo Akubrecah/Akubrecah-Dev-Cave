@@ -1,120 +1,396 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import NextImage from 'next/image';
-import { useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { Search, Menu, X, Github } from 'lucide-react';
 import { SignInButton, UserButton, Show } from '@clerk/nextjs';
 import { type Locale } from '@/lib/i18n/config';
-import styles from './Header.module.css';
+import { Button } from '@/components/ui/Button';
+import { RecentFilesDropdown } from '@/components/common/RecentFilesDropdown';
+import { searchTools, SearchResult } from '@/lib/utils/search';
+import { getToolContent } from '@/config/tool-content';
+import { tools as allTools } from '@/config/tools';
 
 export interface HeaderProps {
-  locale: Locale;
-  showSearch?: boolean;
+    locale: Locale;
+    showSearch?: boolean;
 }
 
-export const Header: React.FC<HeaderProps> = ({ locale: propLocale }) => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const params = useParams();
-  const locale = propLocale || (params?.locale as string) || 'en';
+export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch = true }) => {
+    const t = useTranslations('common');
+    const router = useRouter();
+    const params = useParams();
+    const localeSelection = propLocale || (params?.locale as string) || 'en';
+    const locale = localeSelection as Locale;
 
-  return (
-    <header className={`${styles.header} ${isMenuOpen ? styles.menuOpen : ''}`}>
-      <Link href={`/${locale}`} className={styles.logo}>
-        <NextImage
-          alt="logo"
-          src="/logo.png"
-          width={40}
-          height={40}
-          style={{ objectFit: 'contain' }}
-          priority
-        />
-        <span className={styles.logoText}>
-          Akubrecah <span className={styles.brandYellow}>Dev Cave</span>
-        </span>
-      </Link>
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+    const [selectedIndex, setSelectedIndex] = useState(-1);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [scrolled, setScrolled] = useState(false);
+    const [localizedTools, setLocalizedTools] = useState<Record<string, { title: string; description: string }>>({});
+    const searchInputRef = useRef<HTMLInputElement>(null);
+    const searchContainerRef = useRef<HTMLDivElement>(null);
 
-      <ul className={styles.links}>
-        <li className={styles.links_item}>
-          <Link href={`/${locale}/dashboard`} className={styles.link}>
-            KRA Checker
-          </Link>
-        </li>
-        <li className={styles.links_item}>
-          <div className={styles.dropDown}>
-            <div className={styles.label}>
-              <span>Pricing</span>
-              <svg className={styles.arrow} viewBox="0 0 11 7" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path
-                  d="M5.29358 5.91632L5.50636 6.12981L5.71885 5.91603L10.2128 1.39478L10.4159 1.19046L10.2199 0.979263L10.0499 0.795969L9.83742 0.566936L9.61719 0.788512L5.50607 4.92462L1.39496 0.788512L1.18219 0.574444L0.969412 0.788512L0.787226 0.971806L0.576732 1.18358L0.787512 1.39507L5.29358 5.91632Z"
-                  fill="white"
-                  stroke="white"
-                  strokeWidth="0.6"
-                />
-              </svg>
+    // Load localized tool content on mount
+    useEffect(() => {
+        const contentMap: Record<string, { title: string; description: string }> = {};
+
+        allTools.forEach(tool => {
+            const content = getToolContent(locale, tool.id);
+            if (content) {
+                contentMap[tool.id] = {
+                    title: content.title,
+                    description: content.metaDescription
+                };
+            }
+        });
+
+        setLocalizedTools(contentMap);
+    }, [locale]);
+
+    // Handle scroll effect
+    useEffect(() => {
+        const handleScroll = () => {
+            setScrolled(window.scrollY > 10);
+        };
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    // Handle search query changes
+    useEffect(() => {
+        if (searchQuery.trim()) {
+            const results = searchTools(searchQuery, localizedTools);
+            setSearchResults(results.slice(0, 8));
+            setSelectedIndex(-1);
+        } else {
+            setSearchResults([]);
+            setSelectedIndex(-1);
+        }
+    }, [searchQuery, localizedTools]);
+
+    // Close search when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+                setIsSearchOpen(false);
+                setSearchQuery('');
+                setSearchResults([]);
+            }
+        };
+
+        if (isSearchOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+            return () => document.removeEventListener('mousedown', handleClickOutside);
+        }
+    }, [isSearchOpen]);
+
+    // Handle keyboard navigation
+    const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            setSelectedIndex(prev => Math.min(prev + 1, searchResults.length - 1));
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            setSelectedIndex(prev => Math.max(prev - 1, -1));
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            if (selectedIndex >= 0 && searchResults[selectedIndex]) {
+                navigateToTool(searchResults[selectedIndex].tool.slug);
+            } else if (searchResults.length > 0) {
+                navigateToTool(searchResults[0].tool.slug);
+            }
+        } else if (e.key === 'Escape') {
+            setIsSearchOpen(false);
+            setSearchQuery('');
+            setSearchResults([]);
+        }
+    }, [searchResults, selectedIndex]);
+
+    const navigateToTool = useCallback((slug: string) => {
+        router.push(`/${locale}/pdf-tools/${slug}`);
+        setIsSearchOpen(false);
+        setSearchQuery('');
+        setSearchResults([]);
+    }, [locale, router]);
+
+    const handleSearchToggle = useCallback(() => {
+        setIsSearchOpen((prev) => !prev);
+        if (!isSearchOpen) {
+            setTimeout(() => searchInputRef.current?.focus(), 100);
+        } else {
+            setSearchQuery('');
+            setSearchResults([]);
+        }
+    }, [isSearchOpen]);
+
+    // Keyboard shortcut for search
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                e.preventDefault();
+                setIsSearchOpen(true);
+                setTimeout(() => searchInputRef.current?.focus(), 100);
+            }
+        };
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, []);
+
+    const handleMobileMenuToggle = useCallback(() => {
+        setIsMobileMenuOpen((prev) => !prev);
+    }, []);
+
+    // Get tool icon based on category
+    const getToolIcon = (category: string) => {
+        const icons: Record<string, string> = {
+            'edit-annotate': '✏️',
+            'convert-to-pdf': '📄',
+            'convert-from-pdf': '🖼️',
+            'organize-manage': '📁',
+            'optimize-repair': '🔧',
+            'secure-pdf': '🔒',
+        };
+        return icons[category] || '📄';
+    };
+
+    const navItems = [
+        { href: `/${locale}/dashboard`, label: 'KRA Checker' },
+        { href: `/${locale}/pdf-tools`, label: 'PDF Tools' },
+        { href: `/${locale}/pricing`, label: 'Pricing' },
+    ];
+
+    return (
+        <header
+            className={`fixed top-0 z-50 w-full transition-all duration-300 ${scrolled
+                ? 'bg-[hsl(var(--color-background))]/80 backdrop-blur-md border-b border-[hsl(var(--color-border))/0.5] shadow-sm'
+                : 'bg-transparent border-transparent'
+                }`}
+            role="banner"
+        >
+            <div className="container mx-auto px-4">
+                <div className="flex h-20 items-center justify-between">
+                    {/* Logo and Brand */}
+                    <div className="flex items-center gap-2">
+                        <Link
+                            href={`/${locale}`}
+                            className="group flex items-center gap-2.5 text-xl font-bold text-[hsl(var(--color-foreground))] hover:opacity-90 transition-opacity"
+                            aria-label={`${t('brand')} - ${t('navigation.home')}`}
+                        >
+                            <div className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[hsl(var(--color-primary))] to-[hsl(var(--color-accent))] shadow-lg shadow-primary/25 transition-transform group-hover:scale-105">
+                                <svg
+                                    className="h-5 w-5 text-white"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2.5"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                >
+                                    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+                                    <polyline points="14 2 14 8 20 8" />
+                                </svg>
+                            </div>
+                            <span className="text-xl tracking-tight hidden sm:inline-block">
+                                Akubrecah <span className="text-[hsl(var(--color-accent))]">Dev Cave</span>
+                            </span>
+                        </Link>
+                    </div>
+
+                    {/* Desktop Navigation */}
+                    <nav
+                        className={`hidden md:flex items-center gap-1 rounded-full border border-[hsl(var(--color-border))/0.4] bg-[hsl(var(--color-background))/0.5] p-1.5 backdrop-blur-sm shadow-sm transition-all duration-300 ${isSearchOpen ? 'opacity-0 translate-y-[-10px] pointer-events-none' : 'opacity-100 translate-y-0'
+                            }`}
+                        role="navigation"
+                        aria-label="Main navigation"
+                    >
+                        {navItems.map((item) => (
+                            <Link
+                                key={item.href}
+                                href={item.href}
+                                className="px-4 py-1.5 text-sm font-medium text-[hsl(var(--color-muted-foreground))] hover:text-[hsl(var(--color-foreground))] hover:bg-[hsl(var(--color-muted))/0.5] rounded-full transition-all"
+                            >
+                                {item.label}
+                            </Link>
+                        ))}
+                    </nav>
+
+                    {/* Right side actions */}
+                    <div className="flex items-center gap-3">
+                        {/* Search */}
+                        {showSearch && (
+                            <div className="relative" ref={searchContainerRef}>
+                                {isSearchOpen ? (
+                                    <div className="fixed md:absolute left-4 right-4 md:left-auto md:right-0 top-[22px] md:top-1/2 md:-translate-y-1/2 z-50 md:origin-right animate-in fade-in slide-in-from-right-4 duration-200">
+                                        <div className="relative w-full md:w-96">
+                                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[hsl(var(--color-muted-foreground))]" />
+                                            <input
+                                                ref={searchInputRef}
+                                                type="search"
+                                                value={searchQuery}
+                                                onChange={(e) => setSearchQuery(e.target.value)}
+                                                onKeyDown={handleKeyDown}
+                                                placeholder={t('search.placeholder') || 'Search tools...'}
+                                                className="w-full pl-10 pr-10 py-2.5 text-sm rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-background))] shadow-lg focus:outline-none focus:ring-2 focus:ring-[hsl(var(--color-primary))]"
+                                                aria-label="Search tools"
+                                                autoComplete="off"
+                                            />
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={handleSearchToggle}
+                                                aria-label="Close search"
+                                                className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 p-0 hover:bg-transparent"
+                                            >
+                                                <X className="h-4 w-4 text-[hsl(var(--color-muted-foreground))]" aria-hidden="true" />
+                                            </Button>
+
+                                            {/* Search Results Dropdown */}
+                                            {searchResults.length > 0 && (
+                                                <div className="absolute top-full left-0 right-0 mt-2 bg-[hsl(var(--color-background))] border border-[hsl(var(--color-border))] rounded-xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 max-h-[60vh] overflow-y-auto">
+                                                    <ul className="py-2" role="listbox">
+                                                        {searchResults.map((result, index) => {
+                                                            const localized = localizedTools[result.tool.id];
+                                                            const toolName = localized?.title || result.tool.id.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                                                            const toolDescription = localized?.description || result.tool.features.slice(0, 3).join(' • ');
+
+                                                            return (
+                                                                <li key={result.tool.id}>
+                                                                    <button
+                                                                        onClick={() => navigateToTool(result.tool.slug)}
+                                                                        onMouseEnter={() => setSelectedIndex(index)}
+                                                                        className={`
+                                                                    w-full px-4 py-2.5 text-left flex items-center gap-3 transition-colors
+                                                                    ${index === selectedIndex
+                                                                                ? 'bg-[hsl(var(--color-primary))/0.1] text-[hsl(var(--color-primary))]'
+                                                                                : 'hover:bg-[hsl(var(--color-muted))] text-[hsl(var(--color-foreground))]'
+                                                                            }
+                                                                  `}
+                                                                        role="option"
+                                                                        aria-selected={index === selectedIndex}
+                                                                    >
+                                                                        <span className="text-xl filter grayscale group-hover:grayscale-0">{getToolIcon(result.tool.category)}</span>
+                                                                        <div className="flex-1 min-w-0">
+                                                                            <div className="font-semibold text-sm truncate">
+                                                                                {toolName}
+                                                                            </div>
+                                                                            <div className="text-xs text-[hsl(var(--color-muted-foreground))] truncate">
+                                                                                {toolDescription}
+                                                                            </div>
+                                                                        </div>
+                                                                    </button>
+                                                                </li>
+                                                            );
+                                                        })}
+                                                    </ul>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={handleSearchToggle}
+                                        aria-label="Open search"
+                                        className="relative text-[hsl(var(--color-muted-foreground))] hover:text-[hsl(var(--color-foreground))]"
+                                    >
+                                        <Search className="h-5 w-5" aria-hidden="true" />
+                                        <span className="ml-2 hidden lg:inline-block text-xs text-[hsl(var(--color-muted-foreground))/0.5] border border-[hsl(var(--color-border))] rounded px-1.5 py-0.5">⌘K</span>
+                                    </Button>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Recent Files Dropdown */}
+                        <RecentFilesDropdown
+                            locale={locale}
+                            translations={{
+                                title: t('recentFiles.title') || 'Recent Files',
+                                empty: t('recentFiles.empty') || 'No recent files',
+                                clearAll: t('recentFiles.clearAll') || 'Clear all',
+                                processedWith: t('recentFiles.processedWith') || 'Processed with',
+                            }}
+                        />
+
+                        {/* Authentication */}
+                        <div className="flex items-center gap-2">
+                            <Show when="signed-out">
+                                <SignInButton mode="modal">
+                                    <Button variant="ghost" size="sm" className="hidden sm:inline-flex">
+                                        Sign in
+                                    </Button>
+                                </SignInButton>
+                                <SignInButton mode="modal">
+                                    <Button size="sm" className="hidden sm:inline-flex">
+                                        Sign up
+                                    </Button>
+                                </SignInButton>
+                            </Show>
+                            <Show when="signed-in">
+                                <UserButton appearance={{ elements: { avatarBox: 'h-9 w-9' } }} />
+                            </Show>
+                        </div>
+
+                        {/* Mobile Menu Toggle */}
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="md:hidden"
+                            onClick={handleMobileMenuToggle}
+                            aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
+                            aria-expanded={isMobileMenuOpen}
+                            aria-controls="mobile-menu"
+                        >
+                            {isMobileMenuOpen ? (
+                                <X className="h-5 w-5" aria-hidden="true" />
+                            ) : (
+                                <Menu className="h-5 w-5" aria-hidden="true" />
+                            )}
+                        </Button>
+                    </div>
+                </div>
+
+                {/* Mobile Navigation */}
+                {isMobileMenuOpen && (
+                    <nav
+                        id="mobile-menu"
+                        className="md:hidden py-4 border-t border-[hsl(var(--color-border))] bg-[hsl(var(--color-background))] backdrop-blur-xl shadow-lg"
+                        role="navigation"
+                        aria-label="Mobile navigation"
+                    >
+                        <ul className="flex flex-col gap-2 p-2">
+                            {navItems.map((item) => (
+                                <li key={item.href}>
+                                    <Link
+                                        href={item.href}
+                                        className="block px-4 py-3 text-base font-medium text-[hsl(var(--color-foreground))] hover:bg-[hsl(var(--color-muted))] rounded-lg transition-colors"
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                    >
+                                        {item.label}
+                                    </Link>
+                                </li>
+                            ))}
+                            <li className="pt-2 mt-2 border-t border-[hsl(var(--color-border))]/0.5">
+                                <Show when="signed-out">
+                                    <SignInButton mode="modal">
+                                        <button className="w-full text-left px-4 py-3 text-base font-medium text-[hsl(var(--color-foreground))] hover:bg-[hsl(var(--color-muted))] rounded-lg transition-colors">
+                                            Sign in
+                                        </button>
+                                    </SignInButton>
+                                </Show>
+                            </li>
+                        </ul>
+                    </nav>
+                )}
             </div>
-            <div className={styles.body}>
-              <Link href={`/${locale}/pricing/personal`} className={styles.dropDownLink}>
-                For Persons
-              </Link>
-              <Link href={`/${locale}/pricing/business`} className={styles.dropDownLink}>
-                For Business
-              </Link>
-            </div>
-          </div>
-        </li>
-        <Link href={`/${locale}/contact`} className={`${styles.button} ${styles.mainButton}`}>
-          <span className={styles.bg}></span>
-          Get in Touch
-        </Link>
-      </ul>
-
-      <div className={styles.log_in_buttons}>
-        <Show when="signed-out">
-          <SignInButton mode="modal">
-            <button className={`${styles.button} ${styles.transparentButton}`}>
-              Sign in
-            </button>
-          </SignInButton>
-          <SignInButton mode="modal">
-            <Link href="#" className={`${styles.button} ${styles.blackButton}`}>
-              Sign up
-            </Link>
-          </SignInButton>
-        </Show>
-        <Show when="signed-in">
-          <Link href={`/${locale}/dashboard`} className={`${styles.button} ${styles.transparentButton}`}>
-            Dashboard
-          </Link>
-          <UserButton appearance={{ elements: { avatarBox: 'w-9 h-9' } }} />
-        </Show>
-      </div>
-
-      <button 
-        className={styles.mobileMenu}
-        onClick={() => setIsMenuOpen(!isMenuOpen)}
-        aria-label="Toggle menu"
-      >
-        <svg viewBox="0 0 16 11" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M0 1C0 0.447715 0.447715 0 1 0H15C15.5523 0 16 0.447715 16 1C16 1.55228 15.5523 2 15 2H1C0.447715 2 0 1.55228 0 1Z" fill="white" />
-          <path d="M0 5.5C0 4.94772 0.447715 4.5 1 4.5H15C15.5523 4.5 16 4.94772 16 5.5C16 6.05228 15.5523 6.5 15 6.5H1 C0.447715 6.5 0 6.05228 0 5.5Z" fill="white" />
-          <path d="M0 10C0 9.44772 0.447715 9 1 9H15C15.5523 9 16 9.44772 16 10C16 10.5523 15.5523 11 15 11H1C0.447715 11 0 10.5523 0 10Z" fill="white" />
-        </svg>
-      </button>
-
-      {isMenuOpen && (
-        <div className={styles.mobileOverlay}>
-          <ul className={styles.mobileLinks}>
-            {/* Repeat links for mobile or refactor to a shared list */}
-            <li><Link href={`/${locale}/dashboard`} onClick={() => setIsMenuOpen(false)}>KRA Checker</Link></li>
-            <li><Link href={`/${locale}/pricing`} onClick={() => setIsMenuOpen(false)}>Pricing</Link></li>
-            <li><Link href={`/${locale}#contact`} onClick={() => setIsMenuOpen(false)}>Contact</Link></li>
-          </ul>
-        </div>
-      )}
-    </header>
-  );
+        </header>
+    );
 };
 
 export default Header;

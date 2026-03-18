@@ -93,8 +93,8 @@ export class TextColorProcessor extends BasePDFProcessor {
 
         await page.render({
           canvasContext: ctx,
-          canvas: canvas,
           viewport: renderViewport,
+          canvas: canvas,
         }).promise;
 
         // Get image data and change colors

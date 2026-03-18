@@ -1,0 +1,66 @@
+
+> kra-next-scaffold@0.1.0 build
+> prisma generate && next build
+
+[dotenv@17.3.1] injecting env (15) from .env -- tip: ⚙️  suppress all logs with { quiet: true }
+Loaded Prisma config from prisma.config.ts.
+
+Prisma schema loaded from prisma/schema.prisma.
+warn Preview feature "driverAdapters" is deprecated. The functionality can be used without specifying it as a preview feature.
+
+✔ Generated Prisma Client (v7.5.0) to ./node_modules/@prisma/client in 259ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+
+▲ Next.js 16.1.6 (Turbopack)
+- Environments: .env
+
+  Creating an optimized production build ...
+
+> Build error occurred
+Error: Turbopack build failed with 2 errors:
+./components/pdf-lab/ToolSidebar.tsx:5:19
+Parsing ecmascript source code failed
+[0m [90m 3 |[39m [36mimport[39m [33mReact[39m[33m,[39m { useState[33m,[39m useMemo } [36mfrom[39m [32m'react'[39m[33m;[39m
+ [90m 4 |[39m [36mimport[39m { useTranslations[33m,[39m useLocale } [36mfrom[39m [32m'next-intl'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 5 |[39m [36mimport[39m { [33mPDF_TOOLS[39m[33m:[39m tools } [36mfrom[39m [32m'@/config/pdf-tools'[39m[33m;[39m
+ [90m   |[39m                   [31m[1m^[22m[39m
+ [90m 6 |[39m [36mimport[39m { getToolContent } [36mfrom[39m [32m'@/config/pdf-tool-content'[39m[33m;[39m
+ [90m 7 |[39m [36mimport[39m { [33mToolNodeData[39m } [36mfrom[39m [32m'@/types/workflow'[39m[33m;[39m
+ [90m 8 |[39m [36mimport[39m [33m*[39m [36mas[39m [33mLucideIcons[39m [36mfrom[39m [32m'lucide-react'[39m[33m;[39m[0m
+
+Expected ',', got ':'
+
+Import trace:
+  Client Component Browser:
+    ./components/pdf-lab/ToolSidebar.tsx [Client Component Browser]
+    ./components/pdf-lab/WorkflowEditor.tsx [Client Component Browser]
+    ./app/[locale]/pdf-lab/WorkflowPageClient.tsx [Client Component Browser]
+    ./app/[locale]/pdf-lab/WorkflowPageClient.tsx [Server Component]
+    ./app/[locale]/pdf-lab/page.tsx [Server Component]
+
+
+./components/pdf-tools/crop/CropPDFTool.tsx:6:1
+Module not found: Can't resolve 'cropperjs/dist/cropper.css'
+[0m [90m 4 |[39m [36mimport[39m { useTranslations } [36mfrom[39m [32m'next-intl'[39m[33m;[39m
+ [90m 5 |[39m [36mimport[39m [33mCropper[39m[33m,[39m { [33mReactCropperElement[39m } [36mfrom[39m [32m'react-cropper'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 6 |[39m [36mimport[39m [32m'cropperjs/dist/cropper.css'[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 7 |[39m
+ [90m 8 |[39m [36mimport[39m { [33mFileUploader[39m } [36mfrom[39m [32m'../FileUploader'[39m[33m;[39m
+ [90m 9 |[39m [36mimport[39m { [33mProcessingProgress[39m[33m,[39m [33mProcessingStatus[39m } [36mfrom[39m [32m'../ProcessingProgress'[39m[33m;[39m[0m
+
+
+
+Import trace:
+  Server Component:
+    ./components/pdf-tools/crop/CropPDFTool.tsx
+    ./app/[locale]/pdf-tools/[tool]/page.tsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+    at <unknown> (./components/pdf-lab/ToolSidebar.tsx:5:19)
+    at <unknown> (./components/pdf-tools/crop/CropPDFTool.tsx:6:1)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)

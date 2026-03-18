@@ -2,16 +2,18 @@
  * Site configuration
  */
 export const siteConfig = {
-  name: 'PDFCraft',
-  description: 'Professional PDF Tools - Free, Private & Browser-Based. Merge, split, compress, convert, and edit PDF files online without uploading to servers.',
-  url: 'https://pdfcraft.devtoolcafe.com',
+  name: 'Akubrecah',
+  description: 'Your Professional KRA Compliance & PDF Mastery Suite. Verify KRA PINs and access 88+ powerful, private PDF tools locally in your browser.',
+  url: 'https://akubrecah.vercel.app', // Update with actual URL if known, assuming vercel for now
   ogImage: '/images/og-image.png',
   links: {
-    github: 'https://github.com/PDFCraftTool/pdfcraft',
-    twitter: 'https://twitter.com/pdfcraft',
+    github: 'https://github.com/AkubrecaH',
+    twitter: 'https://twitter.com/akubrecah',
   },
-  creator: 'PDFCraft Team',
+  creator: 'AkubrecaH Team',
   keywords: [
+    'KRA PIN verification',
+    'Kenya tax compliance',
     'PDF tools',
     'PDF editor',
     'merge PDF',
@@ -22,12 +24,13 @@ export const siteConfig = {
     'online PDF editor',
     'browser-based PDF',
     'private PDF processing',
+    'AkubrecaH',
   ],
   // SEO-related settings
   seo: {
-    titleTemplate: '%s | PDFCraft',
-    defaultTitle: 'PDFCraft - Professional PDF Tools',
-    twitterHandle: '@pdfcraft',
+    titleTemplate: '%s | Akubrecah',
+    defaultTitle: 'Akubrecah - KRA Compliance & PDF Tools',
+    twitterHandle: '@akubrecah',
     locale: 'en_US',
   },
 };
