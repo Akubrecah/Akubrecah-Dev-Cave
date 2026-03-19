@@ -264,21 +264,20 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
     transition-all duration-300
     cursor-pointer
     group
-    z-10
   `;
 
   // Dynamic styles based on state
   const stateStyles = disabled
-    ? 'border-white/5 bg-white/5 cursor-not-allowed opacity-50'
+    ? 'border-[hsl(var(--color-muted))] bg-[hsl(var(--color-muted)/0.3)] cursor-not-allowed opacity-50'
     : isDragging
-      ? 'border-[var(--color-brand-red)] bg-[var(--color-brand-red)]/5 scale-[1.01] shadow-2xl shadow-red-900/20'
+      ? 'border-[hsl(var(--color-primary))] bg-[hsl(var(--color-primary)/0.05)] scale-[1.01] shadow-2xl shadow-primary/10'
       : `
-      border-white/10 
-      bg-black/40
-      hover:border-[var(--color-brand-red)]/50 
-      hover:bg-black/60
-      hover:shadow-2xl hover:shadow-red-900/5
-      backdrop-blur-xl
+      border-[hsl(var(--color-border))] 
+      bg-[hsl(var(--color-card)/0.5)] 
+      hover:border-[hsl(var(--color-primary))] 
+      hover:bg-[hsl(var(--color-background))] 
+      hover:shadow-xl hover:shadow-[hsl(var(--color-primary)/0.05)]
+      glass-card
     `;
 
   return (
@@ -311,30 +310,30 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
 
       {/* Decorative background blob */}
       <div className="absolute inset-0 overflow-hidden rounded-[2rem] pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-[var(--color-brand-red)]/5 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-[hsl(var(--color-primary)/0.03)] rounded-full blur-3xl" />
       </div>
 
       {/* Upload icon */}
       <div className={`
-        mb-6 p-5 rounded-3xl transition-all duration-300 group-hover:scale-110 group-hover:rotate-3
-        ${isDragging ? 'bg-[var(--color-brand-red)]/20 text-[var(--color-brand-red)]' : 'bg-white/5 text-[#BEA0A0] group-hover:bg-[var(--color-brand-red)]/10 group-hover:text-[var(--color-brand-red)] border border-white/5'}
+        mb-6 p-4 rounded-full transition-transform duration-300 group-hover:scale-110
+        ${isDragging ? 'bg-[hsl(var(--color-primary)/0.1)] text-[hsl(var(--color-primary))]' : 'bg-[hsl(var(--color-muted))] text-[hsl(var(--color-muted-foreground))] group-hover:bg-[hsl(var(--color-primary)/0.1)] group-hover:text-[hsl(var(--color-primary))]'}
       `}>
-        <UploadCloud className="w-12 h-12" aria-hidden="true" />
+        <UploadCloud className="w-10 h-10" aria-hidden="true" />
       </div>
 
       {/* Label */}
-      <p className="text-2xl font-bold text-white mb-3 text-center tracking-tight">
+      <p className="text-xl font-semibold text-[hsl(var(--color-foreground))] mb-3 text-center">
         {label || t('buttons.upload')}
       </p>
 
       {/* Description */}
-      <div className="text-[#BEA0A0] text-center max-w-sm leading-relaxed">
+      <div className="text-sm text-[hsl(var(--color-muted-foreground))] text-center max-w-sm leading-relaxed">
         {description || (
           <>
-            <p className="mb-4 text-base">{t('fileUploader.dragDrop')}</p>
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/5 text-xs font-semibold uppercase tracking-wider">
-              <span className="opacity-60">{t('fileUploader.support')}:</span>
-              <span className="text-[var(--color-brand-yellow)]">{t('fileUploader.paste')}</span>
+            <p className="mb-2">{t('fileUploader.dragDrop')}</p>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[hsl(var(--color-muted)/0.5)] text-xs font-medium">
+              <span className="opacity-70">{t('fileUploader.support')}:</span>
+              <span>{t('fileUploader.paste')}</span>
             </div>
           </>
         )}
@@ -342,20 +341,20 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
 
       {/* File info hints - only show when multiple files allowed */}
       {multiple && (
-        <div className="mt-8 flex flex-wrap gap-2 justify-center">
-          <span className="text-xs px-3 py-1.5 rounded-lg bg-white/5 border border-white/5 text-[#BEA0A0] font-medium italic">
-            Max Files: {maxFiles}
+        <div className="mt-6 flex flex-wrap gap-2 justify-center">
+          <span className="text-xs px-2 py-1 rounded-md bg-[hsl(var(--color-muted))] text-[hsl(var(--color-muted-foreground))]">
+            Files: {maxFiles}
           </span>
         </div>
       )}
 
       {/* Drag overlay */}
       {isDragging && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 backdrop-blur-md rounded-[2rem] z-20 transition-opacity duration-200 border-2 border-[var(--color-brand-red)]">
-          <div className="p-6 rounded-3xl bg-[var(--color-brand-red)]/20 text-[var(--color-brand-red)] mb-4 motion-safe:animate-bounce shadow-lg shadow-red-900/20">
-            <Plus className="w-10 h-10" />
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-[hsl(var(--color-background)/0.9)] backdrop-blur-sm rounded-[2rem] z-10 transition-opacity duration-200">
+          <div className="p-4 rounded-full bg-[hsl(var(--color-primary)/0.1)] text-[hsl(var(--color-primary))] mb-4 motion-safe:animate-bounce">
+            <Plus className="w-8 h-8" />
           </div>
-          <p className="text-2xl font-black text-white tracking-widest uppercase">
+          <p className="text-xl font-bold text-[hsl(var(--color-primary))]">
             {t('fileUploader.dropToUpload')}
           </p>
         </div>
@@ -363,6 +362,5 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
     </div>
   );
 };
-
 
 export default FileUploader;

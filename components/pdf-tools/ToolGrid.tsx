@@ -102,11 +102,11 @@ export function ToolGrid({
   if (filteredTools.length === 0) {
     return (
       <div
-        className={`text-center py-24 glass-panel ${className}`}
+        className={`text-center py-12 ${className}`}
         data-testid="tool-grid-empty"
       >
-        <p className="text-[#BEA0A0] text-lg">
-          No tools found for your search
+        <p className="text-[hsl(var(--color-muted-foreground))]">
+          No tools found
         </p>
       </div>
     );
@@ -115,24 +115,24 @@ export function ToolGrid({
   // Render grouped by category
   if (showCategoryHeaders && groupedTools) {
     return (
-      <div className={`space-y-16 ${className}`} data-testid="tool-grid">
-        {(Object.entries(groupedTools) as [ToolCategory, Tool[]][]).map(([cat, categoryTools]) => {
+      <div className={`space-y-8 ${className}`} data-testid="tool-grid">
+        {Object.entries(groupedTools).map(([cat, categoryTools]) => {
           if (categoryTools.length === 0) return null;
 
-          const categoryInfo = CATEGORY_INFO[cat];
-          const categoryName = t(`home.categories.${categoryTranslationKeys[cat]}`);
+          const categoryInfo = CATEGORY_INFO[cat as ToolCategory];
+          const categoryName = t(`home.categories.${categoryTranslationKeys[cat as ToolCategory]}`);
 
           return (
-            <div key={cat} className="animate-in fade-in slide-in-from-bottom-4 duration-700" data-testid={`tool-grid-category-${cat}`}>
-              <div className="mb-8 border-l-4 border-[var(--color-brand-red)] pl-6">
-                <h2 className="text-3xl font-bold text-white mb-2">
+            <section key={cat} data-testid={`tool-grid-category-${cat}`}>
+              <div className="mb-4">
+                <h2 className="text-xl font-semibold text-[hsl(var(--color-foreground))]">
                   {categoryName}
                 </h2>
-                <p className="text-[#BEA0A0] text-lg">
+                <p className="text-sm text-[hsl(var(--color-muted-foreground))]">
                   {categoryInfo.description}
                 </p>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {categoryTools.map(tool => (
                   <ToolCard
                     key={tool.id}
@@ -142,7 +142,7 @@ export function ToolGrid({
                   />
                 ))}
               </div>
-            </div>
+            </section>
           );
         })}
       </div>
@@ -152,7 +152,7 @@ export function ToolGrid({
   // Render flat grid
   return (
     <div
-      className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 ${className}`}
+      className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 ${className}`}
       data-testid="tool-grid"
     >
       {filteredTools.map(tool => (
@@ -166,6 +166,5 @@ export function ToolGrid({
     </div>
   );
 }
-
 
 export default ToolGrid;

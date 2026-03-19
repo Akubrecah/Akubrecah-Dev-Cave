@@ -143,61 +143,77 @@ export const ProcessingProgress: React.FC<ProcessingProgressProps> = ({
         {announcementRef.current}
       </div>
       {/* Status and percentage header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
           {/* Status indicator */}
           {(status === 'uploading' || status === 'processing') && (
             <div className="relative">
-              <div className="w-5 h-5 rounded-full bg-[var(--color-brand-red)]/20" />
-              <div className="absolute inset-0 w-5 h-5 rounded-full bg-[var(--color-brand-red)] animate-ping opacity-40" />
-              <div className="absolute inset-1.5 w-2 h-2 rounded-full bg-[var(--color-brand-red)] shadow-[0_0_10px_var(--color-brand-red)]" />
+              <div className="w-4 h-4 rounded-full bg-[hsl(var(--color-primary)/0.3)]" />
+              <div className="absolute inset-0 w-4 h-4 rounded-full bg-[hsl(var(--color-primary))] animate-ping opacity-75" />
             </div>
           )}
           {status === 'complete' && (
-             <div className="w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center border border-green-500/30">
-               <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-               </svg>
-             </div>
+            <svg
+              className="w-5 h-5 text-green-500"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
           )}
           {status === 'error' && (
-             <div className="w-6 h-6 rounded-full bg-red-500/20 flex items-center justify-center border border-red-500/30">
-               <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
-               </svg>
-             </div>
+            <svg
+              className="w-5 h-5 text-red-500"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
           )}
           
           {/* Status text */}
-          <span className="text-base font-bold text-white tracking-tight uppercase">
+          <span className="text-sm font-medium text-[hsl(var(--color-foreground))]">
             {statusText}
           </span>
         </div>
 
         {/* Percentage */}
         {showPercentage && (
-          <span className="text-2xl font-black text-[var(--color-brand-yellow)] tabular-nums">
-            {Math.round(clampedProgress)}<span className="text-xs ml-0.5 opacity-60">%</span>
+          <span className="text-sm font-medium text-[hsl(var(--color-muted-foreground))]">
+            {Math.round(clampedProgress)}%
           </span>
         )}
       </div>
 
-      {/* Progress bar container */}
-      <div className="relative w-full h-3 bg-white/5 rounded-full overflow-hidden border border-white/5 p-0.5">
+      {/* Progress bar */}
+      <div className="relative w-full h-2 bg-[hsl(var(--color-muted))] rounded-full overflow-hidden">
         <div
-          className={`absolute left-0.5 top-0.5 h-[calc(100%-4px)] transition-all duration-700 ease-out rounded-full ${status === 'complete' ? 'bg-green-500' : status === 'error' ? 'bg-red-500' : 'bg-gradient-to-r from-[var(--color-brand-crimson)] to-[var(--color-brand-red)] shadow-[0_0_15px_rgba(227,6,19,0.5)]'}`}
-          style={{ width: `calc(${clampedProgress}% - 4px)` }}
+          className={`absolute left-0 top-0 h-full transition-all duration-300 ease-out rounded-full ${progressBarColor}`}
+          style={{ width: `${clampedProgress}%` }}
         />
         
         {/* Animated shimmer for active states */}
         {(status === 'uploading' || status === 'processing') && clampedProgress < 100 && (
           <div
-            className="absolute left-0 top-0 h-full bg-gradient-to-r from-transparent via-white/30 to-transparent motion-safe:animate-shimmer"
+            className="absolute left-0 top-0 h-full bg-gradient-to-r from-transparent via-[hsl(var(--color-primary-foreground)/0.3)] to-transparent motion-safe:animate-shimmer"
             style={{ width: `${clampedProgress}%` }}
           />
         )}
       </div>
-
 
       {/* Message and estimated time */}
       <div className="flex items-center justify-between mt-2">

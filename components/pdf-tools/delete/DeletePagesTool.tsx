@@ -82,8 +82,7 @@ export function DeletePagesTool({ className = '' }: DeletePagesToolProps) {
           
           await page.render({
             canvasContext: context,
-            viewport: viewport,canvas: canvas,
-          }).promise;
+            viewport: viewport, canvas: canvas, }).promise;
           
           previews.push({
             pageNumber: i,

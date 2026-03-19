@@ -116,8 +116,7 @@ export function FindAndRedactTool({ className = '' }: FindAndRedactToolProps) {
                     context.clearRect(0, 0, canvas.width, canvas.height);
                     await page.render({
                         canvasContext: context,
-                        viewport: viewport,canvas: canvas,
-                    }).promise;
+                        viewport: viewport, canvas: canvas, }).promise;
 
                     // Draw match highlights
                     const pageMatches = matches.filter(m => m.page === previewPage);
@@ -166,8 +165,7 @@ export function FindAndRedactTool({ className = '' }: FindAndRedactToolProps) {
             // Render the PDF page
             await page.render({
                 canvasContext: context,
-                viewport: viewport,canvas: canvas,
-            }).promise;
+                viewport: viewport, canvas: canvas, }).promise;
 
             // Draw match highlights
             const pageMatches = matches.filter(m => m.page === previewPage);

@@ -119,8 +119,7 @@ export function SplitPDFTool({ className = '' }: SplitPDFToolProps) {
 
           await page.render({
             canvasContext: context,
-            viewport: viewport,canvas: canvas,
-          }).promise;
+            viewport: viewport, canvas: canvas, }).promise;
 
           previews.push({
             pageNumber: i,

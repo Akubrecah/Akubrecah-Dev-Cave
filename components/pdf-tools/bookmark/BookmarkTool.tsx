@@ -170,7 +170,8 @@ export function BookmarkTool({ className = '' }: BookmarkToolProps) {
 
       await page.render({
         canvasContext: ctx,
-        viewport: scaledViewport,canvas: canvasRef.current!,
+        viewport: scaledViewport,
+        canvas: canvas,
       }).promise;
 
     } catch (err) {
