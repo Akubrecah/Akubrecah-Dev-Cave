@@ -303,7 +303,8 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
         accept={acceptString}
         multiple={multiple}
         onChange={handleInputChange}
-        className="hidden"
+        className="sr-only"
+        tabIndex={-1}
         aria-hidden="true"
         disabled={disabled}
       />
