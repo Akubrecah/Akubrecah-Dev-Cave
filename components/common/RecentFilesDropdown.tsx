@@ -187,7 +187,7 @@ export const RecentFilesDropdown: React.FC<RecentFilesDropdownProps> = ({
                   <div className="flex items-start justify-between gap-2">
                     <Link
                       ref={(el) => { itemRefs.current[index] = el; }}
-                      href={`/${locale}/tools/${file.toolUsed}`}
+                      href={`/${locale}/pdf-tools/${file.toolUsed}`}
                       className="flex-1 min-w-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--color-ring))] rounded-sm"
                       tabIndex={focusedIndex === index ? 0 : -1}
                       onClick={() => {

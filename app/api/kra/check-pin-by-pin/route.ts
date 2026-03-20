@@ -53,12 +53,15 @@ export async function POST(req: Request) {
                     throw new Error('Invalid JSON response from KRA');
                 }
 
-                console.log(`[KRA-PIN] Response status: ${response.status}, body: ${rawText.substring(0, 300)}`);
+                console.log(`[KRA-PIN] Response status: ${response.status}, body: ${rawText.substring(0, 500)}`);
 
                 if (!response.ok) {
-                    const errorBody = data?.errorMessage || data?.error || data?.message || `KRA API error ${response.status}`;
+                    const errorBody = data?.errorMessage || data?.ErrorMessage || data?.error || data?.message || `KRA API error ${response.status}`;
+                    console.error(`[KRA-PIN] API Error: ${errorBody}`, data);
                     return NextResponse.json({ errorMessage: errorBody }, { status: response.status });
                 }
+
+                console.log(`[KRA-PIN] Success data keys: ${Object.keys(data).join(', ')}`);
 
                 // Increment usage upon success (best-effort)
                 try { await incrementUsage('KRA'); } catch (e) { console.warn('[KRA-PIN] incrementUsage failed:', e); }

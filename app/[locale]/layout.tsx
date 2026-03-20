@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { locales, Locale, localeConfig } from '@/lib/i18n/config';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import { AlertBanner } from '@/components/layout/AlertBanner';
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -40,6 +41,7 @@ export default async function LocaleLayout({
           {children}
         </main>
         <Footer locale={locale as Locale} />
+        <AlertBanner />
       </div>
     </NextIntlClientProvider>
   );

@@ -202,7 +202,7 @@ export const SavedProjectsPanel: React.FC<SavedProjectsPanelProps> = ({
 
                 <div className="flex items-center gap-1">
                   {project.status !== 'completed' && (
-                    <Link href={`/${locale}/tools/${project.toolId}`}>
+                    <Link href={`/${locale}/pdf-tools/${project.toolId}`}>
                       <Button
                         variant="ghost"
                         size="sm"

@@ -3,6 +3,9 @@ import { currentUser } from '@clerk/nextjs/server';
 
 export type UsageType = 'KRA' | 'PDF';
 
+// ALL SERVICES ARE FREE UNTIL JUNE 1, 2026
+const FREE_UNTIL_DATE = new Date('2026-06-01T00:00:00Z');
+
 /**
  * Checks if a user has reached their daily usage limit.
  * Fremium users are limited to 2 usages per day per type.
@@ -13,6 +16,11 @@ export async function checkUsageLimit(type: UsageType): Promise<{
   remaining: number;
   isPremium: boolean;
 }> {
+  // Global bypass until June 2026
+  if (new Date() < FREE_UNTIL_DATE) {
+    return { allowed: true, count: 0, remaining: 999, isPremium: true };
+  }
+
   const user = await currentUser();
   if (!user) {
     return { allowed: false, count: 0, remaining: 0, isPremium: false };
@@ -79,6 +87,10 @@ export async function checkUsageLimit(type: UsageType): Promise<{
  * Increments the usage count for a user for a specific type.
  */
 export async function incrementUsage(type: UsageType): Promise<void> {
+  // skip incrementing before the deadline
+  if (new Date() < FREE_UNTIL_DATE) {
+    return;
+  }
   const user = await currentUser();
   if (!user) return;
 

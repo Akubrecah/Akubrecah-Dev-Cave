@@ -63,13 +63,17 @@ export async function POST(req: Request) {
                 try {
                     data = JSON.parse(rawText);
                 } catch {
+                    console.log(`[KRA-ID] KRA returned non-JSON response (${response.status}), body: ${rawText.substring(0, 500)}`);
                     throw new Error(`KRA returned non-JSON response (${response.status}): ${rawText.substring(0, 100)}`);
                 }
 
                 if (!response.ok) {
                     const errorBody = data?.ErrorMessage || data?.errorMessage || data?.error || data?.message || `KRA API error ${response.status}`;
+                    console.error(`[KRA-ID] API Error: ${errorBody}`, data);
                     return NextResponse.json({ errorMessage: errorBody }, { status: response.status });
                 }
+
+                console.log(`[KRA-ID] Success data keys: ${Object.keys(data).join(', ')}`);
 
                 // Increment usage on success (best-effort)
                 try { await incrementUsage('KRA'); } catch (e) { console.warn('[KRA-ID] incrementUsage failed:', e); }

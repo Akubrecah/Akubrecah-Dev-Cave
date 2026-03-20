@@ -80,7 +80,7 @@ export function ToolPage({ tool, content, locale, children, localizedRelatedTool
               </Link>
               <ChevronRight className="w-4 h-4 mx-2 text-[hsl(var(--color-border))]" />
               <Link
-                href={`/${locale}/tools/category/${tool.category}`}
+                href={`/${locale}/pdf-tools/category/${tool.category}`}
                 className="hover:text-[hsl(var(--color-primary))] transition-colors"
               >
                 {t(`home.categories.${categoryTranslationKeys[tool.category]}`)}
@@ -426,7 +426,7 @@ function RelatedToolsSection({ tools, locale, localizedRelatedTools }: RelatedTo
           return (
             <a
               key={tool.id}
-              href={`/${locale}/tools/${tool.slug}`}
+              href={`/${locale}/pdf-tools/${tool.slug}`}
               className="block group"
             >
               <Card hover clickable className="h-full glass-card transition-all duration-300 group-hover:-translate-y-1">

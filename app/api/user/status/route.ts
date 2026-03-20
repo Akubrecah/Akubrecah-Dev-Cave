@@ -30,22 +30,24 @@ export async function GET() {
     }
 
     const now = new Date();
+    // ALL SERVICES ARE FREE UNTIL JUNE 1, 2026
+    const FREE_UNTIL_DATE = new Date('2026-06-01T00:00:00Z');
+    const isFreePeriod = now < FREE_UNTIL_DATE;
     
     // Check Cyber Pro/Premium subscription
-    // Any tier starting with 'premium' OR 'weekly'/'monthly' OR explicit role 'cyber'
-    const isCyberPro = (
-      user.role === 'cyber' || 
+    const isCyberPro = isFreePeriod || (
+      (user.role === 'cyber' || 
       user.subscriptionTier?.startsWith('premium') || 
       user.subscriptionTier === 'weekly' || 
-      user.subscriptionTier === 'monthly'
-    ) && 
-    user.subscriptionStatus === 'active' && 
-    user.subscriptionEnd && 
-    new Date(user.subscriptionEnd) > now;
+      user.subscriptionTier === 'monthly') && 
+      user.subscriptionStatus === 'active' && 
+      user.subscriptionEnd && 
+      new Date(user.subscriptionEnd) > now
+    );
 
     // Check Daily PDF Premium - Cyber Pro/Premium also have PDF access
-    // We check both pdfPremiumEnd (for daily/one-off) and isCyberPro
-    const hasPdfPremium = isCyberPro || 
+    const hasPdfPremium = isFreePeriod || 
+                          isCyberPro || 
                           (user.pdfPremiumEnd && new Date(user.pdfPremiumEnd) > now) === true;
 
     // Fetch usage counts for today
@@ -72,10 +74,10 @@ export async function GET() {
     return NextResponse.json({ 
         isCyberPro,
         hasPdfPremium,
-        subscriptionTier: user.subscriptionTier,
-        subscriptionStatus: user.subscriptionStatus,
-        subscriptionEnd: user.subscriptionEnd,
-        pdfPremiumEnd: user.pdfPremiumEnd,
+        subscriptionTier: isFreePeriod ? 'premium_free' : user.subscriptionTier,
+        subscriptionStatus: isFreePeriod ? 'active' : user.subscriptionStatus,
+        subscriptionEnd: isFreePeriod ? FREE_UNTIL_DATE.toISOString() : user.subscriptionEnd,
+        pdfPremiumEnd: isFreePeriod ? FREE_UNTIL_DATE.toISOString() : user.pdfPremiumEnd,
         role: user.role,
         usage: {
           KRA: kraUsage,

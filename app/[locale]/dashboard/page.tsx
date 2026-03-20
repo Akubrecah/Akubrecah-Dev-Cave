@@ -192,7 +192,8 @@ export default function Dashboard() {
       'weekly': 'Cyber Pro (Weekly)',
       'monthly': 'Cyber Pro (Monthly)',
       'premium_weekly': 'Cyber Premium (Weekly)',
-      'premium_monthly': 'Cyber Premium (Monthly)'
+      'premium_monthly': 'Cyber Premium (Monthly)',
+      'premium_free': 'Promo: Free Access'
     };
     return labels[tier] || 'Selection Mode';
   };
@@ -211,6 +212,16 @@ export default function Dashboard() {
       district: '',
       postal: countyData ? countyData.postalCode : ''
     }));
+  };
+
+  const getKRAValue = (obj: Record<string, any>, ...keys: string[]) => {
+    for (const key of keys) {
+      if (obj[key] !== undefined && obj[key] !== null) return obj[key];
+      // Try case-insensitive
+      const foundKey = Object.keys(obj).find(k => k.toLowerCase() === key.toLowerCase());
+      if (foundKey) return obj[foundKey];
+    }
+    return '';
   };
 
   const verifyAndAutofill = async () => {
@@ -236,22 +247,23 @@ export default function Dashboard() {
       const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
+        body: JSON.stringify(body),
+        credentials: 'include' // Ensure session cookies are sent for potentially protected API routes
       });
       
+      const result = await res.json().catch(() => ({}));
+      console.log('[KRA-DASHBOARD] Verification response:', { status: res.status, ok: res.ok, result });
+
       if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.errorMessage || `KRA API returned ${res.status}`);
+        throw new Error(result.errorMessage || `KRA API returned ${res.status}`);
       }
 
-      const result = await res.json();
-      
       setFormData(prev => ({
         ...prev,
-        kraPin: result.TaxpayerPIN || prev.kraPin,
-        taxpayerName: (result.TaxpayerName || prev.taxpayerName || '').toUpperCase(),
-        obligation: result.Type || prev.obligation,
-        status: result.Status || prev.status
+        kraPin: getKRAValue(result, 'TaxpayerPIN', 'PIN') || prev.kraPin,
+        taxpayerName: (getKRAValue(result, 'TaxpayerName', 'Name') || prev.taxpayerName || '').toUpperCase(),
+        obligation: getKRAValue(result, 'Type', 'TaxpayerType') || prev.obligation,
+        status: getKRAValue(result, 'Status') || prev.status
       }));
 
       // Update local storage stats for UI
@@ -261,7 +273,7 @@ export default function Dashboard() {
 
       showStatus('Verification successful! Details updated.');
     } catch (error: Error | unknown) {
-      console.error(error);
+      console.error('[KRA-DASHBOARD] Verification error:', error);
       const msg = error instanceof Error ? error.message : 'Error occurred during verification';
       
       if (msg.includes('429') || msg.toLowerCase().includes('limit reached')) {
@@ -293,15 +305,29 @@ export default function Dashboard() {
       const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
+        body: JSON.stringify(body),
+        credentials: 'include'
       });
+
+      const data = await res.json().catch(() => ({}));
+      console.log('[KRA-DASHBOARD] QuickView response:', { status: res.status, ok: res.ok, data });
+
       if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.errorMessage || `KRA API returned ${res.status}`);
+        throw new Error(data.errorMessage || `KRA API returned ${res.status}`);
       }
-      const data = await res.json();
-      setViewerResult(data);
+      
+      // Normalize data for consistent UI display
+      const normalizedData = {
+        ...data,
+        TaxpayerPIN: getKRAValue(data, 'TaxpayerPIN', 'PIN'),
+        TaxpayerName: getKRAValue(data, 'TaxpayerName', 'Name'),
+        Type: getKRAValue(data, 'Type', 'TaxpayerType'),
+        Status: getKRAValue(data, 'Status')
+      };
+      
+      setViewerResult(normalizedData);
     } catch (err: Error | unknown) {
+      console.error('[KRA-DASHBOARD] QuickView error:', err);
       const msg = err instanceof Error ? err.message : 'Unknown error';
       if (msg.includes('429') || msg.toLowerCase().includes('limit reached')) {
         setViewerResult({ error: 'Daily limit reached. Please upgrade for unlimited access.' });
