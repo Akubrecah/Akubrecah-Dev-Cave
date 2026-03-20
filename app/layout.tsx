@@ -18,8 +18,11 @@ export const metadata: Metadata = {
   title: "AkubrecaH | KRA & PDF Tools",
   description: "Secure and fast KRA PIN certificate generation & PDF processing",
   icons: {
-    icon: '/favicon.png',
-    shortcut: '/favicon.png',
+    icon: [
+      { url: '/favicon.png', type: 'image/png' },
+      { url: '/favicon.ico', type: 'image/x-icon' },
+    ],
+    shortcut: '/favicon.ico',
     apple: '/favicon.png',
   },
 };
