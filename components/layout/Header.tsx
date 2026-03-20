@@ -1,16 +1,20 @@
 'use client';
 
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import NextImage from 'next/image';
 import { useRouter, useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { Search, Menu, X, Github } from 'lucide-react';
+import {
+    Search,
+    Menu,
+    X,
+} from 'lucide-react';
 import { SignInButton, UserButton, Show } from '@clerk/nextjs';
 import { type Locale } from '@/lib/i18n/config';
 import { Button } from '@/components/ui/Button';
 import { RecentFilesDropdown } from '@/components/common/RecentFilesDropdown';
-import { searchTools, SearchResult } from '@/lib/utils/search';
+import { searchTools } from '@/lib/utils/search';
 import { getToolContent } from '@/config/tool-content';
 import { tools as allTools } from '@/config/tools';
 
@@ -28,16 +32,14 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
 
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
-    const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
     const [selectedIndex, setSelectedIndex] = useState(-1);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
-    const [localizedTools, setLocalizedTools] = useState<Record<string, { title: string; description: string }>>({});
     const searchInputRef = useRef<HTMLInputElement>(null);
     const searchContainerRef = useRef<HTMLDivElement>(null);
 
-    // Load localized tool content on mount
-    useEffect(() => {
+    // Memoize localized tools to avoid cascading renders in effects
+    const localizedTools = useMemo(() => {
         const contentMap: Record<string, { title: string; description: string }> = {};
 
         allTools.forEach(tool => {
@@ -49,8 +51,7 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                 };
             }
         });
-
-        setLocalizedTools(contentMap);
+        return contentMap;
     }, [locale]);
 
     // Handle scroll effect
@@ -62,16 +63,11 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    // Handle search query changes
-    useEffect(() => {
-        if (searchQuery.trim()) {
-            const results = searchTools(searchQuery, localizedTools);
-            setSearchResults(results.slice(0, 8));
-            setSelectedIndex(-1);
-        } else {
-            setSearchResults([]);
-            setSelectedIndex(-1);
-        }
+    // Update search results directly in search handler or via useMemo
+    const searchResults = useMemo(() => {
+        if (!searchQuery.trim()) return [];
+        const results = searchTools(searchQuery, localizedTools);
+        return results.slice(0, 8);
     }, [searchQuery, localizedTools]);
 
     // Close search when clicking outside
@@ -80,7 +76,6 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
             if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
                 setIsSearchOpen(false);
                 setSearchQuery('');
-                setSearchResults([]);
             }
         };
 
@@ -94,7 +89,6 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
         router.push(`/${locale}/pdf-tools/${slug}`);
         setIsSearchOpen(false);
         setSearchQuery('');
-        setSearchResults([]);
     }, [locale, router]);
 
     // Handle keyboard navigation
@@ -115,7 +109,6 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
         } else if (e.key === 'Escape') {
             setIsSearchOpen(false);
             setSearchQuery('');
-            setSearchResults([]);
         }
     }, [searchResults, selectedIndex, navigateToTool]);
 
@@ -125,7 +118,6 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
             setTimeout(() => searchInputRef.current?.focus(), 100);
         } else {
             setSearchQuery('');
-            setSearchResults([]);
         }
     }, [isSearchOpen]);
 
@@ -179,22 +171,19 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                     <div className="flex items-center gap-2">
                         <Link
                             href={`/${locale}`}
-                            className="group flex items-center gap-2.5 text-xl font-bold text-[hsl(var(--color-foreground))] hover:opacity-90 transition-opacity"
+                            className="group flex items-center gap-4 text-xl font-bold text-[hsl(var(--color-foreground))] hover:opacity-90 transition-opacity"
                             aria-label={`${t('brand')} - ${t('navigation.home')}`}
                         >
-                            <div className="relative flex h-10 w-10 items-center justify-center rounded-xl overflow-hidden shadow-lg transition-transform group-hover:scale-105">
+                            <div className="relative flex h-12 items-center justify-center transition-transform group-hover:scale-105">
                                 <NextImage
-                                    src="/favicon.png"
+                                    src="/logo.png"
                                     alt="AkubrecaH Logo"
-                                    width={40}
-                                    height={40}
+                                    width={180}
+                                    height={48}
                                     className="object-contain"
                                     priority
                                 />
                             </div>
-                            <span className="text-xl tracking-tight hidden sm:inline-block">
-                                Akubrecah <span className="text-[hsl(var(--color-accent))]">Dev Cave</span>
-                            </span>
                         </Link>
                     </div>
 

@@ -46,15 +46,13 @@ export const Footer: React.FC<FooterProps> = ({ locale }) => {
               className="group flex items-center gap-2.5 text-xl font-bold text-[hsl(var(--color-foreground))]"
               aria-label={`${t('brand')} - ${t('navigation.home')}`}
             >
-              <div className="relative flex h-10 w-10 items-center justify-center rounded-xl overflow-hidden shadow-md transition-transform group-hover:scale-105">
                 <NextImage
-                  src="/favicon.png"
+                  src="/logo.png"
                   alt="AkubrecaH Logo"
-                  width={40}
-                  height={40}
+                  width={200}
+                  height={60}
                   className="object-contain"
                 />
-              </div>
               <span data-testid="footer-brand-name">{t('brand')}</span>
             </Link>
             <p className="text-sm text-[hsl(var(--color-muted-foreground))] leading-relaxed max-w-xs">
