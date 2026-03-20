@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import NextImage from 'next/image';
 import { Shield, Lock, FileCheck, Github, Twitter, Mail, Globe } from 'lucide-react';
 import { type Locale, locales, localeConfig, getLocalizedPath } from '@/lib/i18n/config';
 import { saveLanguagePreference } from './LanguageSelector';
@@ -45,19 +46,14 @@ export const Footer: React.FC<FooterProps> = ({ locale }) => {
               className="group flex items-center gap-2.5 text-xl font-bold text-[hsl(var(--color-foreground))]"
               aria-label={`${t('brand')} - ${t('navigation.home')}`}
             >
-              <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-[hsl(var(--color-primary))] text-white shadow-md transition-transform group-hover:scale-105">
-                <svg
-                  className="h-5 w-5"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-                  <polyline points="14 2 14 8 20 8" />
-                </svg>
+              <div className="relative flex h-10 w-10 items-center justify-center rounded-xl overflow-hidden shadow-md transition-transform group-hover:scale-105">
+                <NextImage
+                  src="/favicon.png"
+                  alt="AkubrecaH Logo"
+                  width={40}
+                  height={40}
+                  className="object-contain"
+                />
               </div>
               <span data-testid="footer-brand-name">{t('brand')}</span>
             </Link>

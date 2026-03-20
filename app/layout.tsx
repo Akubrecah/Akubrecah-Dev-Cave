@@ -15,8 +15,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "KRA PIN Checker Pro",
-  description: "Secure and fast KRA PIN certificate generation",
+  title: "AkubrecaH | KRA & PDF Tools",
+  description: "Secure and fast KRA PIN certificate generation & PDF processing",
+  icons: {
+    icon: '/favicon.png',
+    shortcut: '/favicon.png',
+    apple: '/favicon.png',
+  },
 };
 
 export default function RootLayout({

@@ -90,6 +90,13 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
         }
     }, [isSearchOpen]);
 
+    const navigateToTool = useCallback((slug: string) => {
+        router.push(`/${locale}/pdf-tools/${slug}`);
+        setIsSearchOpen(false);
+        setSearchQuery('');
+        setSearchResults([]);
+    }, [locale, router]);
+
     // Handle keyboard navigation
     const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
         if (e.key === 'ArrowDown') {
@@ -110,14 +117,7 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
             setSearchQuery('');
             setSearchResults([]);
         }
-    }, [searchResults, selectedIndex]);
-
-    const navigateToTool = useCallback((slug: string) => {
-        router.push(`/${locale}/pdf-tools/${slug}`);
-        setIsSearchOpen(false);
-        setSearchQuery('');
-        setSearchResults([]);
-    }, [locale, router]);
+    }, [searchResults, selectedIndex, navigateToTool]);
 
     const handleSearchToggle = useCallback(() => {
         setIsSearchOpen((prev) => !prev);
@@ -182,19 +182,15 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                             className="group flex items-center gap-2.5 text-xl font-bold text-[hsl(var(--color-foreground))] hover:opacity-90 transition-opacity"
                             aria-label={`${t('brand')} - ${t('navigation.home')}`}
                         >
-                            <div className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[hsl(var(--color-primary))] to-[hsl(var(--color-accent))] shadow-lg shadow-primary/25 transition-transform group-hover:scale-105">
-                                <svg
-                                    className="h-5 w-5 text-white"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2.5"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                >
-                                    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-                                    <polyline points="14 2 14 8 20 8" />
-                                </svg>
+                            <div className="relative flex h-10 w-10 items-center justify-center rounded-xl overflow-hidden shadow-lg transition-transform group-hover:scale-105">
+                                <NextImage
+                                    src="/favicon.png"
+                                    alt="AkubrecaH Logo"
+                                    width={40}
+                                    height={40}
+                                    className="object-contain"
+                                    priority
+                                />
                             </div>
                             <span className="text-xl tracking-tight hidden sm:inline-block">
                                 Akubrecah <span className="text-[hsl(var(--color-accent))]">Dev Cave</span>
