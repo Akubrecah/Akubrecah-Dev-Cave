@@ -60,7 +60,7 @@ export async function getAccessToken(apiType: 'pinByID' | 'pinByPIN' | 'nilRetur
                 
                 const headers: Record<string, string> = { 
                     'Authorization': `Basic ${credentials}`,
-                    'User-Agent': 'Mozilla/5.0 (Node.js/KRA-Checker)',
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
                     'Accept': 'application/json'
                 };
 
@@ -69,10 +69,19 @@ export async function getAccessToken(apiType: 'pinByID' | 'pinByPIN' | 'nilRetur
 
                 if (method === 'POST') {
                     headers['Content-Type'] = 'application/x-www-form-urlencoded';
-                    // Some APIs prefer grant_type in the body for POST
+                    
+                    // KRA Production API (api.kra.go.ke) sometimes requires grant_type in the URL 
+                    // even for POST requests. We'll try both by default or keep it in URL.
                     body = 'grant_type=client_credentials';
-                    // Remove query params from endpoint if they are in the body
-                    endpoint = endpoint.split('?')[0];
+                    
+                    // NEW: Try to keep the query parameters for the first attempt if it's production
+                    const isProduction = endpoint.includes('api.kra.go.ke');
+                    if (isProduction) {
+                        console.log(`[AUTH] Production endpoint detected, keeping grant_type in URL for POST.`);
+                    } else {
+                        // For sandbox, we usually split it
+                        endpoint = endpoint.split('?')[0];
+                    }
                 }
 
                 const response = await fetch(endpoint, {
@@ -97,8 +106,14 @@ export async function getAccessToken(apiType: 'pinByID' | 'pinByPIN' | 'nilRetur
                 }
 
                 if (!contentType || !contentType.includes('application/json')) {
-                    const errorMessage = `KRA Auth Failed: Status ${response.status} ${response.statusText}, CT: ${contentType || 'missing'}, Len: ${contentLength || '0'}. Content preview: ${text.substring(0, 100)}`;
+                    // Check if it's HTML (often happens with error pages from proxies/WAFs)
+                    const isHtml = text.trim().toLowerCase().startsWith('<!doctype') || text.trim().toLowerCase().startsWith('<html');
+                    
+                    const errorMessage = `KRA Auth Failed: Status ${response.status} ${response.statusText}, CT: ${contentType || 'missing'}, Len: ${contentLength || '0'}. ${isHtml ? 'Response is HTML (likely an error page).' : 'Content preview: ' + text.substring(0, 100)}`;
                     console.error(`[AUTH] ${errorMessage}`);
+                    if (isHtml) {
+                        console.debug(`[AUTH] HTML Title: ${text.match(/<title>(.*?)<\/title>/i)?.[1] || 'Unknown'}`);
+                    }
                     console.debug(`[AUTH] Full response content: ${text}`);
                     console.debug(`[AUTH] Response headers: ${JSON.stringify(allHeaders)}`);
 
