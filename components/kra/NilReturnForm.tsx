@@ -101,6 +101,9 @@ export function NilReturnForm() {
                             <div className="space-y-2">
                                 <label htmlFor="pin" className="text-sm font-medium">KRA PIN</label>
                                 <Input id="pin" name="pin" placeholder="e.g. A001234567X" required className="uppercase" />
+                                <p className="text-[10px] text-muted-foreground italic">
+                                    Test PIN: <code className="bg-emerald-500/10 px-1 rounded select-all cursor-pointer">A521040203F</code> (Sandbox only)
+                                </p>
                             </div>
                             <div className="space-y-2">
                                 <label htmlFor="obligation" className="text-sm font-medium">Obligation</label>
