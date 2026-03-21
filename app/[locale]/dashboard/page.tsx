@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   FileCheck2, FileText, ArrowLeft, Eye, CheckCircle2, Coins, Search, Hash, 
@@ -11,7 +11,7 @@ import { KENYA_DATA } from '@/lib/kenya-data';
 import { NilReturnForm } from '@/components/kra/NilReturnForm';
 import { useSearchParams } from 'next/navigation';
 
-export default function Dashboard() {
+function DashboardContent() {
   const router = useRouter();
   
   // Define showStatus early so it can be used in useEffect
@@ -992,5 +992,25 @@ export default function Dashboard() {
         </div>
       </div>
     </div>
+  );
+}
+
+function DashboardFallback() {
+  return (
+    <div className="min-h-screen pt-32 pb-16 px-6 flex items-center justify-center">
+      <div className="text-center">
+        <div className="w-16 h-16 border-4 border-[var(--color-brand-red)] border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
+        <h2 className="text-2xl font-bold text-white mb-2">Loading Dashboard...</h2>
+        <p className="text-[var(--color-text-secondary)]">Please wait while we prepare your workspace</p>
+      </div>
+    </div>
+  );
+}
+
+export default function Dashboard() {
+  return (
+    <Suspense fallback={<DashboardFallback />}>
+      <DashboardContent />
+    </Suspense>
   );
 }
