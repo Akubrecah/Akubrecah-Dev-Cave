@@ -7,6 +7,7 @@
  */
 
 import type { PDFDocument } from 'pdf-lib';
+import { setupDOMMatrix } from './dommatrix';
 
 // Type definitions for lazy-loaded libraries
 type PDFLibModule = typeof import('pdf-lib');
@@ -72,6 +73,9 @@ export async function loadPdfjs(): Promise<PDFJSModule> {
   if (pdfjsLoadingPromise) {
     return pdfjsLoadingPromise;
   }
+
+  // Ensure DOMMatrix is polyfilled on the server before importing pdfjs-dist
+  setupDOMMatrix();
 
   pdfjsLoadingPromise = import('pdfjs-dist').then((module) => {
     // Configure worker using centralized function

@@ -90,15 +90,17 @@ export async function getAccessToken(apiType: 'pinByID' | 'pinByPIN' | 'nilRetur
 
                 const text = await response.text();
 
-                // If we get 200 OK but empty body, and we're on GET, try POST
-                if (response.status === 200 && (!text || text.trim().length === 0) && method === 'GET') {
-                    console.warn(`[AUTH] GET returned 200 OK but empty body. Retrying with POST...`);
-                    continue;
+                if (method === 'POST' && body && text.trim() === body.trim()) {
+                    const echoError = `KRA Auth Failed: Server echoed request body back. This usually means the endpoint is misconfigured or a proxy is intercepting the request. URL: ${endpoint}`;
+                    console.error(`[AUTH] ${echoError}`);
+                    throw new Error(echoError);
                 }
 
                 if (!contentType || !contentType.includes('application/json')) {
-                    const errorMessage = `KRA Auth Failed: Status ${response.status} ${response.statusText}, CT: ${contentType || 'missing'}, Len: ${contentLength || '0'}. Content: ${text.substring(0, 200)}`;
+                    const errorMessage = `KRA Auth Failed: Status ${response.status} ${response.statusText}, CT: ${contentType || 'missing'}, Len: ${contentLength || '0'}. Content preview: ${text.substring(0, 100)}`;
                     console.error(`[AUTH] ${errorMessage}`);
+                    console.debug(`[AUTH] Full response content: ${text}`);
+                    console.debug(`[AUTH] Response headers: ${JSON.stringify(allHeaders)}`);
 
                     // If it's 200, maybe we can still try to parse it if it looks like JSON?
                     if (response.status === 200 && text.trim().startsWith('{')) {
