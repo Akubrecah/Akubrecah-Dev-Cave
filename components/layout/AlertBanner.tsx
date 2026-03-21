@@ -38,7 +38,7 @@ export function AlertBanner() {
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-3 p-4 sm:p-6 rounded-2xl bg-[hsl(var(--color-primary))/0.05] border border-[hsl(var(--color-primary))/0.1] text-[hsl(var(--color-foreground))]">
                   <span className="text-3xl animate-bounce">🎉</span>
                   <p className="font-semibold text-lg sm:text-xl leading-snug">
-                    <span className="text-[hsl(var(--color-accent))]">All services & tools</span> are currently <span className="text-[hsl(var(--color-brand-green))] underline decoration-2 underline-offset-4">FREE</span> until May 2026!
+                    <span className="text-[hsl(var(--color-accent))]">All PDF tools</span> are currently <span className="text-[hsl(var(--color-brand-green))] underline decoration-2 underline-offset-4">FREE</span> until May 2026!
                   </p>
                 </div>
               </div>
