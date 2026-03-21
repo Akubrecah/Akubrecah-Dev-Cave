@@ -3,8 +3,8 @@ import { currentUser } from '@clerk/nextjs/server';
 
 export type UsageType = 'KRA' | 'PDF';
 
-// ALL SERVICES ARE FREE UNTIL JUNE 1, 2026
-const FREE_UNTIL_DATE = new Date('2026-06-01T00:00:00Z');
+// ALL SERVICES ARE FREE UNTIL MAY 1, 2026
+const FREE_UNTIL_DATE = new Date('2026-05-01T00:00:00Z');
 
 /**
  * Checks if a user has reached their daily usage limit.
