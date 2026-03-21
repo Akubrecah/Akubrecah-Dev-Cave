@@ -12,18 +12,26 @@ const KRA_CONFIG = {
         consumerSecret: (process.env.KRA_PIN_CONSUMER_SECRET || '').trim(),
         tokenEndpoint: `${BASE_URL}/v1/token/generate?grant_type=client_credentials`,
         pinCheckerEndpoint: `${BASE_URL}/checker/v1/pinbypin`
+    },
+    nilReturn: {
+        consumerKey: (process.env.KRA_NIL_CONSUMER_KEY || '').trim(),
+        consumerSecret: (process.env.KRA_NIL_CONSUMER_SECRET || '').trim(),
+        tokenEndpoint: `${BASE_URL}/v1/token/generate?grant_type=client_credentials`,
+        nilReturnEndpoint: `${BASE_URL}/dtd/return/v1/nil`
     }
 };
 
 const tokenCache: {
   pinByID: { token: string | null; expiry: number };
   pinByPIN: { token: string | null; expiry: number };
+  nilReturn: { token: string | null; expiry: number };
 } = {
   pinByID: { token: null, expiry: 0 },
-  pinByPIN: { token: null, expiry: 0 }
+  pinByPIN: { token: null, expiry: 0 },
+  nilReturn: { token: null, expiry: 0 }
 };
 
-export async function getAccessToken(apiType: 'pinByID' | 'pinByPIN', retries = 2) {
+export async function getAccessToken(apiType: 'pinByID' | 'pinByPIN' | 'nilReturn', retries = 2) {
     const config = KRA_CONFIG[apiType];
     const cache = tokenCache[apiType];
     const now = Math.floor(Date.now() / 1000);
@@ -129,4 +137,51 @@ export async function getAccessToken(apiType: 'pinByID' | 'pinByPIN', retries = 
         }
         await new Promise(resolve => setTimeout(resolve, i * 1000 + 500));
     }
+}
+
+export type NilReturnData = {
+    TaxpayerPIN: string;
+    ObligationCode: string;
+    Month: string;
+    Year: string;
+};
+
+export async function fileNilReturn(data: NilReturnData) {
+    const token = await getAccessToken('nilReturn');
+    const endpoint = KRA_CONFIG.nilReturn.nilReturnEndpoint;
+
+    console.log(`[NIL-RETURN] Filing Nil Return for PIN: ${data.TaxpayerPIN}...`);
+
+    const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+            TAXPAYERDETAILS: data
+        })
+    });
+
+    const text = await response.text();
+    console.log(`[NIL-RETURN] Response Status: ${response.status}. Body: ${text.substring(0, 500)}`);
+
+    let result;
+    try {
+        result = JSON.parse(text);
+    } catch {
+        throw new Error(`Failed to parse Nil Return response: ${text.substring(0, 100)}`);
+    }
+
+    // Handle KRA application-level errors (even on 200 OK)
+    if (result.ErrorCode && result.ErrorCode !== "0" && result.ErrorCode !== 0) {
+        throw new Error(result.ErrorMessage || `KRA Error ${result.ErrorCode}: File failed validation.`);
+    }
+
+    if (!response.ok) {
+        throw new Error(result.RESPONSE?.Message || `Nil Return filing failed with status ${response.status}`);
+    }
+
+    return result;
 }

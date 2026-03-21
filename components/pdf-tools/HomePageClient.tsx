@@ -23,8 +23,8 @@ export default function HomePageClient({ locale }: HomePageClientProps) {
   const features = [
     {
       icon: ShieldCheck,
-      title: 'KRA PIN Verification',
-      description: 'Verify any KRA PIN in seconds. Get taxpayer name, obligation type, and compliance status instantly.',
+      title: 'KRA Solutions',
+      description: 'Verify KRA PINs and file Nil Returns instantly. Get professional compliance certificates in seconds.',
       color: 'text-green-500',
       bg: 'bg-green-500/10'
     },
@@ -207,16 +207,16 @@ export default function HomePageClient({ locale }: HomePageClientProps) {
       <div className="bg-[#6A0808]/20 py-6 overflow-hidden border-y border-white/10 backdrop-blur-sm" aria-label="Feature highlight marquee">
         <div className="flex animate-[marquee_30s_linear_infinite] whitespace-nowrap items-center" aria-hidden="true">
           {[1, 2, 3, 4].map((i) => (
-             <React.Fragment key={i}>
+              <React.Fragment key={i}>
                 <span className="px-12 text-xl font-bold text-[#BEA0A0]">Merge PDFs</span>
                 <span className="px-8 text-[var(--color-brand-red)]"><Zap size={20}/></span>
                 <span className="px-12 text-xl font-bold text-[#BEA0A0]">Verify KRA PINs</span>
                 <span className="px-8 text-[var(--color-brand-red)]"><Zap size={20}/></span>
+                <span className="px-12 text-xl font-bold text-[#BEA0A0]">KRA Nil Returns</span>
+                <span className="px-8 text-[var(--color-brand-red)]"><Zap size={20}/></span>
                 <span className="px-12 text-xl font-bold text-[#BEA0A0]">Split & Organize</span>
                 <span className="px-8 text-[var(--color-brand-red)]"><Zap size={20}/></span>
                 <span className="px-12 text-xl font-bold text-[#BEA0A0]">Taxpayer Lookup</span>
-                <span className="px-8 text-[var(--color-brand-red)]"><Zap size={20}/></span>
-                <span className="px-12 text-xl font-bold text-[#BEA0A0]">Convert Documents</span>
                 <span className="px-8 text-[var(--color-brand-red)]"><Zap size={20}/></span>
              </React.Fragment>
           ))}

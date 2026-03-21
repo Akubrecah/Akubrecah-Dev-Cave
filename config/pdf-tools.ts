@@ -33,6 +33,18 @@ export const PDF_TOOLS: Tool[] = [
     features: ['pin-verification', 'certificate-generation', 'compliance-check'],
     relatedTools: ['sign-pdf', 'encrypt-pdf', 'edit-pdf'],
   },
+  {
+    id: 'kra-nil-return',
+    slug: 'dashboard?feature=nil-return',
+    icon: 'file-check-2',
+    category: 'secure-pdf',
+    acceptedFormats: ['none'],
+    outputFormat: 'json',
+    maxFileSize: 0,
+    maxFiles: 0,
+    features: ['nil-return', 'tax-compliance', 'instant-filing'],
+    relatedTools: ['kra-verify', 'sign-pdf', 'edit-pdf'],
+  },
   // ==================== ORGANIZE & MANAGE ====================
   {
     id: 'pdf-multi-tool',

@@ -3,11 +3,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
-  FileCheck2, FileText, ArrowLeft, Eye, CheckCircle, Coins, Search, Hash, 
-  Download, Activity, Zap 
+  FileCheck2, FileText, ArrowLeft, Eye, CheckCircle2, Coins, Search, Hash, 
+  Download, Activity, AlertCircle 
 } from 'lucide-react';
 
 import { KENYA_DATA } from '@/lib/kenya-data';
+import { NilReturnForm } from '@/components/kra/NilReturnForm';
+import { useSearchParams } from 'next/navigation';
 
 export default function Dashboard() {
   const router = useRouter();
@@ -25,7 +27,17 @@ export default function Dashboard() {
   
   // Dashboard routing
   const [selectedService, setSelectedService] = useState<'selection' | 'kra'>('selection');
-  const [feature, setFeature] = useState<'generator' | 'viewer'>('generator');
+  const [feature, setFeature] = useState<'generator' | 'viewer' | 'nil-return'>('generator');
+  const searchParams = useSearchParams();
+
+  // Load feature from URL if present
+  useEffect(() => {
+    const f = searchParams.get('feature');
+    if (f === 'nil-return') {
+      setSelectedService('kra');
+      setFeature('nil-return');
+    }
+  }, [searchParams]);
   const [verifyMode, setVerifyMode] = useState<'id' | 'pin'>('pin');
   
   // KRA Wizard stats
@@ -424,21 +436,38 @@ export default function Dashboard() {
           <h1 className="text-4xl font-bold text-white mb-2">Welcome Back!</h1>
           <p className="text-[var(--color-text-secondary)] text-lg mb-12">Choose a service to get started</p>
           
-          <div className="max-w-2xl mx-auto">
-            <div 
-              onClick={() => setSelectedService('kra')}
-              className="bg-[#111111] border border-white/10 p-12 rounded-3xl cursor-pointer hover:-translate-y-2 hover:border-[var(--color-brand-red)] transition-all duration-300 text-center"
-            >
-              <div className="w-20 h-20 bg-[var(--color-brand-red)]/10 text-[var(--color-brand-red)] rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <FileCheck2 size={40} />
+            <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+              <div 
+                onClick={() => setSelectedService('kra')}
+                className="bg-[#111111] border border-white/10 p-8 rounded-3xl cursor-pointer hover:-translate-y-2 hover:border-[var(--color-brand-red)] transition-all duration-300 text-center"
+              >
+                <div className="w-16 h-16 bg-[var(--color-brand-red)]/10 text-[var(--color-brand-red)] rounded-2xl flex items-center justify-center mx-auto mb-6">
+                  <FileCheck2 size={32} />
+                </div>
+                <h2 className="text-xl font-bold text-white mb-2">PIN CERTIFICATE</h2>
+                <p className="text-[var(--color-text-secondary)] text-sm mb-6">Verify PINs and generate professional PDF certificates.</p>
+                <div className="w-full py-2 rounded-xl bg-[var(--color-brand-red)] text-white font-bold text-sm">
+                  ENTER →
+                </div>
               </div>
-              <h2 className="text-2xl font-bold text-white mb-4">KRA PIN CERTIFICATE</h2>
-              <p className="text-[var(--color-text-secondary)] mb-6">Verify KRA PINs and generate professional PDF certificates with full taxpayer details.</p>
-              <button className="w-full py-3 rounded-xl bg-[var(--color-brand-red)] text-white font-bold hover:bg-[var(--color-deep-crimson)] transition-colors">
-                ENTER KRA DASHBOARD →
-              </button>
+
+              <div 
+                onClick={() => {
+                  setSelectedService('kra');
+                  setFeature('nil-return');
+                }}
+                className="bg-[#111111] border border-white/10 p-8 rounded-3xl cursor-pointer hover:-translate-y-2 hover:border-emerald-500 transition-all duration-300 text-center"
+              >
+                <div className="w-16 h-16 bg-emerald-500/10 text-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                  <Activity size={32} />
+                </div>
+                <h2 className="text-xl font-bold text-white mb-2">NIL RETURN</h2>
+                <p className="text-[var(--color-text-secondary)] text-sm mb-6">File your Nil Returns instantly with KRA integration.</p>
+                <div className="w-full py-2 rounded-xl bg-emerald-500 text-white font-bold text-sm">
+                  FILE RETURN →
+                </div>
+              </div>
             </div>
-          </div>
         </div>
       </div>
     );
@@ -460,7 +489,7 @@ export default function Dashboard() {
         </button>
 
         {/* Top Controls Generator vs Viewer */}
-        <div className="grid md:grid-cols-2 gap-4 mb-8">
+        <div className="grid md:grid-cols-3 gap-4 mb-8">
           <div 
             onClick={() => setFeature('generator')}
             className={`p-6 rounded-2xl cursor-pointer border-2 transition-all flex items-center gap-4 ${feature === 'generator' ? 'border-[var(--color-brand-red)] bg-[#111111]' : 'border-white/10 bg-black/50 hover:border-white/20'}`}
@@ -469,21 +498,34 @@ export default function Dashboard() {
               <FileCheck2 size={24} />
             </div>
             <div>
-              <h3 className={`font-bold text-lg ${feature === 'generator' ? 'text-white' : 'text-white/50'}`}>GENERATE CERTIFICATE</h3>
-              <p className="text-sm text-white/50">Full verification & PDF download</p>
+              <h3 className={`font-bold text-sm ${feature === 'generator' ? 'text-white' : 'text-white/50'}`}>PIN CERTIFICATE</h3>
+              <p className="text-[10px] text-white/50 uppercase">Certificate Engine</p>
             </div>
           </div>
 
           <div 
             onClick={() => setFeature('viewer')}
-            className={`p-6 rounded-2xl cursor-pointer border-2 transition-all flex items-center gap-4 ${feature === 'viewer' ? 'border-[#F5C200] bg-[#111111]' : 'border-white/10 bg-black/50 hover:border-white/20'}`}
+            className={`p-6 rounded-2xl cursor-pointer border-2 transition-all flex items-center gap-4 ${feature === 'viewer' ? 'border-blue-400 bg-[#111111]' : 'border-white/10 bg-black/50 hover:border-white/20'}`}
           >
-            <div className={`p-4 rounded-xl ${feature === 'viewer' ? 'bg-[#F5C200]/20 text-[#F5C200]' : 'bg-white/5 text-white/50'}`}>
+            <div className={`p-4 rounded-xl ${feature === 'viewer' ? 'bg-blue-400/20 text-blue-400' : 'bg-white/5 text-white/50'}`}>
               <Eye size={24} />
             </div>
             <div>
-              <h3 className={`font-bold text-lg ${feature === 'viewer' ? 'text-white' : 'text-white/50'}`}>QUICK PIN VIEW</h3>
-              <p className="text-sm text-white/50">View details without generating certificate</p>
+              <h3 className={`font-bold text-sm ${feature === 'viewer' ? 'text-white' : 'text-white/50'}`}>QUICK VIEW</h3>
+              <p className="text-[10px] text-white/50 uppercase">PIN Checker</p>
+            </div>
+          </div>
+
+          <div 
+            onClick={() => setFeature('nil-return')}
+            className={`p-6 rounded-2xl cursor-pointer border-2 transition-all flex items-center gap-4 ${feature === 'nil-return' ? 'border-emerald-500 bg-[#111111]' : 'border-white/10 bg-black/50 hover:border-white/20'}`}
+          >
+            <div className={`p-4 rounded-xl ${feature === 'nil-return' ? 'bg-emerald-500/20 text-emerald-500' : 'bg-white/5 text-white/50'}`}>
+              <Activity size={24} />
+            </div>
+            <div>
+              <h3 className={`font-bold text-sm ${feature === 'nil-return' ? 'text-white' : 'text-white/50'}`}>NIL RETURN</h3>
+              <p className="text-[10px] text-white/50 uppercase">Instant Filing</p>
             </div>
           </div>
         </div>
@@ -556,13 +598,20 @@ export default function Dashboard() {
           </div>
         )}
 
+        {/* Nil Return block */}
+        {feature === 'nil-return' && (
+          <div className="animate-in fade-in duration-500">
+             <NilReturnForm />
+          </div>
+        )}
+
         {/* Generator mode block */}
         {feature === 'generator' && (
           <>
             {/* Stats & Subscription Timer */}
             <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
               <div className="bg-[#111111] rounded-2xl p-6 border border-white/5 flex items-center gap-3">
-                <div className="bg-white/5 p-2 rounded-lg text-white/50"><CheckCircle size={20} /></div>
+                <div className="bg-white/5 p-2 rounded-lg text-white/50"><CheckCircle2 size={20} /></div>
                 <div>
                   <div className="text-xl font-bold text-white">{stats.verifications}</div>
                   <div className="text-[10px] text-white/40 uppercase">Verifications</div>
@@ -627,7 +676,7 @@ export default function Dashboard() {
                 {/* Status Message */}
                 {statusMessage && (
                   <div className={`p-4 rounded-xl mb-6 flex items-center gap-3 border ${isStatusError ? 'bg-red-500/10 border-red-500/20 text-red-400' : isStatusPending ? 'bg-blue-500/10 border-blue-500/20 text-blue-400' : 'bg-green-500/10 border-green-500/20 text-green-400'}`}>
-                    {isStatusError ? <Activity size={18} /> : isStatusPending ? <Search size={18} className="animate-pulse" /> : <CheckCircle size={18} />}
+                    {isStatusError ? <AlertCircle size={18} /> : isStatusPending ? <Search size={18} className="animate-pulse" /> : <CheckCircle2 size={18} />}
                     {statusMessage}
                   </div>
                 )}
