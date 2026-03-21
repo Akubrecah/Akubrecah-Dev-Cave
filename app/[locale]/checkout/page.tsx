@@ -70,23 +70,23 @@ function CheckoutContent() {
   }), [clientSecret, appearance]);
 
   // Map tier to display name and amount
-  let planName = 'Premium Plan';
-  let planPrice = '50 KES';
+  let planName = 'KRA Pro Plan';
+  let planPrice = '500 KES';
   
-  if (tier === 'weekly') {
-      planName = 'Cyber Pro Weekly';
-      planPrice = '300 KES';
+  if (tier === 'daily') {
+      planName = 'KRA Pro Daily';
+      planPrice = '100 KES';
+  } else if (tier === 'weekly') {
+      planName = 'KRA Pro Weekly';
+      planPrice = '500 KES';
   } else if (tier === 'monthly') {
-      planName = 'Cyber Pro Monthly';
-      planPrice = '1,000 KES';
-  } else if (tier === 'daily') {
-      planName = 'PDF Premium Daily';
-      planPrice = '50 KES';
+      planName = 'KRA Pro Monthly';
+      planPrice = '1,500 KES';
   } else if (tier === 'premium_weekly') {
-      planName = 'Cyber Premium Weekly';
+      planName = 'KRA Premium Weekly';
       planPrice = '700 KES';
   } else if (tier === 'premium_monthly') {
-      planName = 'Cyber Premium Monthly';
+      planName = 'KRA Premium Monthly';
       planPrice = '2,500 KES';
   }
 

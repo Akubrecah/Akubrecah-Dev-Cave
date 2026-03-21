@@ -33,12 +33,12 @@ export function AlertBanner() {
               </h3>
               <div className="text-base sm:text-lg text-[hsl(var(--color-muted-foreground))] leading-relaxed space-y-4">
                 <p>
-                  Starting <strong className="text-[hsl(var(--color-foreground))] font-bold">June 01, 2026</strong>, an active subscription will be required in order to use KRA services on this platform.
+                  Starting <strong className="text-[hsl(var(--color-foreground))] font-bold">May 01, 2026</strong>, an active subscription will be required in order to use KRA services on this platform.
                 </p>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-3 p-4 sm:p-6 rounded-2xl bg-[hsl(var(--color-primary))/0.05] border border-[hsl(var(--color-primary))/0.1] text-[hsl(var(--color-foreground))]">
                   <span className="text-3xl animate-bounce">🎉</span>
                   <p className="font-semibold text-lg sm:text-xl leading-snug">
-                    <span className="text-[hsl(var(--color-accent))]">All services & tools</span> are currently <span className="text-[hsl(var(--color-brand-green))] underline decoration-2 underline-offset-4">FREE</span> until June 2026!
+                    <span className="text-[hsl(var(--color-accent))]">All services & tools</span> are currently <span className="text-[hsl(var(--color-brand-green))] underline decoration-2 underline-offset-4">FREE</span> until May 2026!
                   </p>
                 </div>
               </div>

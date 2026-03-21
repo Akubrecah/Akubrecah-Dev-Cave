@@ -5,6 +5,7 @@ import { locales, Locale, localeConfig } from '@/lib/i18n/config';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { AlertBanner } from '@/components/layout/AlertBanner';
+import { Analytics } from "@vercel/analytics/next";
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -42,6 +43,7 @@ export default async function LocaleLayout({
         </main>
         <Footer locale={locale as Locale} />
         <AlertBanner />
+        <Analytics />
       </div>
     </NextIntlClientProvider>
   );
