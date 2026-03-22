@@ -164,24 +164,29 @@ export type NilReturnData = {
 
 export async function fileNilReturn(data: NilReturnData) {
     const token = await getAccessToken('nilReturn');
+    if (!token) {
+        throw new Error('Failed to obtain KRA access token for Nil Return.');
+    }
     const endpoint = KRA_CONFIG.nilReturn.nilReturnEndpoint;
 
     console.log(`[NIL-RETURN] Filing Nil Return for PIN: ${data.TaxpayerPIN}...`);
 
+    console.log(`[NIL-RETURN] Filing using token starting with: ${token.substring(0, 10)}... (Length: ${token.length})`);
+    const body = JSON.stringify({ TAXPAYERDETAILS: data });
+    
     const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`,
-            'Accept': 'application/json'
+            'Accept': 'application/json',
+            'User-Agent': 'Mozilla/5.0'
         },
-        body: JSON.stringify({
-            TAXPAYERDETAILS: data
-        })
+        body
     });
 
     const text = await response.text();
-    console.log(`[NIL-RETURN] Response Status: ${response.status}. Body: ${text.substring(0, 500)}`);
+    console.log(`[NIL-RETURN] Response Status: ${response.status}. Body Preview: ${text.substring(0, 500)}`);
 
     let result;
     try {
