@@ -30,9 +30,8 @@ export async function GET() {
     }
 
     const now = new Date();
-    // ALL SERVICES ARE FREE UNTIL JUNE 1, 2026
-    const FREE_UNTIL_DATE = new Date('2026-06-01T00:00:00Z');
-    const isFreePeriod = now < FREE_UNTIL_DATE;
+    // ALL SERVICES ARE PERMANENTLY FREE as requested
+    const isFreePeriod = true;
     
     // Check Cyber Pro/Premium subscription
     const isCyberPro = isFreePeriod || (
@@ -74,10 +73,10 @@ export async function GET() {
     return NextResponse.json({ 
         isCyberPro,
         hasPdfPremium,
-        subscriptionTier: isFreePeriod ? 'premium_free' : user.subscriptionTier,
-        subscriptionStatus: isFreePeriod ? 'active' : user.subscriptionStatus,
-        subscriptionEnd: isFreePeriod ? FREE_UNTIL_DATE.toISOString() : user.subscriptionEnd,
-        pdfPremiumEnd: isFreePeriod ? FREE_UNTIL_DATE.toISOString() : user.pdfPremiumEnd,
+        subscriptionTier: 'premium_free',
+        subscriptionStatus: 'active',
+        subscriptionEnd: new Date(now.getFullYear() + 10, 0, 1).toISOString(),
+        pdfPremiumEnd: new Date(now.getFullYear() + 10, 0, 1).toISOString(),
         role: user.role,
         usage: {
           KRA: kraUsage,
@@ -90,7 +89,7 @@ export async function GET() {
     console.error('Error fetching user status:', error);
     if (error instanceof Error) {
       console.error('Message:', error.message);
-      // @ts-ignore - Prisma error codes are sometimes dynamic
+      // @ts-expect-error - Prisma error codes are sometimes dynamic
       if (error.code) console.error('Code:', error.code);
     }
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
