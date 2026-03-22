@@ -1,5 +1,8 @@
 const KRA_PROD_BASE = 'https://api.kra.go.ke';
-const KRA_SBX_BASE = (process.env.KRA_API_BASE_URL || 'https://sbx.kra.go.ke').replace(/\/+$/, '');
+const KRA_DEFAULT_SBX = 'https://sbx.kra.go.ke';
+
+// Use a dedicated env var for Nil Return base, fallback to the general one or sandbox
+const KRA_NIL_BASE = (process.env.KRA_NIL_API_BASE_URL || process.env.KRA_API_BASE_URL || KRA_DEFAULT_SBX).replace(/\/+$/, '');
 
 const KRA_CONFIG = {
     pinByID: {
@@ -17,8 +20,8 @@ const KRA_CONFIG = {
     nilReturn: {
         consumerKey: (process.env.KRA_NIL_CONSUMER_KEY || '').trim(),
         consumerSecret: (process.env.KRA_NIL_CONSUMER_SECRET || '').trim(),
-        tokenEndpoint: `${KRA_SBX_BASE}/v1/token/generate?grant_type=client_credentials`,
-        nilReturnEndpoint: `${KRA_SBX_BASE}/dtd/return/v1/nil`
+        tokenEndpoint: `${KRA_NIL_BASE}/v1/token/generate?grant_type=client_credentials`,
+        nilReturnEndpoint: `${KRA_NIL_BASE}/dtd/return/v1/nil`
     }
 };
 
@@ -69,19 +72,19 @@ export async function getAccessToken(apiType: 'pinByID' | 'pinByPIN' | 'nilRetur
                 let endpoint = config.tokenEndpoint;
 
                 if (method === 'POST') {
+                    // HEURISTIC: api.kra.go.ke often echoes POST bodies, so we should avoid POST if it's production
+                    // unless GET has definitively failed with a protocol error.
+                    if (endpoint.includes('api.kra.go.ke')) {
+                        console.warn(`[AUTH] Skipping POST fallback for production KRA endpoint as it is known to echo bodies instead of processing tokens.`);
+                        continue; 
+                    }
+
                     headers['Content-Type'] = 'application/x-www-form-urlencoded';
-                    
-                    // NEW: Try to keep the query parameters for the first attempt if it's production
-                    // Production endpoints (api.kra.go.ke) often have issues with POST body vs query param
-                    const isProduction = endpoint.includes('api.kra.go.ke');
-                    
                     body = 'grant_type=client_credentials';
                     
-                    if (!isProduction) {
-                        // For sandbox, we usually split it (Standard OAuth2)
+                    // For sandbox, we usually split it (Standard OAuth2)
+                    if (endpoint.includes('sbx.kra.go.ke')) {
                         endpoint = endpoint.split('?')[0];
-                    } else {
-                        console.log(`[AUTH] Production endpoint detected, keeping grant_type in URL for POST.`);
                     }
                 }
 
@@ -93,32 +96,23 @@ export async function getAccessToken(apiType: 'pinByID' | 'pinByPIN' | 'nilRetur
                 });
 
                 const contentType = response.headers.get('content-type');
-                const allHeaders = Object.fromEntries(response.headers.entries());
-                const contentLength = response.headers.get('content-length');
-                // Remove sensitive headers if any
-                delete allHeaders['set-cookie'];
-
                 const text = await response.text();
+                const isJson = contentType?.includes('application/json');
 
-                // HEURISTIC: Check if server echoed the body back (happens with some misconfigured KRA production endpoints)
+                // HEURISTIC: Check if server echoed the body back (happens with misconfigured KRA production/proxy endpoints)
                 if (method === 'POST' && body && text.trim() === body.trim()) {
-                    const echoError = `KRA Auth Failed: Server echoed request body back. Status: ${response.status}, URL: ${endpoint}`;
-                    console.error(`[AUTH] ${echoError}`);
-                    console.debug(`[AUTH] Response Headers: ${JSON.stringify(allHeaders)}`);
-                    // If it echoed, it means POST failed to reach the actual token service correctly.
-                    // We throw here which will either retry the loop or fail finally.
-                    throw new Error(echoError);
+                    throw new Error(`KRA Auth Failed: Server echoed request body back. Status: ${response.status}, URL: ${endpoint}`);
                 }
 
-                if (!contentType || !contentType.includes('application/json')) {
-                    // Check if it's HTML (often happens with error pages from proxies/WAFs)
+                if (!isJson) {
                     const isHtml = text.trim().toLowerCase().startsWith('<!doctype') || text.trim().toLowerCase().startsWith('<html');
+                    const errorPreview = isHtml ? 'HTML Error' : text.substring(0, 100);
+                    const errorMessage = `KRA Auth Failed: Status ${response.status}, CT: ${contentType || 'missing'}, Body: ${errorPreview}`;
                     
-                    const errorMessage = `KRA Auth Failed: Status ${response.status} ${response.statusText}, CT: ${contentType || 'missing'}, Len: ${contentLength || '0'}. ${isHtml ? 'Response is HTML (likely an error page).' : 'Content preview: ' + text.substring(0, 100)}`;
-                    console.error(`[AUTH] ${errorMessage}`);
+                    console.error(`[AUTH] Non-JSON response for ${apiType} (${method}): ${errorMessage}`);
                     
                     if (method === 'GET') {
-                        console.warn(`[AUTH] GET returned non-JSON. Falling back to POST.`);
+                        console.warn(`[AUTH] Falling back to POST...`);
                         continue;
                     }
                     throw new Error(errorMessage);
@@ -126,16 +120,15 @@ export async function getAccessToken(apiType: 'pinByID' | 'pinByPIN' | 'nilRetur
 
                 const data = JSON.parse(text);
                 if (!response.ok) {
-                    const errorMsg = data.errorMessage || data.message || `Auth failed with status ${response.status}`;
-                    console.error(`[AUTH] API Error: ${errorMsg}`);
+                    const kraErrorMsg = data.errorMessage || data.message || `Auth failed with status ${response.status}`;
+                    console.error(`[AUTH] KRA API reported error: ${kraErrorMsg}`);
 
-                    // If it's a structured JSON error from KRA (like "Invalid client"), 
-                    // then we've reached the API and it rejected us. Don't bother falling back to POST.
+                    // If we got a structured JSON error from KRA, then the endpoint reached the service.
+                    // Credentials are likely wrong. No point in falling back to POST.
                     if (method === 'GET') {
-                        console.error(`[AUTH] GET returned a structured error. This usually means credentials are invalid. Skipping POST fallback.`);
-                        throw new Error(`KRA API Error: ${errorMsg}`);
+                        throw new Error(`KRA API Error: ${kraErrorMsg}`);
                     }
-                    throw new Error(errorMsg);
+                    throw new Error(kraErrorMsg);
                 }
 
                 cache.token = data.access_token;
@@ -145,14 +138,16 @@ export async function getAccessToken(apiType: 'pinByID' | 'pinByPIN' | 'nilRetur
             } catch (error: unknown) {
                 clearTimeout(timeout);
                 if (error instanceof Error) {
-                    const isTimeout = error.name === 'AbortError';
-                    console.error(`[AUTH] Attempt ${i + 1} for ${apiType} failed (${method}): ${isTimeout ? 'Request Timed Out' : error.message}`);
+                    if (error.name === 'AbortError') {
+                        console.error(`[AUTH] Attempt ${i + 1} for ${apiType} timed out.`);
+                    } else if (error.message.startsWith('KRA API Error:')) {
+                        throw error; // Propagate credential errors immediately
+                    } else {
+                        console.error(`[AUTH] Attempt ${i + 1} failed (${method}): ${error.message}`);
+                    }
                     
-                    // If it's a definitive KRA API error, don't retry or fallback
-                    if (error.message.startsWith('KRA API Error:')) throw error;
-                    
-                    // If it's the last attempt and it's POST, throw
                     if (i === retries && method === 'POST') throw error;
+                    if (i === retries && method === 'GET' && apiType !== 'nilReturn') throw error; // Also throw for GET if it's the last attempt
                 }
             }
         }
