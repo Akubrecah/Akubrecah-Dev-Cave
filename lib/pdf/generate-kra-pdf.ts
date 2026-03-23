@@ -1,4 +1,5 @@
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
+import { PIN_CERTIFICATE_TEMPLATE_BASE64 } from './pin-certificate-template';
 
 export interface KraPdfData {
   kraPin: string;
@@ -20,13 +21,19 @@ export interface KraPdfData {
   status: string;
 }
 
-export async function generateKraPdf(data: KraPdfData): Promise<Uint8Array> {
-  // Fetch the template PDF
-  const templateUrl = '/templates/pin_certificate.pdf';
-  const response = await fetch(templateUrl);
-  const templateBytes = await response.arrayBuffer();
+/** Decode a base64 string to Uint8Array (works in browser) */
+function base64ToUint8Array(base64: string): Uint8Array {
+  const binaryString = atob(base64);
+  const bytes = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  return bytes;
+}
 
-  // Load the template
+export async function generateKraPdf(data: KraPdfData): Promise<Uint8Array> {
+  // Load the embedded template (no fetch needed)
+  const templateBytes = base64ToUint8Array(PIN_CERTIFICATE_TEMPLATE_BASE64);
   const pdfDoc = await PDFDocument.load(templateBytes);
   const pages = pdfDoc.getPages();
   const firstPage = pages[0];
