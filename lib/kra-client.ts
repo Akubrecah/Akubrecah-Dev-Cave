@@ -1,21 +1,23 @@
-const KRA_PROD_BASE = 'https://api.kra.go.ke';
 const KRA_DEFAULT_SBX = 'https://sbx.kra.go.ke';
 
-// Use a dedicated env var for Nil Return base, fallback to the general one or sandbox
+// Single source of truth: respect KRA_API_BASE_URL if set, otherwise default to sandbox
+const KRA_BASE = (process.env.KRA_API_BASE_URL || KRA_DEFAULT_SBX).replace(/\/+$/, '');
+
+// Use a dedicated env var for Nil Return base, fallback to general or sandbox
 const KRA_NIL_BASE = (process.env.KRA_NIL_API_BASE_URL || process.env.KRA_API_BASE_URL || KRA_DEFAULT_SBX).replace(/\/+$/, '');
 
 const KRA_CONFIG = {
     pinByID: {
         consumerKey: (process.env.KRA_ID_CONSUMER_KEY || '').trim(),
         consumerSecret: (process.env.KRA_ID_CONSUMER_SECRET || '').trim(),
-        tokenEndpoint: `${KRA_PROD_BASE}/v1/token/generate?grant_type=client_credentials`,
-        pinCheckerEndpoint: `${KRA_PROD_BASE}/checker/v1/pin`
+        tokenEndpoint: `${KRA_BASE}/v1/token/generate?grant_type=client_credentials`,
+        pinCheckerEndpoint: `${KRA_BASE}/checker/v1/pin`
     },
     pinByPIN: {
         consumerKey: (process.env.KRA_PIN_CONSUMER_KEY || '').trim(),
         consumerSecret: (process.env.KRA_PIN_CONSUMER_SECRET || '').trim(),
-        tokenEndpoint: `${KRA_PROD_BASE}/v1/token/generate?grant_type=client_credentials`,
-        pinCheckerEndpoint: `${KRA_PROD_BASE}/checker/v1/pinbypin`
+        tokenEndpoint: `${KRA_BASE}/v1/token/generate?grant_type=client_credentials`,
+        pinCheckerEndpoint: `${KRA_BASE}/checker/v1/pinbypin`
     },
     nilReturn: {
         consumerKey: (process.env.KRA_NIL_CONSUMER_KEY || '').trim(),
@@ -72,17 +74,17 @@ export async function getAccessToken(apiType: 'pinByID' | 'pinByPIN' | 'nilRetur
                 let endpoint = config.tokenEndpoint;
 
                 if (method === 'POST') {
-                    // HEURISTIC: api.kra.go.ke often echoes POST bodies, so we should avoid POST if it's production
-                    // unless GET has definitively failed with a protocol error.
-                    if (endpoint.includes('api.kra.go.ke')) {
-                        console.warn(`[AUTH] Skipping POST fallback for production KRA endpoint as it is known to echo bodies instead of processing tokens.`);
+                    // HEURISTIC: KRA endpoints often echo/mirror POST bodies or fail if POSTed to /generate
+                    // without certain query patterns. If we reached here, GET likely failed.
+                    if (endpoint.includes('kra.go.ke')) {
+                        console.warn(`[AUTH] Skipping POST fallback for ${endpoint} as it frequently echoes bodies or fails on standard POST.`);
                         continue; 
                     }
 
                     headers['Content-Type'] = 'application/x-www-form-urlencoded';
                     body = 'grant_type=client_credentials';
                     
-                    // For sandbox, we usually split it (Standard OAuth2)
+                    // For sandbox, strip the query string (standard OAuth2)
                     if (endpoint.includes('sbx.kra.go.ke')) {
                         endpoint = endpoint.split('?')[0];
                     }
@@ -99,9 +101,14 @@ export async function getAccessToken(apiType: 'pinByID' | 'pinByPIN' | 'nilRetur
                 const text = await response.text();
                 const isJson = contentType?.includes('application/json');
 
-                // HEURISTIC: Check if server echoed the body back (happens with misconfigured KRA production/proxy endpoints)
-                if (method === 'POST' && body && text.trim() === body.trim()) {
+                // HEURISTIC: Check if server echoed the body back (standard POST) OR the entire request URL/headers (GET/POST)
+                if (body && text.trim() === body.trim()) {
                     throw new Error(`KRA Auth Failed: Server echoed request body back. Status: ${response.status}, URL: ${endpoint}`);
+                }
+                
+                // Detection for mirrored/echoed responses (some proxies echo headers if path is not found)
+                if (text.includes('authorization: Basic') || text.includes('host: sbx.kra.go.ke')) {
+                    throw new Error(`KRA Auth Failed: Server mirrored the request instead of processing it. Status: ${response.status}`);
                 }
 
                 if (!isJson) {
@@ -112,6 +119,19 @@ export async function getAccessToken(apiType: 'pinByID' | 'pinByPIN' | 'nilRetur
                     console.error(`[AUTH] Non-JSON response for ${apiType} (${method}): ${errorMessage}`);
                     
                     if (method === 'GET') {
+                        // If GET failed with a non-JSON response, don't try POST if it's production
+                        if (endpoint.includes('api.kra.go.ke')) {
+                            throw new Error(errorMessage);
+                        }
+
+                        // For sandbox, if /v1/token/generate failed, try /token before falling back to POST
+                        if (endpoint.includes('sbx.kra.go.ke') && endpoint.includes('/v1/token/generate')) {
+                            const altEndpoint = endpoint.replace('/v1/token/generate', '/token');
+                            console.warn(`[AUTH] Path /v1/token/generate failed for sandbox, trying alternative: ${altEndpoint}...`);
+                            config.tokenEndpoint = altEndpoint; // Update for future attempts in this loop
+                            continue; 
+                        }
+
                         console.warn(`[AUTH] Falling back to POST...`);
                         continue;
                     }
@@ -126,6 +146,12 @@ export async function getAccessToken(apiType: 'pinByID' | 'pinByPIN' | 'nilRetur
                     // If we got a structured JSON error from KRA, then the endpoint reached the service.
                     // Credentials are likely wrong. No point in falling back to POST.
                     if (method === 'GET') {
+                        // Special case: if it's a 404 on the sandbox, try the other path
+                        if (response.status === 404 && endpoint.includes('sbx.kra.go.ke') && endpoint.includes('/v1/token/generate')) {
+                            const altEndpoint = endpoint.replace('/v1/token/generate', '/token');
+                            config.tokenEndpoint = altEndpoint;
+                            continue;
+                        }
                         throw new Error(`KRA API Error: ${kraErrorMsg}`);
                     }
                     throw new Error(kraErrorMsg);
