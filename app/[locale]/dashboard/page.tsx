@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, Suspense } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   FileCheck2, FileText, ArrowLeft, Eye, CheckCircle2, Coins, Search, Hash, 
@@ -79,7 +79,7 @@ function DashboardContent() {
     activity: ''
   });
 
-  const certContainerRef = useRef<HTMLDivElement>(null);
+
 
   // Subscription state
   const [subscription, setSubscription] = useState<{
@@ -226,7 +226,7 @@ function DashboardContent() {
     }));
   };
 
-  const getKRAValue = (obj: Record<string, any>, ...keys: string[]) => {
+  const getKRAValue = (obj: Record<string, unknown>, ...keys: string[]) => {
     for (const key of keys) {
       if (obj[key] !== undefined && obj[key] !== null) return obj[key];
       // Try case-insensitive
@@ -382,30 +382,26 @@ function DashboardContent() {
 
       showStatus('Generating PDF...', false, true);
 
-      // Lazy load html2pdf client-side
-      const html2pdf = (await import('html2pdf.js')).default;
+      // Template-based PDF generation using pdf-lib
+      const { generateKraPdf } = await import('@/lib/pdf/generate-kra-pdf');
       
-      const element = certContainerRef.current;
-      if (!element) throw new Error('Certificate container not found');
-
-      // Unhide the ref temporarily for generation
-      element.style.display = 'flex';
-
       const filename = formData.kraPin 
         ? `KRA_PIN_Certificate_${formData.kraPin}.pdf` 
-        : `KRA_PIN_Certificate_${formData.taxpayerName.replace(/\\s+/g, '_')}.pdf`;
-      
-      const opt = {
-        margin: 0,
-        filename: filename,
-        image: { type: 'jpeg' as const, quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, logging: false },
-        jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const }
-      };
+        : `KRA_PIN_Certificate_${formData.taxpayerName.replace(/\s+/g, '_')}.pdf`;
 
-      await html2pdf().set(opt).from(element).save();
+      const pdfBytes = await generateKraPdf({
+        ...formData,
+        tillDate: formData.tillDate || 'N.A.'
+      });
       
-      element.style.display = 'none';
+      const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      link.click();
+      
+      // Clean up URL object
+      setTimeout(() => URL.revokeObjectURL(link.href), 100);
 
       // Update local storage stats for UI purely for display feedback
       const newStats = { ...stats, certificates: stats.certificates + 1 };
@@ -424,7 +420,6 @@ function DashboardContent() {
       if (err instanceof Error) errorDetail = err.message;
       else if (typeof err === 'string') errorDetail = err;
       showStatus(`Failed to generate PDF: ${errorDetail}`, true);
-      if (certContainerRef.current) certContainerRef.current.style.display = 'none';
     }
   };
 
@@ -474,7 +469,6 @@ function DashboardContent() {
   }
 
   // --- HTML2PDF Certificate Template (Hidden in DOM, rendered by html2pdf) ---
-  const todayStr = new Date().toLocaleDateString('en-GB');
 
   return (
     <div className="min-h-screen pt-24 pb-16 px-6">
@@ -888,109 +882,7 @@ function DashboardContent() {
         )}
       </div>
 
-      {/* Hidden Certificate Container for html2pdf */}
-      <div 
-        ref={certContainerRef} 
-        style={{ display: 'none', width: '210mm', minHeight: '297mm', background: 'white', padding: '20mm', boxSizing: 'border-box', fontFamily: '"Inter", system-ui, -apple-system, sans-serif', color: 'black', flexDirection: 'column', position: 'relative' }}
-      >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid black', paddingBottom: '10px', marginBottom: '15px', position: 'relative' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <img src="/kra-logo.jpeg" alt="KRA Logo" style={{ height: '50px' }} />
-          </div>
-          <div style={{ background: '#e5e7eb', padding: '10px 40px', fontWeight: 900, fontSize: '18px', border: '1px solid #d1d5db', position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>
-            PIN Certificate
-          </div>
-          <div style={{ textAlign: 'right', fontSize: '9px', lineHeight: 1.4 }}>
-            <strong>For General Tax Questions<br/>Contact KRA Call Centre</strong><br/>
-            Tel: +254 (020) 4999 999<br/>
-            Cell: +254(0711)099 999<br/>
-            Email: callcentre@kra.go.ke
-          </div>
-        </div>
 
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
-          <div style={{ textAlign: 'right', lineHeight: 1.5 }}>
-            <div style={{ fontSize: '11px' }}><strong>Certificate Date :</strong> {todayStr}</div>
-            <div style={{ fontWeight: 700, fontSize: '12px', marginTop: '5px' }}>Personal Identification Number</div>
-            <div style={{ fontWeight: 500, fontSize: '11px' }}>{formData.kraPin || 'N/A'}</div>
-          </div>
-        </div>
-
-        <div style={{ textAlign: 'center', fontSize: '11px', marginBottom: '20px' }}>
-          This is to certify that taxpayer shown herein has been registered with Kenya Revenue Authority
-        </div>
-
-        <div style={{ textAlign: 'center', fontWeight: 700, fontSize: '13px', marginBottom: '10px' }}>Taxpayer Information</div>
-        <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '20px', fontSize: '11px' }}>
-          <tbody>
-            <tr>
-              <td style={{ border: '1px solid black', padding: '3px 6px', fontWeight: 700, width: '30%' }}>Taxpayer Name</td>
-              <td style={{ border: '1px solid black', padding: '3px 6px' }}>{(formData.taxpayerName || 'N/A').toUpperCase()}</td>
-            </tr>
-            <tr>
-              <td style={{ border: '1px solid black', padding: '3px 6px', fontWeight: 700, width: '30%' }}>Email Address</td>
-              <td style={{ border: '1px solid black', padding: '3px 6px' }}>{formData.email || 'N/A'}</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <div style={{ textAlign: 'center', fontWeight: 700, fontSize: '13px', marginBottom: '10px' }}>Registered Address</div>
-        <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '20px', fontSize: '11px' }}>
-          <tbody>
-            <tr>
-              <td style={{ border: '1px solid black', padding: '3px 6px' }}><strong>L.R. Number :</strong> {formData.lrNumber}</td>
-              <td style={{ border: '1px solid black', padding: '3px 6px' }}><strong>Building :</strong> {formData.building}</td>
-            </tr>
-            <tr>
-              <td style={{ border: '1px solid black', padding: '3px 6px' }}><strong>Street/Road :</strong> {formData.street}</td>
-              <td style={{ border: '1px solid black', padding: '3px 6px' }}><strong>City/Town :</strong> {formData.city}</td>
-            </tr>
-            <tr>
-              <td style={{ border: '1px solid black', padding: '3px 6px' }}><strong>County :</strong> {formData.county}</td>
-              <td style={{ border: '1px solid black', padding: '3px 6px' }}><strong>Sub-County :</strong> {formData.district}</td>
-            </tr>
-            <tr>
-              <td style={{ border: '1px solid black', padding: '3px 6px' }}><strong>Tax Area :</strong> {formData.taxArea}</td>
-              <td style={{ border: '1px solid black', padding: '3px 6px' }}><strong>Station :</strong> {formData.station}</td>
-            </tr>
-            <tr>
-              <td style={{ border: '1px solid black', padding: '3px 6px' }}><strong>P. O. Box :</strong> {formData.box}</td>
-              <td style={{ border: '1px solid black', padding: '3px 6px' }}><strong>Postal Code :</strong> {formData.postal}</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <div style={{ textAlign: 'center', fontWeight: 700, fontSize: '13px', marginBottom: '10px' }}>Tax Obligation(s) Registration</div>
-        <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '20px', fontSize: '11px', textAlign: 'center' }}>
-          <thead>
-            <tr>
-              <th style={{ border: '1px solid black', padding: '3px 6px' }}>Sr. No.</th>
-              <th style={{ border: '1px solid black', padding: '3px 6px' }}>Tax Obligation(s)</th>
-              <th style={{ border: '1px solid black', padding: '3px 6px' }}>Effective From Date</th>
-              <th style={{ border: '1px solid black', padding: '3px 6px' }}>Effective Till</th>
-              <th style={{ border: '1px solid black', padding: '3px 6px' }}>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td style={{ border: '1px solid black', padding: '3px 6px' }}>1</td>
-              <td style={{ border: '1px solid black', padding: '3px 6px' }}>{formData.obligation}</td>
-              <td style={{ border: '1px solid black', padding: '3px 6px' }}>{formData.fromDate}</td>
-              <td style={{ border: '1px solid black', padding: '3px 6px' }}>{formData.tillDate}</td>
-              <td style={{ border: '1px solid black', padding: '3px 6px', color: formData.status === 'Active' ? 'green' : 'red', fontWeight: 600 }}>{formData.status}</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <div style={{ fontSize: '10px', lineHeight: 1.5, marginTop: 'auto', paddingTop: '20px' }}>
-          The above PIN must appear on all your tax invoices and correspondences with Kenya Revenue Authority. 
-          Your accounting end date is 31st December as per the provisions stated in the Income Tax Act unless 
-          a change has been approved by the Commissioner-Domestic Taxes Department.
-        </div>
-        <div style={{ borderTop: '1px solid black', paddingTop: '5px', marginTop: '30px', fontWeight: 700, fontSize: '10px' }}>
-          Disclaimer : This is a system generated certificate and does not require signature.
-        </div>
-      </div>
     </div>
   );
 }
