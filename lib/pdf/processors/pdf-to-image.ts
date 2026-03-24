@@ -119,6 +119,15 @@ export class PDFToImageProcessor extends BasePDFProcessor {
     this.reset();
     this.onProgress = onProgress;
 
+    // Guard: PDF-to-image conversion requires browser APIs (document, canvas)
+    if (typeof window === 'undefined' || typeof document === 'undefined') {
+      return this.createErrorOutput(
+        PDFErrorCode.BROWSER_NOT_SUPPORTED,
+        'PDF to image conversion requires a browser environment.',
+        'This tool must run client-side. Please ensure it is not being called during server-side rendering.'
+      );
+    }
+
     const { files, options } = input;
     const imageOptions: PDFToImageOptions = {
       ...DEFAULT_OPTIONS,
