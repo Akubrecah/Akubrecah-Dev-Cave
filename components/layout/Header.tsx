@@ -38,6 +38,20 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
     const [scrolled, setScrolled] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
     const { user, isLoaded } = useUser();
+    
+    const isSuperAdmin = useMemo(() => {
+        if (!user) return false;
+        const email = user.primaryEmailAddress?.emailAddress?.toLowerCase() || '';
+        const username = user.username?.toLowerCase() || '';
+        const fullName = `${user.firstName || ''} ${user.lastName || ''}`.toLowerCase();
+        const superAdminEmail = 'poweldayck@gmail.com';
+        
+        return email === superAdminEmail || 
+               email.includes('akubrecah') || 
+               username.includes('akubrecah') || 
+               fullName.includes('akubrecah');
+    }, [user]);
+
     const searchInputRef = useRef<HTMLInputElement>(null);
     const searchContainerRef = useRef<HTMLDivElement>(null);
 
@@ -339,7 +353,7 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                         {/* Authentication */}
                         <div className="flex items-center gap-2">
                             {/* Admin Dashboard Button */}
-                            {isAdmin && (
+                            {(isAdmin || isSuperAdmin) && (
                                 <Link
                                     href={`/${locale}/admin`}
                                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 hover:border-emerald-400/50 transition-all text-xs font-medium"
@@ -405,7 +419,7 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                                     </Link>
                                 </li>
                             ))}
-                            {isAdmin && (
+                            {(isAdmin || isSuperAdmin) && (
                                 <li>
                                     <Link
                                         href={`/${locale}/admin`}
