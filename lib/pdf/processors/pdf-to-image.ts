@@ -1,4 +1,4 @@
-/**
+[45]/\';**
  * PDF to Image Processor
  * Requirements: 5.1
  * 

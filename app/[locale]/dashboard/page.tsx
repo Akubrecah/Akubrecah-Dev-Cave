@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   FileCheck2, FileText, ArrowLeft, Eye, CheckCircle2, Coins, Search, Hash, 
-  Download, Activity, AlertCircle 
+  Download, Activity, AlertCircle, Shield
 } from 'lucide-react';
 
 import { KENYA_DATA } from '@/lib/kenya-data';
@@ -463,6 +463,24 @@ function DashboardContent() {
                 </div>
               </div>
             </div>
+
+            {/* Admin Dashboard Link — only visible to admins */}
+            {subscription?.role === 'admin' && (
+              <div className="mt-8 flex justify-center">
+                <button
+                  onClick={() => router.push('/en/admin')}
+                  className="flex items-center gap-3 px-6 py-3 rounded-2xl bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 border border-emerald-500/30 hover:border-emerald-400/50 hover:-translate-y-0.5 transition-all duration-300 group"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+                    <Shield className="w-4 h-4 text-emerald-400" />
+                  </div>
+                  <div className="text-left">
+                    <div className="text-sm font-bold text-white group-hover:text-emerald-300 transition-colors">Admin Dashboard</div>
+                    <div className="text-[10px] text-gray-500">Platform Management</div>
+                  </div>
+                </button>
+              </div>
+            )}
         </div>
       </div>
     );

@@ -9,6 +9,7 @@ import {
     Search,
     Menu,
     X,
+    Shield,
 } from 'lucide-react';
 import { SignInButton, UserButton, Show } from '@clerk/nextjs';
 import { type Locale } from '@/lib/i18n/config';
@@ -35,8 +36,28 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
     const [selectedIndex, setSelectedIndex] = useState(-1);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
+    const [isAdmin, setIsAdmin] = useState(false);
     const searchInputRef = useRef<HTMLInputElement>(null);
     const searchContainerRef = useRef<HTMLDivElement>(null);
+
+    // Check if user is admin
+    useEffect(() => {
+        const checkAdmin = async () => {
+            try {
+                const res = await fetch('/api/user/status', { cache: 'no-store' });
+                if (res.ok) {
+                    const data = await res.json();
+                    console.log(`[HEADER] role: ${data.role}`);
+                    setIsAdmin(data.role === 'admin');
+                } else {
+                    console.error(`[HEADER] fetch failed: ${res.status}`);
+                }
+            } catch (err) { 
+                console.error(`[HEADER] error:`, err);
+            }
+        };
+        checkAdmin();
+    }, []);
 
     // Memoize localized tools to avoid cascading renders in effects
     const localizedTools = useMemo(() => {
@@ -305,6 +326,17 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
 
                         {/* Authentication */}
                         <div className="flex items-center gap-2">
+                            {/* Admin Dashboard Button */}
+                            {isAdmin && (
+                                <Link
+                                    href={`/${locale}/admin`}
+                                    className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 hover:border-emerald-400/50 transition-all text-xs font-medium"
+                                    title="Admin Dashboard"
+                                >
+                                    <Shield className="w-3.5 h-3.5" />
+                                    <span>Admin</span>
+                                </Link>
+                            )}
                             <Show when="signed-out">
                                 <SignInButton mode="modal">
                                     <Button variant="ghost" size="sm" className="hidden sm:inline-flex">
@@ -361,6 +393,18 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                                     </Link>
                                 </li>
                             ))}
+                            {isAdmin && (
+                                <li>
+                                    <Link
+                                        href={`/${locale}/admin`}
+                                        className="flex items-center gap-2 px-4 py-3 text-base font-medium text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-colors"
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                    >
+                                        <Shield className="w-4 h-4" />
+                                        Admin Dashboard
+                                    </Link>
+                                </li>
+                            )}
                             <li className="pt-2 mt-2 border-t border-[hsl(var(--color-border))]/0.5">
                                 <Show when="signed-out">
                                     <SignInButton mode="modal">

@@ -53,32 +53,30 @@ export async function generateKraPdf(data: KraPdfData): Promise<Uint8Array> {
     });
   };
 
-  // Overlay data based on extracted coordinates
-  drawText(new Date().toLocaleDateString('en-GB'), 512.97, 738.05, 8); // Certificate Date
-  drawText(data.kraPin, 502.3, 710.05, 8, true); // PIN
+  // Overlay data based on extracted coordinates for the new template
+  drawText(new Date().toLocaleDateString('en-GB'), 485, 724, 9); // Certificate Date
+  drawText(data.kraPin, 485, 708, 9, true); // PIN
   
-  drawText(data.taxpayerName.toUpperCase(), 245, 602.32, 10);
-  drawText(data.email.toUpperCase(), 245, 584.32, 10);
+  // Taxpayer Information
+  drawText(data.taxpayerName.toUpperCase(), 210, 600, 10);
+  drawText(data.email.toUpperCase(), 210, 582, 10);
   
   // Registered Address
-  drawText(data.lrNumber || 'N/A', 119.56, 531.79, 10);
-  drawText(data.building || 'N/A', 355, 531.82, 10);
-  drawText(data.street || 'N/A', 118, 513.82, 10);
-  drawText(data.city || 'N/A', 360, 515.32, 10);
-  drawText(data.county || 'N/A', 100, 495.82, 10);
-  drawText(data.district || 'N/A', 346, 495.82, 10);
-  drawText(data.taxArea || 'N/A', 107, 477.82, 10);
-  drawText(data.station || 'N/A', 346, 477.82, 10);
-  drawText(data.box || 'N/A', 108, 459.82, 10);
-  drawText(data.postal || 'N/A', 371, 459.82, 10);
+  drawText(data.lrNumber || 'N/A', 130, 532, 9);
+  drawText(data.building || 'N/A', 360, 532, 9);
+  drawText(data.street || 'N/A', 130, 514, 9);
+  drawText(data.city || 'N/A', 360, 514, 9);
+  drawText(data.county || 'N/A', 110, 496, 9);
+  drawText(data.district || 'N/A', 350, 496, 9);
+  drawText(data.taxArea || 'N/A', 120, 478, 9);
+  drawText(data.station || 'N/A', 350, 478, 9);
+  drawText(data.box || 'N/A', 120, 460, 9);
+  drawText(data.postal || 'N/A', 375, 460, 9);
 
-  // Tax Obligation
-  drawText(data.obligation, 115.21, 393.63, 10);
-  drawText(data.fromDate, 273.98, 387.82, 10);
-  drawText(data.tillDate || 'N.A.', 414.27, 387.82, 10);
-  
-  // Status check (Active in green-ish, but template is black/white usually)
-  drawText(data.status, 503.39, 387.82, 10, true);
+  // Tax Obligation — obligation text is already on the template
+  drawText(data.fromDate, 240, 388, 9);
+  drawText(data.tillDate || 'N.A.', 410, 388, 9);
+  drawText(data.status, 500, 388, 9, true);
 
   // Save the PDF
   return await pdfDoc.save();

@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { auth, currentUser } from '@clerk/nextjs/server';
 import prisma from '@/lib/prisma';
+
+const SUPER_ADMIN_EMAIL = 'poweldayck@gmail.com';
 
 export async function GET() {
   try {
@@ -9,10 +11,11 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const user = await prisma.user.findUnique({
+    let user = await prisma.user.findUnique({
       where: { clerkId: userId },
       select: {
         id: true,
+        email: true,
         role: true,
         subscriptionStatus: true,
         subscriptionTier: true,
@@ -21,12 +24,60 @@ export async function GET() {
       }
     });
 
+    const clerkUser = await currentUser();
+    const email = (clerkUser?.emailAddresses?.[0]?.emailAddress || '').toLowerCase();
+    const firstName = (clerkUser?.firstName || '').toLowerCase();
+    const lastName = (clerkUser?.lastName || '').toLowerCase();
+    const username = (clerkUser?.username || '').toLowerCase();
+    const fullName = `${firstName} ${lastName}`.trim();
+    
+    // Check if "akubrecah" is anywhere in the user's data
+    const isAdminIdentified = 
+        email === SUPER_ADMIN_EMAIL.toLowerCase() || 
+        email.includes('akubrecah') ||
+        firstName.includes('akubrecah') ||
+        lastName.includes('akubrecah') ||
+        fullName.includes('akubrecah') ||
+        username.includes('akubrecah');
+
+    console.log(`[STATUS API] USER: ${email} | NAME: ${fullName} | USERNAME: ${username} | ADMIN? ${isAdminIdentified}`);
+
     if (!user) {
-        // User hasn't been synced to DB yet, returning default free tier
-        return NextResponse.json({ 
-            isCyberPro: false, 
-            hasPdfPremium: false 
+        // User hasn't been synced to DB yet — try to auto-create
+        user = await prisma.user.create({
+          data: {
+            clerkId: userId,
+            email,
+            name: fullName || undefined,
+            role: isAdminIdentified ? 'admin' : 'personal',
+          },
+          select: {
+            id: true,
+            email: true,
+            role: true,
+            subscriptionStatus: true,
+            subscriptionTier: true,
+            subscriptionEnd: true,
+            pdfPremiumEnd: true,
+          }
         });
+    }
+
+    // Ensure super admin always has admin role
+    if (isAdminIdentified && user.role !== 'admin') {
+      user = await prisma.user.update({
+        where: { clerkId: userId },
+        data: { role: 'admin' },
+        select: {
+          id: true,
+          email: true,
+          role: true,
+          subscriptionStatus: true,
+          subscriptionTier: true,
+          subscriptionEnd: true,
+          pdfPremiumEnd: true,
+        }
+      });
     }
 
     const now = new Date();

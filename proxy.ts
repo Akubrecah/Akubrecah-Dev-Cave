@@ -16,7 +16,8 @@ const isPublicRoute = createRouteMatcher([
   '/api/stripe/webhook(.*)',
   '/api/kra/debug(.*)',
   '/api/kra/check-pin(.*)',
-  '/api/kra/check-pin-by-pin(.*)'
+  '/api/kra/check-pin-by-pin(.*)',
+  '/api/admin/setup(.*)'
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
