@@ -29,6 +29,7 @@ interface UserRow {
   subscriptionStatus: string;
   subscriptionTier: string;
   subscriptionEnd: string | null;
+  pdfPremiumEnd?: string | null;
   createdAt: string;
   _count: { verifications: number; certificates: number; transactions: number };
 }
@@ -74,9 +75,16 @@ export default function AdminDashboard() {
   const [vfTotalPages, setVfTotalPages] = useState(1);
   const [vfSearch, setVfSearch] = useState('');
 
-  // Editing user role
-  const [editingUser, setEditingUser] = useState<string | null>(null);
-  const [editRole, setEditRole] = useState('');
+  // Editing user
+  const [editingUser, setEditingUser] = useState<UserRow | null>(null);
+  const [editForm, setEditForm] = useState({
+    role: '',
+    subscriptionTier: '',
+    subscriptionStatus: '',
+    credits: 0,
+    subscriptionEnd: '',
+    pdfPremiumEnd: ''
+  });
 
   const fetchStats = useCallback(async () => {
     try {
@@ -132,18 +140,38 @@ export default function AdminDashboard() {
   useEffect(() => { if (activeTab === 'transactions') fetchTransactions(); }, [activeTab, fetchTransactions]);
   useEffect(() => { if (activeTab === 'verifications') fetchVerifications(); }, [activeTab, fetchVerifications]);
 
-  const handleRoleUpdate = async (userId: string) => {
+  const handleUserUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingUser) return;
     try {
+      const payload: Record<string, string | number | null> = {
+        userId: editingUser.id,
+        role: editForm.role,
+        subscriptionTier: editForm.subscriptionTier,
+        subscriptionStatus: editForm.subscriptionStatus,
+        credits: editForm.credits,
+      };
+      
+      payload.subscriptionEnd = editForm.subscriptionEnd 
+        ? new Date(editForm.subscriptionEnd).toISOString() 
+        : null;
+
+      payload.pdfPremiumEnd = editForm.pdfPremiumEnd 
+        ? new Date(editForm.pdfPremiumEnd).toISOString() 
+        : null;
+
       const res = await fetch('/api/admin/users', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, role: editRole }),
+        body: JSON.stringify(payload),
       });
       if (res.ok) {
         setEditingUser(null);
         fetchUsers();
       }
-    } catch (e) { console.error('Role update failed:', e); }
+    } catch (e) {
+      console.error('User update failed:', e);
+    }
   };
 
   const refreshAll = () => {
@@ -304,6 +332,7 @@ export default function AdminDashboard() {
                         <th className="text-left px-4 py-3 text-gray-400 font-medium">User</th>
                         <th className="text-left px-4 py-3 text-gray-400 font-medium">Role</th>
                         <th className="text-left px-4 py-3 text-gray-400 font-medium">Tier</th>
+                        <th className="text-left px-4 py-3 text-gray-400 font-medium">Credits</th>
                         <th className="text-left px-4 py-3 text-gray-400 font-medium">Verifications</th>
                         <th className="text-left px-4 py-3 text-gray-400 font-medium">Certs</th>
                         <th className="text-left px-4 py-3 text-gray-400 font-medium">Joined</th>
@@ -320,42 +349,40 @@ export default function AdminDashboard() {
                             </div>
                           </td>
                           <td className="px-4 py-3">
-                            {editingUser === user.id ? (
-                              <div className="flex items-center gap-2">
-                                <select
-                                  value={editRole}
-                                  onChange={(e) => setEditRole(e.target.value)}
-                                  className="bg-gray-800 border border-gray-700 rounded-lg px-2 py-1 text-xs"
-                                >
-                                  <option value="personal">Personal</option>
-                                  <option value="cyber">Cyber</option>
-                                  <option value="admin">Admin</option>
-                                </select>
-                                <button onClick={() => handleRoleUpdate(user.id)} className="text-emerald-400 hover:text-emerald-300 text-xs font-medium">Save</button>
-                                <button onClick={() => setEditingUser(null)} className="text-gray-500 hover:text-gray-300 text-xs">Cancel</button>
-                              </div>
-                            ) : (
-                              <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                                user.role === 'admin' ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
-                                user.role === 'cyber' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
-                                'bg-gray-500/20 text-gray-400 border border-gray-500/30'
-                              }`}>
-                                {user.role}
-                              </span>
-                            )}
+                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                              user.role === 'admin' ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
+                              user.role === 'cyber' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
+                              'bg-gray-500/20 text-gray-400 border border-gray-500/30'
+                            }`}>
+                              {user.role}
+                            </span>
                           </td>
                           <td className="px-4 py-3">
-                            <span className="text-xs text-gray-400">{user.subscriptionTier}</span>
+                            <div className="flex flex-col">
+                              <span className="text-xs text-gray-400 capitalize">{user.subscriptionTier.replace('_', ' ')}</span>
+                              <span className={`text-[10px] ${user.subscriptionStatus === 'active' ? 'text-emerald-400' : 'text-gray-500'}`}>{user.subscriptionStatus}</span>
+                            </div>
                           </td>
+                          <td className="px-4 py-3 text-gray-300 text-xs font-mono">{user.credits}</td>
                           <td className="px-4 py-3 text-purple-400">{user._count.verifications}</td>
                           <td className="px-4 py-3 text-orange-400">{user._count.certificates}</td>
                           <td className="px-4 py-3 text-xs text-gray-500">{new Date(user.createdAt).toLocaleDateString()}</td>
                           <td className="px-4 py-3">
                             <button
-                              onClick={() => { setEditingUser(user.id); setEditRole(user.role); }}
-                              className="text-xs text-emerald-400 hover:text-emerald-300 font-medium"
+                              onClick={() => {
+                                setEditingUser(user);
+                                setEditForm({
+                                  role: user.role,
+                                  subscriptionTier: user.subscriptionTier,
+                                  subscriptionStatus: user.subscriptionStatus,
+                                  credits: user.credits,
+                                  subscriptionEnd: user.subscriptionEnd ? new Date(user.subscriptionEnd).toISOString().split('T')[0] : '',
+                                  pdfPremiumEnd: user.pdfPremiumEnd ? new Date(user.pdfPremiumEnd).toISOString().split('T')[0] : ''
+                                });
+                              }}
+                              className="text-xs px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-emerald-400 transition-colors font-medium border border-gray-700"
                             >
-                              Edit Role
+                              Edit Profile
                             </button>
                           </td>
                         </tr>
@@ -366,6 +393,110 @@ export default function AdminDashboard() {
                     </tbody>
                   </table>
                 </div>
+
+                {editingUser && (
+                  <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setEditingUser(null)} />
+                    <div className="relative bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-md p-6 shadow-2xl">
+                      <h3 className="text-xl font-bold text-white mb-4">Edit User Profile</h3>
+                      <form onSubmit={handleUserUpdate} className="space-y-4">
+                        <div>
+                          <label className="block text-xs text-gray-400 mb-1">Email</label>
+                          <input type="text" disabled value={editingUser.email} className="w-full px-3 py-2 bg-gray-800/50 rounded-lg text-gray-500 border border-gray-700/50 cursor-not-allowed" />
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-xs text-gray-400 mb-1">Role</label>
+                            <select
+                              value={editForm.role}
+                              onChange={e => setEditForm(prev => ({ ...prev, role: e.target.value }))}
+                              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500/50"
+                            >
+                              <option value="personal">Personal</option>
+                              <option value="cyber">Cyber</option>
+                              <option value="admin">Admin</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-xs text-gray-400 mb-1">Credits</label>
+                            <input
+                              type="number"
+                              value={editForm.credits}
+                              onChange={e => setEditForm(prev => ({ ...prev, credits: parseInt(e.target.value) || 0 }))}
+                              className="w-full px-3 py-2 bg-gray-800 rounded-lg border border-gray-700 text-sm text-white focus:outline-none focus:border-emerald-500/50"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-xs text-gray-400 mb-1">Tier</label>
+                            <select
+                              value={editForm.subscriptionTier}
+                              onChange={e => setEditForm(prev => ({ ...prev, subscriptionTier: e.target.value }))}
+                              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500/50"
+                            >
+                              <option value="none">None</option>
+                              <option value="pro">Pro</option>
+                              <option value="daily_pro">Daily Pro</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-xs text-gray-400 mb-1">Status</label>
+                            <select
+                              value={editForm.subscriptionStatus}
+                              onChange={e => setEditForm(prev => ({ ...prev, subscriptionStatus: e.target.value }))}
+                              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500/50"
+                            >
+                              <option value="inactive">Inactive</option>
+                              <option value="active">Active</option>
+                              <option value="past_due">Past Due</option>
+                              <option value="canceled">Canceled</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-xs text-gray-400 mb-1">Sub. End</label>
+                            <input
+                              type="date"
+                              value={editForm.subscriptionEnd}
+                              onChange={e => setEditForm(prev => ({ ...prev, subscriptionEnd: e.target.value }))}
+                              className="w-full px-3 py-2 bg-gray-800 rounded-lg border border-gray-700 text-sm text-white focus:outline-none focus:border-emerald-500/50"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs text-gray-400 mb-1">PDF Premium End</label>
+                            <input
+                              type="date"
+                              value={editForm.pdfPremiumEnd}
+                              onChange={e => setEditForm(prev => ({ ...prev, pdfPremiumEnd: e.target.value }))}
+                              className="w-full px-3 py-2 bg-gray-800 rounded-lg border border-gray-700 text-sm text-white focus:outline-none focus:border-emerald-500/50"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-800">
+                          <button
+                            type="button"
+                            onClick={() => setEditingUser(null)}
+                            className="px-4 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white transition-colors"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="submit"
+                            className="px-4 py-2 rounded-lg text-sm font-medium bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30 transition-colors"
+                          >
+                            Save Changes
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                )}
 
                 <Pagination page={usersPage} totalPages={usersTotalPages} onPageChange={setUsersPage} />
               </div>

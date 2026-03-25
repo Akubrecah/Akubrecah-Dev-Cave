@@ -38,6 +38,7 @@ export async function GET(req: Request) {
           subscriptionStatus: true,
           subscriptionTier: true,
           subscriptionEnd: true,
+          pdfPremiumEnd: true,
           createdAt: true,
           _count: {
             select: {
@@ -68,16 +69,20 @@ export async function PATCH(req: Request) {
   if (adminOrError instanceof NextResponse) return adminOrError;
 
   try {
-    const { userId, role, subscriptionTier, subscriptionStatus } = await req.json();
+    const body = await req.json();
+    const { userId, role, subscriptionTier, subscriptionStatus, credits, subscriptionEnd, pdfPremiumEnd } = body;
 
     if (!userId) {
       return NextResponse.json({ error: 'userId is required' }, { status: 400 });
     }
 
-    const updateData: Record<string, string> = {};
-    if (role) updateData.role = role;
-    if (subscriptionTier) updateData.subscriptionTier = subscriptionTier;
-    if (subscriptionStatus) updateData.subscriptionStatus = subscriptionStatus;
+    const updateData: Record<string, string | number | Date | null> = {};
+    if (role !== undefined) updateData.role = role;
+    if (subscriptionTier !== undefined) updateData.subscriptionTier = subscriptionTier;
+    if (subscriptionStatus !== undefined) updateData.subscriptionStatus = subscriptionStatus;
+    if (credits !== undefined) updateData.credits = parseInt(credits, 10);
+    if (subscriptionEnd !== undefined) updateData.subscriptionEnd = subscriptionEnd ? new Date(subscriptionEnd) : null;
+    if (pdfPremiumEnd !== undefined) updateData.pdfPremiumEnd = pdfPremiumEnd ? new Date(pdfPremiumEnd) : null;
 
     const updated = await prisma.user.update({
       where: { id: userId },
