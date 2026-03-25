@@ -11,7 +11,7 @@ import {
     X,
     Shield,
 } from 'lucide-react';
-import { SignInButton, UserButton, Show } from '@clerk/nextjs';
+import { SignInButton, UserButton, Show, useUser } from '@clerk/nextjs';
 import { type Locale } from '@/lib/i18n/config';
 import { Button } from '@/components/ui/Button';
 import { RecentFilesDropdown } from '@/components/common/RecentFilesDropdown';
@@ -37,27 +37,39 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
+    const { user, isLoaded } = useUser();
     const searchInputRef = useRef<HTMLInputElement>(null);
     const searchContainerRef = useRef<HTMLDivElement>(null);
 
     // Check if user is admin
     useEffect(() => {
+        if (!isLoaded) return;
+        
         const checkAdmin = async () => {
             try {
-                const res = await fetch('/api/user/status', { cache: 'no-store' });
+                // Add a timestamp to bypass any browser caching despite no-store
+                const res = await fetch(`/api/user/status?t=${Date.now()}`, { 
+                    cache: 'no-store',
+                    headers: {
+                        'Pragma': 'no-cache',
+                        'Cache-Control': 'no-cache'
+                    }
+                });
                 if (res.ok) {
                     const data = await res.json();
-                    console.log(`[HEADER] role: ${data.role}`);
+                    console.log(`[HEADER] Admin Check -> role: ${data.role}`);
                     setIsAdmin(data.role === 'admin');
                 } else {
                     console.error(`[HEADER] fetch failed: ${res.status}`);
+                    setIsAdmin(false);
                 }
             } catch (err) { 
                 console.error(`[HEADER] error:`, err);
             }
         };
+        
         checkAdmin();
-    }, []);
+    }, [user, isLoaded]);
 
     // Memoize localized tools to avoid cascading renders in effects
     const localizedTools = useMemo(() => {
@@ -330,7 +342,7 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                             {isAdmin && (
                                 <Link
                                     href={`/${locale}/admin`}
-                                    className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 hover:border-emerald-400/50 transition-all text-xs font-medium"
+                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 hover:border-emerald-400/50 transition-all text-xs font-medium"
                                     title="Admin Dashboard"
                                 >
                                     <Shield className="w-3.5 h-3.5" />
