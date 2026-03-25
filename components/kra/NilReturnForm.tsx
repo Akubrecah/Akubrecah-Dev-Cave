@@ -4,7 +4,9 @@ import { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input, Select } from '@/components/ui/FormField';
-import { CheckCircle2, AlertCircle } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Download } from 'lucide-react';
+import { generateReceiptPdf, ReceiptPdfData } from '@/lib/pdf/generate-receipt-pdf';
+
 
 const OBLIGATIONS = [
     { value: "1", label: "Income Tax - Individual Resident" },
@@ -16,6 +18,14 @@ const OBLIGATIONS = [
     { value: "7", label: "Excise" },
     { value: "8", label: "Income Tax - Rent Income (MRI)" },
 ];
+
+interface NilReturnResult {
+    ResponseCode: string;
+    AckNumber: string;
+    Status: string;
+    Message: string;
+}
+
 
 const MONTHS = [
     { value: "01", label: "January" },
@@ -34,8 +44,12 @@ const MONTHS = [
 
 export function NilReturnForm() {
     const [loading, setLoading] = useState(false);
-    const [result, setResult] = useState<any>(null);
+    const [result, setResult] = useState<NilReturnResult | null>(null);
     const [error, setError] = useState<string | null>(null);
+
+    const [downloading, setDownloading] = useState(false);
+    const [formPin, setFormPin] = useState("");
+
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
@@ -45,11 +59,13 @@ export function NilReturnForm() {
 
         const formData = new FormData(e.currentTarget);
         const data = {
-            TaxpayerPIN: formData.get('pin')?.toString().toUpperCase(),
-            ObligationCode: formData.get('obligation')?.toString(),
-            Month: formData.get('month')?.toString(),
-            Year: formData.get('year')?.toString(),
+            TaxpayerPIN: formData.get('pin')?.toString().toUpperCase() || '',
+            ObligationCode: formData.get('obligation')?.toString() || '',
+            Month: formData.get('month')?.toString() || '',
+            Year: formData.get('year')?.toString() || '',
         };
+        setFormPin(data.TaxpayerPIN);
+
 
         try {
             const res = await fetch('/api/kra/nil-return', {
@@ -61,13 +77,45 @@ export function NilReturnForm() {
             const json = await res.json();
             if (!res.ok) throw new Error(json.errorMessage || 'Failed to file Nil Return');
 
-            setResult(json.RESPONSE);
-        } catch (err: any) {
-            setError(err.message);
+            setResult(json.RESPONSE as NilReturnResult);
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : 'An unknown error occurred');
         } finally {
             setLoading(false);
         }
+
     }
+
+    async function handleDownload() {
+        if (!result) return;
+        setDownloading(true);
+        try {
+            const pdfData: ReceiptPdfData = {
+                kraPin: formPin,
+                taxpayerName: "KRA Taxpayer", // We don't have this from Nil Return API, using generic
+                acknowledgmentNumber: result.AckNumber,
+                date: new Date().toLocaleDateString('en-GB'),
+            };
+
+            const bytes = await generateReceiptPdf(pdfData);
+            const blob = new Blob([new Uint8Array(bytes)], { type: 'application/pdf' });
+
+
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `KRA_Receipt_${result.AckNumber}.pdf`;
+            a.click();
+            URL.revokeObjectURL(url);
+        } catch (err: unknown) {
+            console.error('Download failed:', err);
+            setError('Failed to generate PDF receipt. Please try again.');
+        } finally {
+            setDownloading(false);
+        }
+    }
+
+
 
     return (
         <Card className="w-full max-w-2xl mx-auto border-2 border-emerald-500/20 bg-background/50 backdrop-blur-sm" size="lg">
@@ -157,16 +205,28 @@ export function NilReturnForm() {
                                 <span className="font-medium">{result.Status}</span>
                             </div>
                             <p className="text-emerald-800 bg-emerald-100/50 p-3 rounded-lg mt-4 italic">
-                                "{result.Message}"
+                                &quot;{result.Message}&quot;
                             </p>
+
                         </div>
-                        <Button 
-                            onClick={() => setResult(null)} 
-                            variant="outline" 
-                            className="w-full mt-6 border-emerald-500 text-emerald-600 hover:bg-emerald-50"
-                        >
-                            File Another Return
-                        </Button>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
+                            <Button 
+                                onClick={handleDownload}
+                                loading={downloading}
+                                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold h-12 flex items-center justify-center gap-2"
+                            >
+                                <Download className="h-5 w-5" />
+                                Download Receipt
+                            </Button>
+                            <Button 
+                                onClick={() => setResult(null)} 
+                                variant="outline" 
+                                className="w-full border-emerald-500 text-emerald-600 hover:bg-emerald-50 h-12"
+                            >
+                                File Another Return
+                            </Button>
+                        </div>
+
                     </div>
                 )}
             </CardContent>
