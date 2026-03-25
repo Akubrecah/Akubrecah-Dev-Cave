@@ -226,12 +226,12 @@ function DashboardContent() {
     }));
   };
 
-  const getKRAValue = (obj: Record<string, unknown>, ...keys: string[]) => {
+  const getKRAValue = (obj: Record<string, unknown>, ...keys: string[]): string => {
     for (const key of keys) {
-      if (obj[key] !== undefined && obj[key] !== null) return obj[key];
+      if (obj[key] !== undefined && obj[key] !== null) return String(obj[key]);
       // Try case-insensitive
       const foundKey = Object.keys(obj).find(k => k.toLowerCase() === key.toLowerCase());
-      if (foundKey) return obj[foundKey];
+      if (foundKey) return String(obj[foundKey]);
     }
     return '';
   };
@@ -394,7 +394,7 @@ function DashboardContent() {
         tillDate: formData.tillDate || 'N.A.'
       });
       
-      const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+      const blob = new Blob([pdfBytes as any], { type: 'application/pdf' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
       link.download = filename;
