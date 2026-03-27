@@ -7,7 +7,7 @@
 [![Stripe](https://img.shields.io/badge/Stripe-Payments-008CD1?style=for-the-badge&logo=stripe)](https://stripe.com/)
 
 **One Suite. Infinite Power.**
-gg
+
 Akubrecah is a professional-grade, unified platform designed for Kenyan taxpayers and global document professionals. It seamlessly integrates essential **KRA (Kenya Revenue Authority) Compliance** services with a comprehensive suite of **88+ Browser-Based PDF Tools**.
 
 ---
