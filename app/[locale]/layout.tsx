@@ -48,11 +48,13 @@ export default async function LocaleLayout({
         {activeNotification?.type === 'marquee' && (
           <MarqueeBanner message={activeNotification.message} />
         )}
-        <Header locale={locale as Locale} />
-        <main className="flex-1 pt-16">
-          {children}
-        </main>
-        <Footer locale={locale as Locale} />
+        <div className="flex-1 flex flex-col transition-all duration-500">
+          <Header locale={locale as Locale} />
+          <main className="flex-1 pt-16">
+            {children}
+          </main>
+          <Footer locale={locale as Locale} />
+        </div>
         <AlertBanner />
         <Analytics />
       </div>

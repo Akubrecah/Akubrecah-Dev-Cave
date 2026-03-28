@@ -451,14 +451,14 @@ function DashboardContent() {
                   setSelectedService('kra');
                   setFeature('nil-return');
                 }}
-                className="bg-[#111111] border border-white/10 p-8 rounded-3xl cursor-pointer hover:-translate-y-2 hover:border-emerald-500 transition-all duration-300 text-center"
+                className="bg-background/60 backdrop-blur-3xl border border-white/10 p-8 rounded-3xl cursor-pointer hover:-translate-y-2 hover:border-accent transition-all duration-300 text-center"
               >
-                <div className="w-16 h-16 bg-emerald-500/10 text-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <div className="w-16 h-16 bg-accent/10 text-accent rounded-2xl flex items-center justify-center mx-auto mb-6">
                   <Activity size={32} />
                 </div>
-                <h2 className="text-xl font-bold text-white mb-2">NIL RETURN</h2>
-                <p className="text-[var(--color-text-secondary)] text-sm mb-6">File your Nil Returns instantly with KRA integration.</p>
-                <div className="w-full py-2 rounded-xl bg-emerald-500 text-white font-bold text-sm">
+                <h2 className="text-xl font-bold text-white mb-2 uppercase italic tracking-tighter">NIL RETURN</h2>
+                <p className="text-muted-foreground text-sm mb-6">File your Nil Returns instantly with KRA integration.</p>
+                <div className="w-full py-2 rounded-xl bg-accent text-accent-foreground font-black text-xs tracking-[0.2em]">
                   FILE RETURN →
                 </div>
               </div>
@@ -469,14 +469,14 @@ function DashboardContent() {
               <div className="mt-8 flex justify-center">
                 <button
                   onClick={() => router.push('/en/admin')}
-                  className="flex items-center gap-3 px-6 py-3 rounded-2xl bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 border border-emerald-500/30 hover:border-emerald-400/50 hover:-translate-y-0.5 transition-all duration-300 group"
+                  className="flex items-center gap-3 px-6 py-3 rounded-2xl bg-gradient-to-r from-primary/20 to-accent-foreground/20 border border-primary/30 hover:border-primary/50 hover:-translate-y-0.5 transition-all duration-300 group shadow-lg shadow-primary/10"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center">
-                    <Shield className="w-4 h-4 text-emerald-400" />
+                  <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+                    <Shield className="w-4 h-4 text-primary" />
                   </div>
                   <div className="text-left">
-                    <div className="text-sm font-bold text-white group-hover:text-emerald-300 transition-colors">Admin Dashboard</div>
-                    <div className="text-[10px] text-gray-500">Platform Management</div>
+                    <div className="text-sm font-black text-white group-hover:text-primary transition-colors uppercase italic tracking-tight">Admin Dashboard</div>
+                    <div className="text-[10px] text-primary/60 font-bold tracking-widest uppercase">Platform Intelligence</div>
                   </div>
                 </button>
               </div>
@@ -517,27 +517,27 @@ function DashboardContent() {
 
           <div 
             onClick={() => setFeature('viewer')}
-            className={`p-6 rounded-2xl cursor-pointer border-2 transition-all flex items-center gap-4 ${feature === 'viewer' ? 'border-blue-400 bg-[#111111]' : 'border-white/10 bg-black/50 hover:border-white/20'}`}
+            className={`p-6 rounded-2xl cursor-pointer border-2 transition-all flex items-center gap-4 ${feature === 'viewer' ? 'border-accent bg-background/60 backdrop-blur-3xl' : 'border-white/10 bg-black/50 hover:border-white/20'}`}
           >
-            <div className={`p-4 rounded-xl ${feature === 'viewer' ? 'bg-blue-400/20 text-blue-400' : 'bg-white/5 text-white/50'}`}>
+            <div className={`p-4 rounded-xl ${feature === 'viewer' ? 'bg-accent/20 text-accent' : 'bg-white/5 text-white/50'}`}>
               <Eye size={24} />
             </div>
             <div>
-              <h3 className={`font-bold text-sm ${feature === 'viewer' ? 'text-white' : 'text-white/50'}`}>QUICK VIEW</h3>
-              <p className="text-[10px] text-white/50 uppercase">PIN Checker</p>
+              <h3 className={`font-black text-sm uppercase italic tracking-tight ${feature === 'viewer' ? 'text-white' : 'text-white/50'}`}>QUICK VIEW</h3>
+              <p className="text-[10px] text-white/50 uppercase font-bold tracking-widest">PIN Checker</p>
             </div>
           </div>
 
           <div 
             onClick={() => setFeature('nil-return')}
-            className={`p-6 rounded-2xl cursor-pointer border-2 transition-all flex items-center gap-4 ${feature === 'nil-return' ? 'border-emerald-500 bg-[#111111]' : 'border-white/10 bg-black/50 hover:border-white/20'}`}
+            className={`p-6 rounded-2xl cursor-pointer border-2 transition-all flex items-center gap-4 ${feature === 'nil-return' ? 'border-accent bg-background/60 backdrop-blur-3xl' : 'border-white/10 bg-black/50 hover:border-white/20'}`}
           >
-            <div className={`p-4 rounded-xl ${feature === 'nil-return' ? 'bg-emerald-500/20 text-emerald-500' : 'bg-white/5 text-white/50'}`}>
+            <div className={`p-4 rounded-xl ${feature === 'nil-return' ? 'bg-accent/20 text-accent' : 'bg-white/5 text-white/50'}`}>
               <Activity size={24} />
             </div>
             <div>
-              <h3 className={`font-bold text-sm ${feature === 'nil-return' ? 'text-white' : 'text-white/50'}`}>NIL RETURN</h3>
-              <p className="text-[10px] text-white/50 uppercase">Instant Filing</p>
+              <h3 className={`font-black text-sm uppercase italic tracking-tight ${feature === 'nil-return' ? 'text-white' : 'text-white/50'}`}>NIL RETURN</h3>
+              <p className="text-[10px] text-white/50 uppercase font-bold tracking-widest">Instant Filing</p>
             </div>
           </div>
         </div>

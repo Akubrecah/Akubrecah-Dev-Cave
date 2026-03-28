@@ -82,5 +82,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     );
   }
 
-  return <>{children}</>;
+  return (
+    <div className="fixed inset-0 z-[100] bg-gray-950 overflow-auto custom-scrollbar">
+      {children}
+    </div>
+  );
 }
