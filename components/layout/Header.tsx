@@ -74,7 +74,10 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                     console.log(`[HEADER] Admin Check -> role: ${data.role}`);
                     setIsAdmin(data.role === 'admin');
                 } else {
-                    console.error(`[HEADER] fetch failed: ${res.status}`);
+                    // Suppress error message for expected 401 when not logged in
+                    if (res.status !== 401) {
+                        console.error(`[HEADER] fetch failed: ${res.status}`);
+                    }
                     setIsAdmin(false);
                 }
             } catch (err) { 

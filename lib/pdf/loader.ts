@@ -32,8 +32,7 @@ export function configurePdfjsWorker(pdfjsLib: PDFJSModule): void {
   if (workerConfigured) return;
 
   if (typeof window !== 'undefined') {
-    // Use the local worker file for offline support
-    // The worker file is located in public/workers/pdf.worker.min.mjs
+    // PDF.js v4+ uses .mjs for workers
     pdfjsLib.GlobalWorkerOptions.workerSrc = '/workers/pdf.worker.min.mjs';
     workerConfigured = true;
   }
@@ -78,11 +77,12 @@ export async function loadPdfjs(): Promise<PDFJSModule> {
   setupDOMMatrix();
 
   pdfjsLoadingPromise = import('pdfjs-dist').then((module) => {
+    const pdfjs = module as PDFJSModule;
     // Configure worker using centralized function
-    configurePdfjsWorker(module);
-    pdfjsInstance = module;
+    configurePdfjsWorker(pdfjs);
+    pdfjsInstance = pdfjs;
     pdfjsLoadingPromise = null;
-    return module;
+    return pdfjs;
   });
 
   return pdfjsLoadingPromise;
