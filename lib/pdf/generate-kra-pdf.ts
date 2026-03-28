@@ -53,13 +53,35 @@ export async function generateKraPdf(data: KraPdfData): Promise<Uint8Array> {
     });
   };
 
+  // Helper to format date from YYYY-MM-DD to DD/MM/YYYY
+  const formatKraDate = (d: string) => {
+    if (!d) return '';
+    if (d.includes('-')) {
+      const parts = d.split('-');
+      if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
+    return d;
+  };
+
+  // Obscure the hardcoded dates from the template with white rectangles
+
+
   // Overlay data based on extracted coordinates for the new template
-  drawText(new Date().toLocaleDateString('en-GB'), 485, 724, 9); // Certificate Date
-  drawText(data.kraPin, 485, 708, 9, true); // PIN
+  const currentDateFormatted = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  
+  // Calculate X for right alignment (target right edge at X=565)
+  const dateTextWidth = helveticaFont.widthOfTextAtSize(currentDateFormatted, 9);
+  const dateX = 565 - dateTextWidth;
+  
+  const pinWidth = helveticaFont.widthOfTextAtSize(data.kraPin, 9);
+  const pinX = 565 - pinWidth;
+  
+  drawText(currentDateFormatted, dateX, 740, 9); // Certificate Date
+  drawText(data.kraPin, pinX, 708, 9, false); // PIN
   
   // Taxpayer Information
-  drawText(data.taxpayerName.toUpperCase(), 210, 600, 10);
-  drawText(data.email.toUpperCase(), 210, 582, 10);
+  drawText(data.taxpayerName.toUpperCase(), 254, 600, 10);
+  drawText(data.email.toUpperCase(), 254, 582, 10);
   
   // Registered Address
   drawText(data.lrNumber || 'N/A', 130, 532, 9);
@@ -74,10 +96,10 @@ export async function generateKraPdf(data: KraPdfData): Promise<Uint8Array> {
   drawText(data.postal || 'N/A', 375, 460, 9);
 
   // Tax Obligation — obligation text is already on the template
-  drawText(data.fromDate, 240, 388, 9);
-  drawText(data.tillDate || 'N.A.', 410, 388, 9);
-  drawText(data.status, 500, 388, 9, true);
+  drawText(formatKraDate(data.fromDate), 274, 388, 9);
+
 
   // Save the PDF
   return await pdfDoc.save();
 }
+
