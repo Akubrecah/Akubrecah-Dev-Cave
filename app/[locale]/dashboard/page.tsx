@@ -74,7 +74,7 @@ function DashboardContent() {
     obligation: 'INCOME TAX - RESIDENT INDIVIDUAL',
     station: '',
     status: 'Active',
-    fromDate: '',
+    fromDate: new Date().toISOString().split('T')[0],
     tillDate: 'N.A.',
     activity: ''
   });
@@ -827,16 +827,16 @@ function DashboardContent() {
                     <div className="animate-in fade-in slide-in-from-right-4 duration-300">
                       <h3 className="text-xl font-bold text-white mb-6">TAX DETAILS</h3>
                       <div className="grid md:grid-cols-2 gap-4">
-                        <div className="md:col-span-2"><label className="block text-xs font-bold text-white/50 uppercase mb-2">Tax Obligation</label><input type="text" className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white uppercase" value={formData.obligation} onChange={(e) => updateForm('obligation', e.target.value.toUpperCase())} /></div>
+                        <div className="md:col-span-2"><label className="block text-xs font-bold text-white/50 uppercase mb-2">Tax Obligation</label><input type="text" readOnly className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white uppercase opacity-50 cursor-not-allowed" value={formData.obligation} onChange={(e) => updateForm('obligation', e.target.value.toUpperCase())} /></div>
                         <div><label className="block text-xs font-bold text-white/50 uppercase mb-2">Station</label><input type="text" className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white uppercase" value={formData.station} onChange={(e) => updateForm('station', e.target.value.toUpperCase())} /></div>
                         <div>
                           <label className="block text-xs font-bold text-white/50 uppercase mb-2">Status</label>
-                          <select className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white" value={formData.status} onChange={(e) => updateForm('status', e.target.value)}>
+                          <select disabled className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white opacity-50 cursor-not-allowed" value={formData.status} onChange={(e) => updateForm('status', e.target.value)}>
                             <option value="Active">Active</option><option value="Dormant">Dormant</option><option value="Cancelled">Cancelled</option>
                           </select>
                         </div>
                         <div><label className="block text-xs font-bold text-white/50 uppercase mb-2">Effective From</label><input type="date" className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white" value={formData.fromDate} onChange={(e) => updateForm('fromDate', e.target.value)} /></div>
-                        <div><label className="block text-xs font-bold text-white/50 uppercase mb-2">Effective Till</label><input type="text" className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white uppercase" value={formData.tillDate} onChange={(e) => updateForm('tillDate', e.target.value)} /></div>
+                        <div><label className="block text-xs font-bold text-white/50 uppercase mb-2">Effective Till</label><input type="text" readOnly className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white uppercase opacity-50 cursor-not-allowed" value={formData.tillDate} onChange={(e) => updateForm('tillDate', e.target.value)} /></div>
                         <div className="md:col-span-2"><label className="block text-xs font-bold text-white/50 uppercase mb-2">Principal Activity</label><input type="text" className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white uppercase" placeholder="e.g., RETAIL TRADE" value={formData.activity} onChange={(e) => updateForm('activity', e.target.value.toUpperCase())} /></div>
                       </div>
                       <div className="flex justify-between mt-8">
