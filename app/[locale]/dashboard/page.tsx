@@ -400,6 +400,25 @@ function DashboardContent() {
       link.download = filename;
       link.click();
       
+      // Save certificate record to database for admin tracking
+      try {
+        await fetch('/api/user/certificates', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            kraPin: formData.kraPin,
+            taxpayerName: formData.taxpayerName,
+            details: {
+              ...formData,
+              tillDate: formData.tillDate || 'N.A.'
+            }
+          })
+        });
+      } catch (saveErr) {
+        console.error('Failed to save certificate record:', saveErr);
+        // Don't show error to user as the PDF is already downloaded
+      }
+      
       // Clean up URL object
       setTimeout(() => URL.revokeObjectURL(link.href), 100);
 

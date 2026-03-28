@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+import { auth } from '@clerk/nextjs/server';
+import prisma from '@/lib/prisma';
 import { getAccessToken } from '@/lib/kra-client';
 import { checkUsageLimit, incrementUsage } from '@/lib/pdf/usage';
 
@@ -68,6 +70,26 @@ export async function POST(req: Request) {
 
                 if (data && data.TaxpayerName) {
                     data.TaxpayerName = data.TaxpayerName.toUpperCase();
+                }
+
+                // Persistence: Save verification record to DB
+                try {
+                  const dbUser = await prisma.user.findUnique({
+                    where: { clerkId: (await auth()).userId! },
+                    select: { id: true }
+                  });
+                  if (dbUser) {
+                    await prisma.verification.create({
+                      data: {
+                        userId: dbUser.id,
+                        kraPin: data.KRAPIN || pin || 'UNKNOWN',
+                        taxpayerName: data.TaxpayerName || 'UNKNOWN',
+                        result: data
+                      }
+                    });
+                  }
+                } catch (saveErr) {
+                  console.warn('[KRA-PIN] Verification record creation failed:', saveErr);
                 }
 
                 return NextResponse.json(data);

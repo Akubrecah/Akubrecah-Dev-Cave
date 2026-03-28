@@ -115,6 +115,18 @@
   border-color: hsl(var(--color-border));
 }
 
+a {
+  transition: color var(--transition-fast) ease-in-out, background-color var(--transition-fast) ease-in-out;
+}
+
+a:hover {
+  filter: brightness(1.2);
+}
+
+a:active {
+  transform: scale(0.98);
+}
+
 body {
   background-color: hsl(var(--color-background));
   color: hsl(var(--color-foreground));

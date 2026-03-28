@@ -55,6 +55,7 @@ model Certificate {
   kraPin       String
   taxpayerName String?
   pdfUrl       String?
+  details      Json?
   createdAt    DateTime @default(now())
   user         User     @relation(fields: [userId], references: [id])
 }

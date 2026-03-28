@@ -21,54 +21,61 @@ export function AdminHeader({ title, subtitle, onRefresh, isSyncing }: AdminHead
     <motion.header
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      className="flex items-center justify-between p-8 bg-transparent"
+      className="flex items-center justify-between px-8 py-6 bg-transparent"
     >
       <div>
-        <h1 className="text-4xl font-black text-white tracking-tighter leading-none uppercase italic">Ops Intelligence</h1>
-        <p className="text-xs font-bold text-primary opacity-60 uppercase tracking-[0.3em] mt-2 ml-1">System Overlord</p>
+        <h1 className="text-2xl font-black text-white tracking-tight uppercase">Dashboard</h1>
+        <div className="flex items-center gap-2 mt-1">
+          <div className="w-2 h-2 rounded-full bg-[#F5C200] animate-pulse" />
+          <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">System Status: Optimal</p>
+        </div>
       </div>
 
-      <div className="flex items-center gap-4">
-        {/* Search Bar - Premium Style */}
+      <div className="flex items-center gap-3">
+        {/* Search Bar - SaaS Style */}
         <div className="relative group hidden md:block">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 transition-colors group-hover:text-primary" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600 transition-colors group-hover:text-[#F5C200]" />
           <input
             type="text"
-            placeholder="LATENT DATA SEARCH..."
-            className="w-80 pl-12 pr-4 py-3 bg-background/60 backdrop-blur-3xl border border-white/10 rounded-2xl text-[10px] font-black tracking-[0.1em] focus:outline-none focus:border-primary/50 transition-all placeholder:text-gray-700 placeholder:uppercase"
+            placeholder="Search operations..."
+            className="w-72 pl-11 pr-4 py-2 bg-[#1a1a1a] border border-white/5 rounded-xl text-xs font-bold focus:outline-none focus:border-[#F5C200]/50 transition-all placeholder:text-gray-700"
           />
         </div>
 
         {/* Action Buttons */}
-        <Link href={`/${locale}`}>
+        <div className="flex items-center gap-2 px-2 py-1 bg-[#1a1a1a] border border-white/5 rounded-2xl">
+          <Link href={`/${locale}`}>
+            <button 
+              className="p-2 rounded-xl hover:bg-white/5 transition-all group"
+              title="Switch to Home"
+            >
+              <Home className="w-4 h-4 text-gray-500 group-hover:text-white" />
+            </button>
+          </Link>
+
+          <div className="w-px h-4 bg-white/5 mx-1" />
+
           <button 
-            className="p-3 rounded-2xl bg-background/40 backdrop-blur-xl border border-white/10 hover:bg-primary/10 hover:border-primary/30 transition-all group"
-            title="Switch to Home"
+            onClick={onRefresh}
+            className="p-2 rounded-xl hover:bg-white/5 transition-all group"
+            title="Refresh Operations"
           >
-            <Home className="w-5 h-5 text-gray-400 group-hover:text-primary transition-all" />
+            <RefreshCw className={`w-4 h-4 text-gray-500 group-hover:text-white ${isSyncing ? 'animate-spin text-[#F5C200]' : ''}`} />
           </button>
-        </Link>
 
-        <button 
-          onClick={onRefresh}
-          className="p-3 rounded-2xl bg-background/40 backdrop-blur-xl border border-white/10 hover:bg-primary/10 hover:border-primary/30 transition-all group"
-          title="Refresh Operations"
-        >
-          <RefreshCw className={`w-5 h-5 text-gray-400 group-hover:text-primary transition-all ${isSyncing ? 'animate-spin text-primary' : ''}`} />
-        </button>
+          <button className="p-2 rounded-xl hover:bg-white/5 transition-all group relative">
+            <Bell className="w-4 h-4 text-gray-500 group-hover:text-white" />
+            <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-[#F5C200] border border-[#1a1a1a]" />
+          </button>
+        </div>
 
-        <button className="p-3 rounded-2xl bg-background/40 backdrop-blur-xl border border-white/10 hover:bg-white/5 transition-all group relative">
-          <Bell className="w-5 h-5 text-gray-400 group-hover:text-white transition-all" />
-          <div className="absolute top-3 right-3 w-2 h-2 rounded-full bg-primary animate-pulse border-2 border-background" />
-        </button>
-
-        <div className="flex items-center gap-3 p-1.5 pl-4 rounded-3xl bg-background/40 backdrop-blur-xl border border-white/10">
-          <div className="text-right">
-            <p className="text-xs font-bold text-white leading-none">Admin</p>
-            <p className="text-[10px] font-bold text-primary opacity-60 mt-1 uppercase tracking-widest">Active</p>
+        <div className="flex items-center gap-3 pl-4 border-l border-white/5">
+          <div className="text-right hidden sm:block">
+            <p className="text-[10px] font-black text-white leading-none uppercase tracking-tighter">Administrator</p>
+            <p className="text-[9px] font-bold text-[#F5C200] mt-1 uppercase tracking-widest opacity-80">Superuser</p>
           </div>
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-primary/30 to-accent-foreground/30 border border-white/10 flex items-center justify-center">
-            <User className="w-5 h-5 text-white" />
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#F5C200]/20 to-accent-foreground/20 border border-white/5 flex items-center justify-center p-2">
+            <User className="w-full h-full text-[#F5C200]" />
           </div>
         </div>
       </div>

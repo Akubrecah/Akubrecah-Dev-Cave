@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { usePathname, useParams } from 'next/navigation';
+import { usePathname, useParams, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Users, 
@@ -35,6 +35,8 @@ const navItems = [
 export function AdminSidebar() {
   const pathname = usePathname();
   const params = useParams();
+  const searchParams = useSearchParams();
+  const currentTab = searchParams.get('tab') || 'overview';
   const locale = params?.locale as string || 'en';
 
   return (
@@ -59,9 +61,7 @@ export function AdminSidebar() {
       {/* Nav Section */}
       <nav className="flex-1 p-4 space-y-1 mt-4 overflow-y-auto custom-scrollbar">
         {navItems.map((item, idx) => {
-          const isActive = pathname === `/${locale}${item.href.split('?')[0]}`;
-          // For now, since it's a tab-based page, we check query params manually in the page, 
-          // but we can highlight based on current "active" state passed via props if needed.
+          const isActive = currentTab === item.id;
           
           return (
             <motion.div
@@ -75,24 +75,24 @@ export function AdminSidebar() {
                 className={cn(
                   "group relative flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300",
                   isActive 
-                    ? "bg-white/5 text-primary" 
-                    : "text-gray-400 hover:text-white hover:bg-white/[0.02]"
+                    ? "text-[#F5C200]" 
+                    : "text-gray-400 hover:text-white hover:bg-white/[0.02] active:scale-95"
                 )}
               >
                 {isActive && (
                   <motion.div
                     layoutId="sidebar-active"
-                    className="absolute inset-0 bg-primary/10 border border-primary/20 rounded-2xl"
+                    className="absolute inset-0 bg-[#F5C200]/10 border border-[#F5C200]/20 rounded-2xl"
                     transition={{ type: "spring", bounce: 0.3, duration: 0.6 }}
                   />
                 )}
                 
                 <item.icon className={cn(
                   "w-5 h-5 transition-transform duration-300 group-hover:scale-110 relative z-10",
-                  isActive ? "text-primary" : "text-gray-500 group-hover:text-gray-300"
+                  isActive ? "text-[#F5C200] drop-shadow-[0_0_8px_rgba(245,194,0,0.5)]" : "text-gray-500 group-hover:text-gray-300"
                 )} />
                 
-                <span className="text-sm font-medium relative z-10">{item.label}</span>
+                <span className="text-sm font-bold relative z-10 tracking-tight">{item.label}</span>
                 
                 {isActive && (
                   <motion.div 
@@ -102,6 +102,11 @@ export function AdminSidebar() {
                   >
                     <ChevronRight className="w-4 h-4 opacity-50" />
                   </motion.div>
+                )}
+
+                {/* Hover Glow Effect */}
+                {!isActive && (
+                  <div className="absolute inset-0 rounded-2xl bg-[#F5C200]/0 group-hover:bg-[#F5C200]/5 transition-colors" />
                 )}
               </Link>
             </motion.div>

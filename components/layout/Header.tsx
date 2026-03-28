@@ -3,7 +3,7 @@
 import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import NextImage from 'next/image';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, useParams, usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import {
     Search,
@@ -40,6 +40,7 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedIndex, setSelectedIndex] = useState(-1);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const pathname = usePathname();
     const [scrolled, setScrolled] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
     const { user, isLoaded } = useUser();
@@ -251,16 +252,23 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                         role="navigation"
                         aria-label="Main navigation"
                     >
-                        {navItems.map((item) => (
-                            <Link
-                                key={item.href}
-                                href={item.href}
-                                className="group flex items-center gap-2 px-4 py-1.5 text-sm font-medium text-[hsl(var(--color-muted-foreground))] hover:text-[hsl(var(--color-foreground))] hover:bg-[hsl(var(--color-muted))/0.5] rounded-full transition-all"
-                            >
-                                <item.icon className="w-4 h-4 transition-transform group-hover:scale-110" />
-                                <span>{item.label}</span>
-                            </Link>
-                        ))}
+                        {navItems.map((item) => {
+                            const active = pathname === item.href || (item.href !== `/${locale}` && pathname.startsWith(item.href));
+                            return (
+                                <Link
+                                    key={item.href}
+                                    href={item.href}
+                                    className={`group flex items-center gap-2 px-4 py-1.5 text-sm font-medium rounded-full transition-all duration-300 ${
+                                        active 
+                                            ? 'text-[var(--color-brand-yellow)] bg-white/10 shadow-[0_0_15px_rgba(245,194,0,0.1)]' 
+                                            : 'text-[hsl(var(--color-muted-foreground))] hover:text-white hover:bg-white/5'
+                                    }`}
+                                >
+                                    <item.icon className={`w-4 h-4 transition-transform group-hover:scale-110 ${active ? 'text-[var(--color-brand-yellow)]' : ''}`} />
+                                    <span>{item.label}</span>
+                                </Link>
+                            );
+                        })}
                     </nav>
 
                     {/* Right side actions */}

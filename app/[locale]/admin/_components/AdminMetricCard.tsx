@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { LucideIcon } from 'lucide-react';
+import { LucideIcon, TrendingUp } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -34,50 +34,46 @@ export function AdminMetricCard({
       initial={{ y: 20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ delay: 0.1 + index * 0.05, type: 'spring', stiffness: 100 }}
-      whileHover={{ y: -4, scale: 1.01 }}
-      className="relative group p-6 rounded-[32px] bg-background/60 backdrop-blur-3xl border border-white/10 shadow-xl overflow-hidden"
+      className="relative group p-6 rounded-[24px] bg-[#1a1a1a] border border-white/5 hover:border-[#F5C200]/30 transition-all duration-300 shadow-xl overflow-hidden flex flex-col"
     >
-      {/* Background Glow */}
-      <div className="absolute -right-4 -top-4 w-24 h-24 bg-primary/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-      
-      <div className="flex items-start justify-between mb-4">
-        <div className="p-3 rounded-2xl bg-white/5 border border-white/5 text-primary group-hover:scale-110 transition-transform duration-500">
-          <Icon className="w-6 h-6" strokeWidth={2.5} />
+      <div className="flex items-start justify-between">
+        <div className="space-y-2">
+          <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">{label}</p>
+          <h3 className="text-4xl font-black text-white tracking-tighter tabular-nums leading-none">
+            <motion.span
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 1 }}
+            >
+              {value}
+            </motion.span>
+          </h3>
         </div>
+        <div className="p-3 rounded-2xl bg-[#2a2a2a] border border-white/5 text-[#F5C200] group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 shadow-inner">
+          <Icon className="w-5 h-5" strokeWidth={2} />
+        </div>
+      </div>
+
+      <div className="mt-8 pt-4 border-t border-white/5 flex items-center justify-between">
+        {subText ? (
+          <span className="text-[10px] font-bold text-gray-500 uppercase tracking-tight">{subText}</span>
+        ) : <div />}
         
         {trend && (
           <div className={cn(
-            "px-2.5 py-1 rounded-full text-[10px] font-bold tracking-tight border flex items-center gap-1",
-            trend === 'up' && "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-            trend === 'down' && "bg-red-500/10 text-red-400 border-red-500/20",
-            trend === 'neutral' && "bg-gray-500/10 text-gray-400 border-gray-500/20"
+            "px-2.5 py-1 rounded-lg text-[10px] font-black tracking-wider flex items-center gap-1.5 uppercase",
+            trend === 'up' && "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20",
+            trend === 'down' && "bg-red-500/10 text-red-400 border border-red-500/20",
+            trend === 'neutral' && "bg-white/5 text-gray-400 border border-white/10"
           )}>
-            {trend === 'up' && '↑'}
-            {trend === 'down' && '↓'}
+            {trend === 'up' && <TrendingUp size={12} />}
             {trendValue}
           </div>
         )}
       </div>
 
-      <div className="space-y-1">
-        <h3 className="text-3xl font-black text-white tracking-tighter tabular-nums leading-none">
-          <motion.span
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1 }}
-          >
-            {value}
-          </motion.span>
-        </h3>
-        <p className="text-[10px] font-bold text-primary opacity-50 uppercase tracking-[0.2em]">{label}</p>
-      </div>
-
-      {subText && (
-        <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
-          <span className="text-[10px] font-medium text-gray-500 italic">{subText}</span>
-          <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-        </div>
-      )}
+      {/* Subtle corner accent */}
+      <div className="absolute top-0 right-0 w-24 h-24 bg-[#F5C200]/10 blur-3xl rounded-full translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
     </motion.div>
   );
 }
