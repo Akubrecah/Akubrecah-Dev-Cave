@@ -166,7 +166,7 @@ function CheckoutContent() {
                         </div>
                     </div>
 
-                    {status === 'INITIAL' || status === 'FAILED' ? (
+                    {status === 'INITIAL' || status === 'FAILED' || status === 'SENDING' ? (
                         <form onSubmit={handleMpesaPayment} className="space-y-6">
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-[#E8D5D5]">Safaricom Phone Number</label>
