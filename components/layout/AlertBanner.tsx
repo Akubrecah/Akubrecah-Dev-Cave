@@ -3,20 +3,42 @@
 import React, { useState, useEffect } from 'react';
 import { X, Info } from 'lucide-react';
 
+interface Notification {
+  id: string;
+  message: string;
+  type: string;
+  active: boolean;
+}
+
 export function AlertBanner() {
   const [isVisible, setIsVisible] = useState(false);
+  const [notification, setNotification] = useState<Notification | null>(null);
 
   useEffect(() => {
-    // Show every time the page is refreshed/mounted
-    const timer = setTimeout(() => setIsVisible(true), 10);
-    return () => clearTimeout(timer);
+    async function fetchNotification() {
+      try {
+        const res = await fetch('/api/notifications');
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.type === 'popup') {
+            setNotification(data);
+            // Wait a bit before showing for effect
+            const timer = setTimeout(() => setIsVisible(true), 1500);
+            return () => clearTimeout(timer);
+          }
+        }
+      } catch (e) {
+        console.error('Failed to fetch notification for banner:', e);
+      }
+    }
+    fetchNotification();
   }, []);
 
   const handleDismiss = () => {
     setIsVisible(false);
   };
 
-  if (!isVisible) return null;
+  if (!isVisible || !notification) return null;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-[hsl(var(--color-background))/0.4] backdrop-blur-md animate-in fade-in duration-300">
@@ -29,19 +51,12 @@ export function AlertBanner() {
             
             <div className="space-y-4">
               <h3 className="text-2xl sm:text-3xl font-black text-[hsl(var(--color-foreground))] tracking-tight">
-                Service Requirements Update
+                Important Update
               </h3>
-              <div className="text-base sm:text-lg text-[hsl(var(--color-muted-foreground))] leading-relaxed space-y-4">
-                <p>
-                  Starting <strong className="text-[hsl(var(--color-foreground))] font-bold">May 01, 2026</strong>, an active subscription will be required in order to use KRA services on this platform.
-                </p>
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-3 p-4 sm:p-6 rounded-2xl bg-[hsl(var(--color-primary))/0.05] border border-[hsl(var(--color-primary))/0.1] text-[hsl(var(--color-foreground))]">
-                  <span className="text-3xl animate-bounce">🎉</span>
-                  <p className="font-semibold text-lg sm:text-xl leading-snug">
-                    <span className="text-[hsl(var(--color-accent))]">All PDF tools</span> will remain <span className="text-[hsl(var(--color-brand-green))] underline decoration-2 underline-offset-4">FREE</span>!
-                  </p>
-                </div>
-              </div>
+              <div 
+                className="text-base sm:text-lg text-[hsl(var(--color-muted-foreground))] leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: notification.message }}
+              />
             </div>
 
             <div className="pt-2">
