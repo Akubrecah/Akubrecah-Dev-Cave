@@ -4,11 +4,19 @@ import { useState, useEffect, useCallback } from 'react';
 import { 
   Users, DollarSign, FileCheck2, Shield, Search, 
   ChevronLeft, ChevronRight, RefreshCw, TrendingUp,
-  Activity, Eye, ArrowLeft
+  Activity, Eye, ArrowLeft, Trash2, Edit2, Bell
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
-type Tab = 'overview' | 'users' | 'transactions' | 'verifications' | 'safaricom';
+type Tab = 'overview' | 'users' | 'transactions' | 'verifications' | 'safaricom' | 'notifications';
+
+interface NotificationRow {
+  id: string;
+  message: string;
+  type: string;
+  active: boolean;
+  createdAt: string;
+}
 
 interface Stats {
   totalUsers: number;
@@ -76,6 +84,16 @@ export default function AdminDashboard() {
   const [vfTotalPages, setVfTotalPages] = useState(1);
   const [vfSearch, setVfSearch] = useState('');
 
+  // Notifications
+  const [notifications, setNotifications] = useState<NotificationRow[]>([]);
+  const [notificationLoading, setNotificationLoading] = useState(false);
+  const [editingNotification, setEditingNotification] = useState<NotificationRow | null>(null);
+  const [notificationForm, setNotificationForm] = useState({
+    message: '',
+    type: 'marquee' as 'marquee' | 'popup',
+    active: true
+  });
+
   // Editing user
   const [editingUser, setEditingUser] = useState<UserRow | null>(null);
   const [editForm, setEditForm] = useState({
@@ -132,6 +150,15 @@ export default function AdminDashboard() {
     } catch (e) { console.error('Vf fetch failed:', e); }
   }, [vfPage, vfSearch]);
 
+  const fetchNotifications = useCallback(async () => {
+    try {
+      setNotificationLoading(true);
+      const res = await fetch('/api/admin/notifications');
+      if (res.ok) setNotifications(await res.json());
+    } catch (e) { console.error('Notifications fetch failed:', e); }
+    finally { setNotificationLoading(false); }
+  }, []);
+
   useEffect(() => {
     setLoading(true);
     fetchStats().finally(() => setLoading(false));
@@ -140,6 +167,7 @@ export default function AdminDashboard() {
   useEffect(() => { if (activeTab === 'users') fetchUsers(); }, [activeTab, fetchUsers]);
   useEffect(() => { if (activeTab === 'transactions') fetchTransactions(); }, [activeTab, fetchTransactions]);
   useEffect(() => { if (activeTab === 'verifications') fetchVerifications(); }, [activeTab, fetchVerifications]);
+  useEffect(() => { if (activeTab === 'notifications') fetchNotifications(); }, [activeTab, fetchNotifications]);
   
   const [safaricomLoading, setSafaricomLoading] = useState(false);
   const [safaricomResult, setSafaricomResult] = useState<any>(null);
@@ -202,6 +230,7 @@ export default function AdminDashboard() {
     if (activeTab === 'users') fetchUsers();
     if (activeTab === 'transactions') fetchTransactions();
     if (activeTab === 'verifications') fetchVerifications();
+    if (activeTab === 'notifications') fetchNotifications();
   };
 
   const handleSyncUsers = async () => {
@@ -224,6 +253,7 @@ export default function AdminDashboard() {
     { id: 'transactions', label: 'Transactions', icon: <DollarSign className="w-4 h-4" /> },
     { id: 'verifications', label: 'Verifications', icon: <Eye className="w-4 h-4" /> },
     { id: 'safaricom', label: 'Safaricom', icon: <Shield className="w-4 h-4" /> },
+    { id: 'notifications', label: 'Notifications', icon: <Bell className="w-4 h-4" /> },
   ];
 
   const statCards = stats ? [
@@ -726,6 +756,195 @@ export default function AdminDashboard() {
                         </div>
                         <pre className="text-emerald-400">{JSON.stringify(safaricomResult, null, 2)}</pre>
                       </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Notifications Tab */}
+            {activeTab === 'notifications' && (
+              <div className="space-y-6 animate-in fade-in duration-500">
+                <div className="flex justify-between items-center bg-gray-900/40 p-6 rounded-2xl border border-gray-800/60">
+                  <div>
+                    <h2 className="text-xl font-bold text-white">Site Announcements</h2>
+                    <p className="text-sm text-gray-400">Manage popups and marquees for all users</p>
+                  </div>
+                  <button 
+                    onClick={() => {
+                      setEditingNotification(null);
+                      setNotificationForm({ message: '', type: 'marquee', active: true });
+                    }}
+                    className="px-6 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold transition-all shadow-lg shadow-emerald-500/20 active:scale-95"
+                  >
+                    Create New
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Form Container */}
+                  <div className="p-8 rounded-2xl bg-gray-900/60 border border-gray-800/60 backdrop-blur-sm shadow-xl h-fit">
+                    <h3 className="text-lg font-bold mb-6 text-emerald-400 flex items-center gap-2">
+                       <Edit2 className="w-5 h-5" />
+                      {editingNotification ? 'Update Announcement' : 'Compose Announcement'}
+                    </h3>
+                    <div className="space-y-5">
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Message (HTML/Gradients supported)</label>
+                        <textarea 
+                          rows={5}
+                          value={notificationForm.message}
+                          onChange={e => setNotificationForm(prev => ({ ...prev, message: e.target.value }))}
+                          className="w-full px-4 py-3 bg-gray-950/50 rounded-xl border border-gray-700 text-sm focus:outline-none focus:border-emerald-500/50 transition-colors placeholder:text-gray-700" 
+                          placeholder="e.g. <span class='text-emerald-400'>NEW:</span> M-Pesa integration is live!"
+                        />
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Display Style</label>
+                          <select 
+                            value={notificationForm.type}
+                            onChange={e => setNotificationForm(prev => ({ ...prev, type: e.target.value as any }))}
+                            className="w-full px-4 py-2.5 bg-gray-950/50 rounded-xl border border-gray-700 text-sm focus:outline-none focus:border-emerald-500/50 appearance-none cursor-pointer"
+                          >
+                            <option value="marquee">Marquee (Scrolling Top)</option>
+                            <option value="popup">Popup (Center Modal)</option>
+                          </select>
+                        </div>
+                        
+                        <div className="flex items-end pb-1.5">
+                          <label className="flex items-center gap-3 cursor-pointer group">
+                            <div className="relative">
+                              <input 
+                                type="checkbox" 
+                                checked={notificationForm.active}
+                                onChange={e => setNotificationForm(prev => ({ ...prev, active: e.target.checked }))}
+                                className="sr-only peer"
+                              />
+                              <div className="w-11 h-6 bg-gray-700 rounded-full peer peer-checked:bg-emerald-500 transition-colors after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5" />
+                            </div>
+                            <span className="text-sm font-semibold text-gray-300 group-hover:text-white transition-colors">Active Now</span>
+                          </label>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-3 pt-2">
+                        <button 
+                          onClick={async () => {
+                            if (!notificationForm.message) return alert('Message is required');
+                            const method = editingNotification ? 'PATCH' : 'POST';
+                            const res = await fetch('/api/admin/notifications', {
+                              method,
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({
+                                ...notificationForm,
+                                id: editingNotification?.id
+                              })
+                            });
+                            if (res.ok) {
+                              fetchNotifications();
+                              setNotificationForm({ message: '', type: 'marquee', active: true });
+                              setEditingNotification(null);
+                            }
+                          }}
+                          className="flex-1 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl font-bold hover:opacity-90 transition-all shadow-lg shadow-emerald-500/10 active:scale-[0.98]"
+                        >
+                          {editingNotification ? 'Save Changes' : 'Publish Announcement'}
+                        </button>
+                        {editingNotification && (
+                          <button 
+                            onClick={() => {
+                              setEditingNotification(null);
+                              setNotificationForm({ message: '', type: 'marquee', active: true });
+                            }}
+                            className="px-6 py-3 bg-gray-800 text-white rounded-xl font-bold hover:bg-gray-700 transition-all border border-gray-700 active:scale-[0.98]"
+                          >
+                            Cancel
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* History List */}
+                  <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+                    <h3 className="text-lg font-bold text-blue-400 flex items-center gap-2 px-1">
+                      Recent Announcements
+                    </h3>
+                    {notificationLoading ? (
+                      <div className="flex items-center justify-center p-20 bg-gray-900/20 rounded-2xl border border-gray-800/40">
+                         <div className="w-8 h-8 border-2 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin" />
+                      </div>
+                    ) : notifications.length === 0 ? (
+                      <div className="p-12 text-center text-gray-500 bg-gray-900/20 rounded-2xl border border-gray-800/40 border-dashed">
+                        No history found. Create your first announcement.
+                      </div>
+                    ) : (
+                      notifications.map(notif => (
+                        <div 
+                          key={notif.id} 
+                          className={`group p-5 rounded-2xl border transition-all duration-300 ${
+                            notif.active 
+                            ? 'bg-emerald-500/5 border-emerald-500/20 shadow-lg shadow-emerald-500/5 scale-[1.02]' 
+                            : 'bg-gray-950/40 border-gray-800/60 opacity-60 hover:opacity-100 hover:border-gray-700'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="space-y-3 flex-1">
+                              <div className="flex items-center gap-2">
+                                <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${
+                                  notif.type === 'marquee' ? 'bg-blue-500/20 text-blue-400' : 'bg-purple-500/20 text-purple-400'
+                                }`}>
+                                  {notif.type}
+                                </span>
+                                {notif.active && (
+                                  <span className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 text-[10px] font-bold">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                    LIVE
+                                  </span>
+                                )}
+                              </div>
+                              <div 
+                                className="text-sm text-gray-100 leading-relaxed font-medium" 
+                                dangerouslySetInnerHTML={{ __html: notif.message }} 
+                              />
+                              <div className="text-[10px] text-gray-600 font-mono tracking-tighter">
+                                Published {new Date(notif.createdAt).toLocaleDateString()} at {new Date(notif.createdAt).toLocaleTimeString()}
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button 
+                                onClick={() => {
+                                  setEditingNotification(notif);
+                                  setNotificationForm({
+                                    message: notif.message,
+                                    type: notif.type as any,
+                                    active: notif.active
+                                  });
+                                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                                }}
+                                className="p-2.5 rounded-xl bg-gray-800 hover:bg-blue-500/20 text-gray-400 hover:text-blue-400 transition-all active:scale-90"
+                                title="Edit"
+                              >
+                                <Edit2 className="w-4 h-4" />
+                              </button>
+                              <button 
+                                onClick={async () => {
+                                  if (confirm('Permanently delete this announcement?')) {
+                                    const res = await fetch(`/api/admin/notifications?id=${notif.id}`, { method: 'DELETE' });
+                                    if (res.ok) fetchNotifications();
+                                  }
+                                }}
+                                className="p-2.5 rounded-xl bg-gray-800 hover:bg-red-500/20 text-gray-400 hover:text-red-400 transition-all active:scale-90"
+                                title="Delete"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))
                     )}
                   </div>
                 </div>
