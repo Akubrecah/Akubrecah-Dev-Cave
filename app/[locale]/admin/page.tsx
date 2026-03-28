@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
-type Tab = 'overview' | 'users' | 'transactions' | 'verifications';
+type Tab = 'overview' | 'users' | 'transactions' | 'verifications' | 'safaricom';
 
 interface Stats {
   totalUsers: number;
@@ -56,6 +56,7 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<Tab>('overview');
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   // Users
   const [users, setUsers] = useState<UserRow[]>([]);
@@ -139,6 +140,28 @@ export default function AdminDashboard() {
   useEffect(() => { if (activeTab === 'users') fetchUsers(); }, [activeTab, fetchUsers]);
   useEffect(() => { if (activeTab === 'transactions') fetchTransactions(); }, [activeTab, fetchTransactions]);
   useEffect(() => { if (activeTab === 'verifications') fetchVerifications(); }, [activeTab, fetchVerifications]);
+  
+  const [safaricomLoading, setSafaricomLoading] = useState(false);
+  const [safaricomResult, setSafaricomResult] = useState<any>(null);
+  const [stkForm, setStkForm] = useState({ phoneNumber: '', amount: '1', accountRef: 'Test' });
+
+  const handleSafaricomAction = async (action: string, params: any) => {
+    try {
+      setSafaricomLoading(true);
+      const res = await fetch('/api/admin/safaricom', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, params }),
+      });
+      const data = await res.json();
+      setSafaricomResult(data);
+    } catch (e) {
+      console.error('Safaricom action failed:', e);
+      setSafaricomResult({ error: String(e) });
+    } finally {
+      setSafaricomLoading(false);
+    }
+  };
 
   const handleUserUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -181,11 +204,26 @@ export default function AdminDashboard() {
     if (activeTab === 'verifications') fetchVerifications();
   };
 
+  const handleSyncUsers = async () => {
+    try {
+      setIsSyncing(true);
+      const res = await fetch('/api/admin/sync-users');
+      if (res.ok) {
+        refreshAll();
+      }
+    } catch (e) {
+      console.error('Failed to sync users:', e);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
     { id: 'overview', label: 'Overview', icon: <Activity className="w-4 h-4" /> },
     { id: 'users', label: 'Users', icon: <Users className="w-4 h-4" /> },
     { id: 'transactions', label: 'Transactions', icon: <DollarSign className="w-4 h-4" /> },
     { id: 'verifications', label: 'Verifications', icon: <Eye className="w-4 h-4" /> },
+    { id: 'safaricom', label: 'Safaricom', icon: <Shield className="w-4 h-4" /> },
   ];
 
   const statCards = stats ? [
@@ -225,9 +263,19 @@ export default function AdminDashboard() {
                 <p className="text-xs text-gray-500">AkubrecaH Platform Management</p>
               </div>
             </div>
-            <button onClick={refreshAll} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-800/60 hover:bg-gray-700/60 border border-gray-700/50 transition-all text-sm">
-              <RefreshCw className="w-4 h-4" /> Refresh
-            </button>
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={handleSyncUsers} 
+                disabled={isSyncing}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 transition-all text-sm disabled:opacity-50"
+              >
+                {isSyncing ? <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+                {isSyncing ? 'Syncing...' : 'Sync Clerk'}
+              </button>
+              <button onClick={refreshAll} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-800/60 hover:bg-gray-700/60 border border-gray-700/50 transition-all text-sm">
+                <RefreshCw className="w-4 h-4" /> Refresh
+              </button>
+            </div>
           </div>
 
           {/* Tabs */}
@@ -594,6 +642,93 @@ export default function AdminDashboard() {
                   </table>
                 </div>
                 <Pagination page={vfPage} totalPages={vfTotalPages} onPageChange={setVfPage} />
+              </div>
+            )}
+
+            {/* Safaricom Tab */}
+            {activeTab === 'safaricom' && (
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* STK Push Test */}
+                  <div className="p-6 rounded-2xl bg-gray-900/60 border border-gray-800/60">
+                    <h3 className="text-lg font-semibold mb-4 text-emerald-400">M-Pesa Express (STK Push)</h3>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-xs text-gray-400 mb-1">Phone Number (254...)</label>
+                        <input 
+                          type="text" 
+                          placeholder="254700000000"
+                          value={stkForm.phoneNumber}
+                          onChange={e => setStkForm(prev => ({ ...prev, phoneNumber: e.target.value }))}
+                          className="w-full px-3 py-2 bg-gray-800 rounded-lg border border-gray-700 text-sm focus:outline-none focus:border-emerald-500/50" 
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs text-gray-400 mb-1">Amount</label>
+                          <input 
+                            type="number" 
+                            value={stkForm.amount}
+                            onChange={e => setStkForm(prev => ({ ...prev, amount: e.target.value }))}
+                            className="w-full px-3 py-2 bg-gray-800 rounded-lg border border-gray-700 text-sm focus:outline-none focus:border-emerald-500/50" 
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-gray-400 mb-1">Ref</label>
+                          <input 
+                            type="text" 
+                            value={stkForm.accountRef}
+                            onChange={e => setStkForm(prev => ({ ...prev, accountRef: e.target.value }))}
+                            className="w-full px-3 py-2 bg-gray-800 rounded-lg border border-gray-700 text-sm focus:outline-none focus:border-emerald-500/50" 
+                          />
+                        </div>
+                      </div>
+                      <button 
+                        onClick={() => handleSafaricomAction('stkpush', { 
+                          phoneNumber: stkForm.phoneNumber, 
+                          amount: stkForm.amount, 
+                          accountReference: stkForm.accountRef, 
+                          transactionDesc: 'Test from Admin' 
+                        })}
+                        disabled={safaricomLoading || !stkForm.phoneNumber}
+                        className="w-full py-2 bg-emerald-500 text-white rounded-lg font-semibold hover:bg-emerald-600 disabled:opacity-50 transition-colors"
+                      >
+                        {safaricomLoading ? 'Processing...' : 'Send STK Push'}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Other Actions */}
+                  <div className="p-6 rounded-2xl bg-gray-900/60 border border-gray-800/60">
+                    <h3 className="text-lg font-semibold mb-4 text-blue-400">Account & IoT Tools</h3>
+                    <div className="space-y-3">
+                      <button 
+                        onClick={() => handleSafaricomAction('balance', { initiator: 'testman', securityCredential: '...' })}
+                        className="w-full text-left p-3 rounded-xl bg-gray-800 hover:bg-gray-700 border border-gray-700 transition-colors"
+                      >
+                        <div className="font-medium text-sm text-white">Query Multi-Wallet Balance</div>
+                        <div className="text-xs text-gray-500">Check current float and account balances</div>
+                      </button>
+                      <button 
+                        onClick={() => handleSafaricomAction('activate_sim', { msisdn: '...', vpnGroup: '...', username: '...' })}
+                        className="w-full text-left p-3 rounded-xl bg-gray-800 hover:bg-gray-700 border border-gray-700 transition-colors"
+                      >
+                        <div className="font-medium text-sm text-white">SIM Activation Utility</div>
+                        <div className="text-xs text-gray-500">Provision development SIMs on IoT Portal</div>
+                      </button>
+                    </div>
+
+                    {safaricomResult && (
+                      <div className="mt-6 p-4 bg-black rounded-xl border border-gray-800 overflow-auto max-h-48 font-mono text-[10px]">
+                        <div className="flex justify-between mb-2">
+                          <span className="text-gray-500">Last Response:</span>
+                          <button onClick={() => setSafaricomResult(null)} className="text-red-400">Clear</button>
+                        </div>
+                        <pre className="text-emerald-400">{JSON.stringify(safaricomResult, null, 2)}</pre>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
           </>

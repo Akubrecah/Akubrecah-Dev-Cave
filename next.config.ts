@@ -32,10 +32,6 @@ const nextConfig: NextConfig = {
     config.plugins.push(
       new webpack.IgnorePlugin({
         resourceRegExp: /^module$/
-      }),
-      new webpack.IgnorePlugin({
-        resourceRegExp: /^canvas$/,
-        contextRegExp: /pdfjs-dist-legacy/
       })
     );
 

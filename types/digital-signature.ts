@@ -13,6 +13,7 @@ export interface SignatureInfo {
   reason?: string;
   location?: string;
   contactInfo?: string;
+  name?: string;
 }
 
 export interface VisibleSignatureOptions {

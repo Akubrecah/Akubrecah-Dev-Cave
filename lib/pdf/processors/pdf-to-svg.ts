@@ -2,7 +2,7 @@
  * PDF to SVG Processor
  * 
  * Converts PDF pages to SVG (Scalable Vector Graphics) format.
- * Uses pdfjs-dist for rendering PDF pages to canvas, then converts to SVG.
+ * Uses modern pdfjs-dist for rendering PDF pages.
  */
 
 import type {
@@ -12,18 +12,7 @@ import type {
 } from '@/types/pdf';
 import { PDFErrorCode } from '@/types/pdf';
 import { BasePDFProcessor } from '../processor';
-import type { SVGGraphicsConstructor } from '../loader-legacy';
-
-// Dynamic imports to avoid SSR issues with pdfjs-dist-legacy (which requires 'canvas' module)
-async function loadPdfjsLegacy() {
-    const module = await import('../loader-legacy');
-    return module.loadPdfjsLegacy();
-}
-
-async function loadSVGGraphics(): Promise<SVGGraphicsConstructor> {
-    const module = await import('../loader-legacy');
-    return module.loadSVGGraphics();
-}
+import { loadPdfjs } from '../loader';
 
 /**
  * PDF to SVG options
@@ -104,8 +93,8 @@ export class PDFToSVGProcessor extends BasePDFProcessor {
         try {
             this.updateProgress(5, 'Loading PDF library...');
 
-            // Use legacy pdfjs-dist (v2.16.105) for SVGGraphics support
-            const pdfjs = await loadPdfjsLegacy();
+            // Use modern pdfjs-dist
+            const pdfjs = await loadPdfjs();
 
             if (this.checkCancelled()) {
                 return this.createErrorOutput(
@@ -116,7 +105,7 @@ export class PDFToSVGProcessor extends BasePDFProcessor {
 
             this.updateProgress(10, 'Loading PDF document...');
 
-            // Load the PDF document using legacy pdfjs
+            // Load the PDF document
             const arrayBuffer = await file.arrayBuffer();
             const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
             const totalPages = pdf.numPages;
@@ -213,84 +202,24 @@ export class PDFToSVGProcessor extends BasePDFProcessor {
     }
 
     /**
-     * Render a single PDF page to SVG using true vector rendering
+     * Render a single PDF page to SVG
      */
     private async renderPageToSVG(
-        pdf: any, // PDF document from legacy pdfjs-dist
+        pdf: any,
         pageNum: number,
         options: PDFToSVGOptions
     ): Promise<SVGResult> {
         const page = await pdf.getPage(pageNum);
         const viewport = page.getViewport({ scale: options.scale });
 
-        // Try to use SVGGraphics for true vector rendering
-        try {
-            const svgString = await this.renderPageToVectorSVG(page, viewport, options);
-            const svgBlob = new Blob([svgString], { type: 'image/svg+xml' });
-
-            return {
-                svg: svgString,
-                blob: svgBlob,
-                pageNumber: pageNum,
-                width: viewport.width,
-                height: viewport.height,
-            };
-        } catch (vectorError) {
-            console.warn('Vector SVG rendering failed, falling back to canvas:', vectorError);
-            // Fallback to canvas-based rendering
-            return this.renderPageToRasterSVG(page, viewport, options, pageNum);
-        }
+        // Since modern PDF.js distributions often exclude SVGGraphics for bundle size,
+        // we use a high-quality raster-to-SVG conversion with a selectable text layer.
+        // This ensures the SVG remains searchable and selectable while being visually accurate.
+        return this.renderPageToRasterSVG(page, viewport, options, pageNum);
     }
 
     /**
-     * Render page to true vector SVG using legacy PDF.js SVGGraphics
-     * Uses pdfjs-dist v2.16.105 which includes the SVGGraphics module
-     */
-    private async renderPageToVectorSVG(
-        page: any,
-        viewport: any,
-        options: PDFToSVGOptions
-    ): Promise<string> {
-        // Load SVGGraphics from legacy pdfjs-dist
-        const SVGGraphics = await loadSVGGraphics();
-
-        // Get operator list for vector rendering
-        const operatorList = await page.getOperatorList();
-
-        // Create SVGGraphics instance
-        const svgGfx = new SVGGraphics(page.commonObjs, page.objs);
-
-        // Enable embedding fonts if requested
-        if (options.embedFonts) {
-            svgGfx.embedFonts = true;
-        }
-
-        // Generate SVG element
-        const svgElement = await svgGfx.getSVG(operatorList, viewport);
-
-        // Add background if not white/transparent
-        if (options.backgroundColor && options.backgroundColor !== '#ffffff') {
-            const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-            rect.setAttribute('width', '100%');
-            rect.setAttribute('height', '100%');
-            rect.setAttribute('fill', options.backgroundColor);
-            svgElement.insertBefore(rect, svgElement.firstChild);
-        }
-
-        // Add XML declaration and serialize
-        const serializer = new XMLSerializer();
-        let svgString = serializer.serializeToString(svgElement);
-
-        // Add XML declaration if not present
-        if (!svgString.startsWith('<?xml')) {
-            svgString = '<?xml version="1.0" encoding="UTF-8"?>\n' + svgString;
-        }
-
-        return svgString;
-    }
-
-    /**
-     * Fallback: Render page to SVG with embedded raster image and vector text layer
+     * Render page to SVG with embedded raster image and vector text layer
      */
     private async renderPageToRasterSVG(
         page: any,
@@ -316,7 +245,6 @@ export class PDFToSVGProcessor extends BasePDFProcessor {
         await page.render({
             canvasContext: ctx,
             viewport: viewport,
-            canvas: canvas,
         }).promise;
 
         // Get text content for vector text layer
@@ -325,16 +253,19 @@ export class PDFToSVGProcessor extends BasePDFProcessor {
         // Build text layer SVG elements
         let textLayerSVG = '';
         if (textContent && textContent.items && textContent.items.length > 0) {
-            for (const item of textContent.items) {
+            for (const item of textContent.items as any[]) {
                 if (!item.str || item.str.trim() === '') continue;
 
+                // PDF.js v4+ items have transform directly
+                const it = item.transform;
                 const tx = viewport.transform;
+                
                 // Apply viewport transform to get screen coordinates
-                const x = tx[0] * item.transform[4] + tx[2] * item.transform[5] + tx[4];
-                const y = tx[1] * item.transform[4] + tx[3] * item.transform[5] + tx[5];
+                const x = tx[0] * it[4] + tx[2] * it[5] + tx[4];
+                const y = tx[1] * it[4] + tx[3] * it[5] + tx[5];
 
                 // Calculate font size based on transform
-                const fontSize = Math.sqrt(item.transform[0] * item.transform[0] + item.transform[1] * item.transform[1]) * options.scale;
+                const fontSize = Math.sqrt(it[0] * it[0] + it[1] * it[1]) * options.scale;
 
                 // Escape special XML characters
                 const escapedText = item.str
@@ -394,6 +325,7 @@ export class PDFToSVGProcessor extends BasePDFProcessor {
         };
     }
 }
+
 
 /**
  * Create a new instance of the PDF to SVG processor

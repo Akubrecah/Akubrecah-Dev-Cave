@@ -30,6 +30,8 @@ model Transaction {
   amount          Int
   type            String
   status          String   @default("pending")
+  tier            String?  // Plan name (daily, weekly, monthly, etc)
+  failureReason   String?  // Description of why a transaction failed
   stripeSessionId String?  @unique
   mpesaCode       String?
   createdAt       DateTime @default(now())

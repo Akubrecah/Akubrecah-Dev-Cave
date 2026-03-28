@@ -1,4 +1,7 @@
 
+import * as dotenv from 'dotenv';
+dotenv.config();
+
 import prisma from './lib/prisma';
 
 async function main() {

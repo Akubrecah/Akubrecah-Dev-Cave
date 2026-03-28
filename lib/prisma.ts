@@ -1,21 +1,21 @@
-import { Pool, neonConfig } from '@neondatabase/serverless'
-import { PrismaNeon } from '@prisma/adapter-neon'
+import { Pool } from 'pg'
+import { PrismaPg } from '@prisma/adapter-pg'
 import { PrismaClient } from '@prisma/client'
-import ws from 'ws'
 
-neonConfig.webSocketConstructor = ws
-neonConfig.pipelineConnect = false
+// Use the database URL exactly as provided in .env
+const connectionString = (process.env.DATABASE_URL || '').replace(/^["']|["']$/g, '')
 
-// Clean connection string for Neon serverless adapter
-// Adding pgbouncer=true is critical when using Neon's connection pooler with Prisma
-const rawUrl = process.env.DATABASE_URL || ''
-const baseUrl = rawUrl.split('?')[0]
-const connectionString = `${baseUrl}?sslmode=require&pgbouncer=true`
+const pool = new Pool({ 
+  connectionString,
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 30000,
+  ssl: {
+    rejectUnauthorized: false // Required for some environments connecting to Neon
+  }
+})
 
-const pool = new Pool({ connectionString })
-// @ts-ignore - PrismaNeon constructor expects a slightly different Pool type from older versions
-const adapter = new PrismaNeon(pool)
-
+const adapter = new PrismaPg(pool)
 
 const prismaClientSingleton = () => {
   return new PrismaClient({ adapter })

@@ -81,13 +81,10 @@ export async function GET() {
     }
 
     const now = new Date();
-    // ALL SERVICES ARE PERMANENTLY FREE as requested
-    const isFreePeriod = true;
     
-    // Check Cyber Pro/Premium subscription
-    const isCyberPro = isFreePeriod || (
-      (user.role === 'cyber' || 
-      user.subscriptionTier?.startsWith('premium') || 
+    // Check Cyber Pro/Premium subscription (Weekly/Monthly)
+    const isCyberPro = (
+      (user.role === 'cyber' || user.role === 'admin' ||
       user.subscriptionTier === 'weekly' || 
       user.subscriptionTier === 'monthly') && 
       user.subscriptionStatus === 'active' && 
@@ -95,10 +92,8 @@ export async function GET() {
       new Date(user.subscriptionEnd) > now
     );
 
-    // Check Daily PDF Premium - Cyber Pro/Premium also have PDF access
-    const hasPdfPremium = isFreePeriod || 
-                          isCyberPro || 
-                          (user.pdfPremiumEnd && new Date(user.pdfPremiumEnd) > now) === true;
+    // Check PDF Premium (Hourly, 3-hour, Daily) - Cyber Pro also gets PDF access
+    const hasPdfPremium = isCyberPro || (user.pdfPremiumEnd && new Date(user.pdfPremiumEnd) > now) === true;
 
     // Fetch usage counts for today
     const tomorrow = new Date(now);
@@ -110,7 +105,7 @@ export async function GET() {
 
     const usageLimits = await prisma.usageLimit.findMany({
       where: {
-        userId: user.id, // Using dbUser.id or userId (clerkId)
+        userId: user.id,
         date: {
           gte: todayStart,
           lt: tomorrow
@@ -118,16 +113,16 @@ export async function GET() {
       }
     });
 
-    const kraUsage = usageLimits.find(u => u.type === 'KRA')?.count || 0;
-    const pdfUsage = usageLimits.find(u => u.type === 'PDF')?.count || 0;
+    const kraUsage = usageLimits.find((u: { type: string; count: number }) => u.type === 'KRA')?.count || 0;
+    const pdfUsage = usageLimits.find((u: { type: string; count: number }) => u.type === 'PDF')?.count || 0;
 
     return NextResponse.json({ 
         isCyberPro,
         hasPdfPremium,
-        subscriptionTier: 'premium_free',
-        subscriptionStatus: 'active',
-        subscriptionEnd: new Date(now.getFullYear() + 10, 0, 1).toISOString(),
-        pdfPremiumEnd: new Date(now.getFullYear() + 10, 0, 1).toISOString(),
+        subscriptionTier: user.subscriptionTier || 'free',
+        subscriptionStatus: user.subscriptionStatus || 'inactive',
+        subscriptionEnd: user.subscriptionEnd,
+        pdfPremiumEnd: user.pdfPremiumEnd,
         role: user.role,
         usage: {
           KRA: kraUsage,
