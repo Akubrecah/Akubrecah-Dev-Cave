@@ -10,6 +10,11 @@ import {
     Menu,
     X,
     Shield,
+    LayoutGrid,
+    ShieldCheck,
+    FileStack,
+    PieChart,
+    MessageSquare,
 } from 'lucide-react';
 import { SignInButton, UserButton, Show, useUser } from '@clerk/nextjs';
 import { type Locale } from '@/lib/i18n/config';
@@ -202,9 +207,11 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
     };
 
     const navItems = [
-        { href: `/${locale}/dashboard`, label: 'KRA Checker' },
-        { href: `/${locale}/pdf-tools`, label: 'PDF Tools' },
-        { href: `/${locale}/pricing`, label: 'Pricing' },
+        { href: `/${locale}`, label: 'Homepage', icon: LayoutGrid },
+        { href: `/${locale}/dashboard`, label: 'KRA Solutions', icon: ShieldCheck },
+        { href: `/${locale}/pdf-tools`, label: 'PDF Suite', icon: FileStack },
+        { href: `/${locale}/pricing`, label: 'Pricing', icon: PieChart },
+        { href: `/${locale}/support`, label: 'AI Help', icon: MessageSquare },
     ];
 
     return (
@@ -239,7 +246,7 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
 
                     {/* Desktop Navigation */}
                     <nav
-                        className={`hidden md:flex items-center gap-1 rounded-full border border-[hsl(var(--color-border))/0.4] bg-[hsl(var(--color-background))/0.5] p-1.5 backdrop-blur-sm shadow-sm transition-all duration-300 ${isSearchOpen ? 'opacity-0 translate-y-[-10px] pointer-events-none' : 'opacity-100 translate-y-0'
+                        className={`hidden lg:flex items-center gap-1 rounded-full border border-[hsl(var(--color-border))/0.4] bg-[hsl(var(--color-background))/0.5] p-1.5 backdrop-blur-sm shadow-sm transition-all duration-300 ${isSearchOpen ? 'opacity-0 translate-y-[-10px] pointer-events-none' : 'opacity-100 translate-y-0'
                             }`}
                         role="navigation"
                         aria-label="Main navigation"
@@ -248,9 +255,10 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                             <Link
                                 key={item.href}
                                 href={item.href}
-                                className="px-4 py-1.5 text-sm font-medium text-[hsl(var(--color-muted-foreground))] hover:text-[hsl(var(--color-foreground))] hover:bg-[hsl(var(--color-muted))/0.5] rounded-full transition-all"
+                                className="group flex items-center gap-2 px-4 py-1.5 text-sm font-medium text-[hsl(var(--color-muted-foreground))] hover:text-[hsl(var(--color-foreground))] hover:bg-[hsl(var(--color-muted))/0.5] rounded-full transition-all"
                             >
-                                {item.label}
+                                <item.icon className="w-4 h-4 transition-transform group-hover:scale-110" />
+                                <span>{item.label}</span>
                             </Link>
                         ))}
                     </nav>
@@ -415,10 +423,11 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                                 <li key={item.href}>
                                     <Link
                                         href={item.href}
-                                        className="block px-4 py-3 text-base font-medium text-[hsl(var(--color-foreground))] hover:bg-[hsl(var(--color-muted))] rounded-lg transition-colors"
+                                        className="flex items-center gap-3 px-4 py-3 text-base font-medium text-[hsl(var(--color-foreground))] hover:bg-[hsl(var(--color-muted))] rounded-lg transition-colors"
                                         onClick={() => setIsMobileMenuOpen(false)}
                                     >
-                                        {item.label}
+                                        <item.icon className="w-5 h-5 text-[hsl(var(--color-muted-foreground))]" />
+                                        <span>{item.label}</span>
                                     </Link>
                                 </li>
                             ))}
