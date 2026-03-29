@@ -17,11 +17,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AkubrecaH | KRA & PDF Tools",
-  description: "Secure and fast KRA PIN certificate generation & PDF processing",
+  title: "AkubrecaH | KRA PIN Verification & 88+ PDF Tools Kenya",
+  description: "The leading suite for Kenyan KRA compliance, PIN verification, and professional browser-based PDF processing.",
   openGraph: {
-    title: "AkubrecaH | SaaS Solutions",
-    description: "Secure and fast KRA PIN certificate generation & PDF processing",
+    title: "AkubrecaH | KRA & PDF Solutions Kenya",
+    description: "The leading suite for Kenyan KRA compliance, PIN verification, and professional browser-based PDF processing.",
     url: "https://yourdomain.com",
     siteName: "AkubrecaH",
     type: "website",
@@ -50,7 +50,7 @@ export default function RootLayout({
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
           <NextTopLoader color="#FF0000" showSpinner={false} />
           {children}
-          <GoogleAnalytics gaId="G-XXXXXXXXXX" />
+          <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID || ""} />
         </body>
       </html>
     </ClerkProvider>
