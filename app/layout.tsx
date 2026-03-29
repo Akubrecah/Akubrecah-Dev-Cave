@@ -44,5 +44,15 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return children;
+  return (
+    <ClerkProvider>
+      <html lang="en" suppressHydrationWarning>
+        <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+          <NextTopLoader color="#FF0000" showSpinner={false} />
+          {children}
+          <GoogleAnalytics gaId="G-XXXXXXXXXX" />
+        </body>
+      </html>
+    </ClerkProvider>
+  );
 }

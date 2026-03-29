@@ -12,7 +12,7 @@ function cn(...inputs: ClassValue[]) {
 
 interface MetricCardProps {
   label: string;
-  value: React.ReactNode;
+  value: string | number;
   subText?: string;
   icon: LucideIcon;
   trend?: 'up' | 'down' | 'neutral';

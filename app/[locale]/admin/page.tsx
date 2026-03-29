@@ -5,7 +5,7 @@ import {
   Users, DollarSign, FileCheck2, Shield, Search, 
   ChevronLeft, ChevronRight, RefreshCw, TrendingUp,
   Activity, Eye, ArrowLeft, Trash2, Edit2, Bell,
-  Plus, MessageSquare, Zap, Palette
+  Plus
 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -120,7 +120,6 @@ export default function AdminDashboard() {
   const [notificationForm, setNotificationForm] = useState({
     message: '',
     type: 'marquee' as 'marquee' | 'popup',
-    theme: 'purple',
     active: true
   });
 
@@ -138,13 +137,6 @@ export default function AdminDashboard() {
     subscriptionEnd: '',
     pdfPremiumEnd: ''
   });
-
-  const [safaricomLoading, setSafaricomLoading] = useState(false);
-  const [safaricomResult, setSafaricomResult] = useState<any>(null);
-  const [paystackResult, setPaystackResult] = useState<any>(null);
-  const [paystackLoading, setPaystackLoading] = useState(false);
-  const [paystackBalance, setPaystackBalance] = useState<any>(null);
-  const [stkForm, setStkForm] = useState({ phoneNumber: '', amount: '1', accountRef: 'AdminTest' });
 
   // Data Actions
   const fetchStats = useCallback(async () => {
@@ -224,26 +216,15 @@ export default function AdminDashboard() {
         body: JSON.stringify({ action, params }),
       });
       const data = await res.json();
-      if (action === 'balance' && data.data) {
-        setPaystackBalance(data.data[0]);
+      if (action === 'balance' && Array.isArray(data.data)) {
+        // Find KES balance specifically, otherwise fallback to the first one
+        const kesBalance = data.data.find((b: any) => b.currency === 'KES');
+        setPaystackBalance(kesBalance || data.data[0]);
       }
       setPaystackResult(data);
     } catch (e) { console.error('Paystack action failed:', e); }
     finally { setPaystackLoading(false); }
   }, []);
-
-  const handleSafaricomAction = async (action: string, params: any) => {
-    try {
-      setSafaricomLoading(true);
-      const res = await fetch('/api/admin/safaricom', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action, params }),
-      });
-      setSafaricomResult(await res.json());
-    } catch (e) { console.error('Safaricom action failed:', e); }
-    finally { setSafaricomLoading(false); }
-  };
 
   const refreshAll = useCallback(() => {
     setLoading(true);
@@ -262,10 +243,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     refreshAll();
-    if (activeTab === 'safaricom') {
-      handlePaystackAction('balance', {});
-    }
-  }, [activeTab, refreshAll, handlePaystackAction]);
+  }, [activeTab, refreshAll]);
 
   // Activity Feed Derived from Data
   const activities = useMemo<ActivityItem[]>(() => {
@@ -304,6 +282,25 @@ export default function AdminDashboard() {
     }
   };
 
+  const [safaricomLoading, setSafaricomLoading] = useState(false);
+  const [safaricomResult, setSafaricomResult] = useState<any>(null);
+  const [paystackLoading, setPaystackLoading] = useState(false);
+  const [paystackBalance, setPaystackBalance] = useState<any>(null);
+  const [paystackResult, setPaystackResult] = useState<any>(null);
+  const [stkForm, setStkForm] = useState({ phoneNumber: '', amount: '1', accountRef: 'AdminTest' });
+
+  const handleSafaricomAction = async (action: string, params: any) => {
+    try {
+      setSafaricomLoading(true);
+      const res = await fetch('/api/admin/safaricom', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, params }),
+      });
+      setSafaricomResult(await res.json());
+    } catch (e) { console.error('Safaricom action failed:', e); }
+    finally { setSafaricomLoading(false); }
+  };
 
   const handleUserUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -325,46 +322,6 @@ export default function AdminDashboard() {
       });
       if (res.ok) { setEditingUser(null); fetchUsers(); }
     } catch (e) { console.error('User update failed:', e); }
-  };
-
-  const handleSaveNotification = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingNotification) return;
-
-    try {
-      const isNew = editingNotification.id === 'new';
-      const method = isNew ? 'POST' : 'PATCH';
-      const payload = isNew ? notificationForm : { ...notificationForm, id: editingNotification.id };
-
-      const res = await fetch('/api/admin/notifications', {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      if (res.ok) {
-        setEditingNotification(null);
-        fetchNotifications();
-      }
-    } catch (e) {
-      console.error('Failed to save notification:', e);
-    }
-  };
-
-  const handleDeleteNotification = async (id: string) => {
-    if (!confirm('Are you sure you want to terminate this broadcast?')) return;
-
-    try {
-      const res = await fetch(`/api/admin/notifications?id=${id}`, {
-        method: 'DELETE',
-      });
-
-      if (res.ok) {
-        fetchNotifications();
-      }
-    } catch (e) {
-      console.error('Failed to delete notification:', e);
-    }
   };
 
   const fetchUserCertificates = async (user: UserRow) => {
@@ -449,22 +406,10 @@ export default function AdminDashboard() {
                   <VerificationsTab vfSearch={vfSearch} setVfSearch={setVfSearch} setVfPage={setVfPage} verifications={verifications} vfPage={vfPage} vfTotalPages={vfTotalPages} />
                 )}
                 {activeTab === 'safaricom' && (
-                  <SafaricomTab 
-                    stkForm={stkForm} 
-                    setStkForm={setStkForm} 
-                    safaricomLoading={safaricomLoading} 
-                    safaricomResult={safaricomResult} 
-                    handleSafaricomAction={handleSafaricomAction} 
-                    setSafaricomResult={setSafaricomResult}
-                    paystackResult={paystackResult}
-                    setPaystackResult={setPaystackResult}
-                    paystackBalance={paystackBalance}
-                    paystackLoading={paystackLoading}
-                    handlePaystackAction={handlePaystackAction}
-                  />
+                  <SafaricomTab stkForm={stkForm} setStkForm={setStkForm} safaricomLoading={safaricomLoading} safaricomResult={safaricomResult} handleSafaricomAction={handleSafaricomAction} setSafaricomResult={setSafaricomResult} />
                 )}
                 {activeTab === 'notifications' && (
-                  <NotificationsTab notifications={notifications} setEditingNotification={setEditingNotification} setNotificationForm={setNotificationForm} handleDeleteNotification={handleDeleteNotification} />
+                  <NotificationsTab notifications={notifications} setEditingNotification={setEditingNotification} setNotificationForm={setNotificationForm} />
                 )}
              </motion.div>
           )}
@@ -517,128 +462,6 @@ export default function AdminDashboard() {
                        <button type="submit" className="flex-[2] py-5 bg-[#F5C200] text-black rounded-[24px] font-black uppercase tracking-widest text-[10px] transition-all shadow-xl shadow-[#F5C200]/20 active:scale-95">Commit Changes</button>
                     </div>
                  </form>
-              </motion.div>
-           </div>
-        )}
-
-        {editingNotification && (
-           <div className="fixed inset-0 z-[200] flex items-center justify-center p-8">
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setEditingNotification(null)} className="absolute inset-0 bg-black/80 backdrop-blur-xl" />
-              <motion.div initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 20 }} className="relative w-full max-w-xl p-10 rounded-[48px] bg-[#1a1a1a] border border-white/5 shadow-2xl">
-                 <h2 className="text-3xl font-black text-white tracking-tighter mb-8 uppercase">Communications Override</h2>
-                 <form onSubmit={handleSaveNotification} className="space-y-8">
-                  {/* Broadcast Message */}
-                  <div className="space-y-3">
-                    <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-2">
-                       <MessageSquare className="w-3 h-3 text-[#F5C200]" /> Broadcast Message
-                    </label>
-                    <textarea 
-                      value={notificationForm.message}
-                      onChange={e => setNotificationForm(p => ({ ...p, message: e.target.value }))}
-                      placeholder="Enter the transmission content..."
-                      className="w-full h-32 px-6 py-4 bg-[#0a0a0a] border border-white/5 rounded-3xl text-sm font-medium focus:outline-none focus:ring-1 focus:ring-white/20 text-white placeholder:text-gray-700 resize-none transition-all"
-                      required
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-6">
-                    {/* Transmission Mode */}
-                    <div className="space-y-3">
-                      <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-2">
-                        <Zap className="w-3 h-3 text-[#F5C200]" /> Mode
-                      </label>
-                      <div className="flex p-1 bg-[#0a0a0a] border border-white/5 rounded-2xl">
-                        {['marquee', 'popup'].map((t) => (
-                          <button
-                            key={t}
-                            type="button"
-                            onClick={() => setNotificationForm(p => ({ ...p, type: t as any }))}
-                            className={cn(
-                              "flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all",
-                              notificationForm.type === t ? "bg-white/10 text-white shadow-lg" : "text-gray-500 hover:text-gray-300"
-                            )}
-                          >
-                            {t}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Operational State */}
-                    <div className="space-y-3">
-                      <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-2">
-                        <Activity className="w-3 h-3 text-[#F5C200]" /> Flow State
-                      </label>
-                      <button
-                        type="button"
-                        onClick={() => setNotificationForm(p => ({ ...p, active: !p.active }))}
-                        className={cn(
-                          "w-full py-2 px-4 rounded-2xl border transition-all flex items-center justify-between group h-[42px]",
-                          notificationForm.active 
-                            ? "bg-green-500/10 border-green-500/20 text-green-500" 
-                            : "bg-red-500/10 border-red-500/20 text-red-500"
-                        )}
-                      >
-                        <span className="text-[10px] font-black uppercase tracking-widest">
-                          {notificationForm.active ? 'Operational' : 'Deep Sleep'}
-                        </span>
-                        <div className={cn(
-                          "w-2 h-2 rounded-full animate-pulse",
-                          notificationForm.active ? "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]" : "bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]"
-                        )} />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Design Theme Selector */}
-                  <div className="space-y-4">
-                    <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-2">
-                       <Palette className="w-3 h-3 text-[#F5C200]" /> Design Theme
-                    </label>
-                    <div className="grid grid-cols-5 gap-4 p-4 bg-[#0a0a0a] border border-white/5 rounded-3xl">
-                      {[
-                        { id: 'purple', name: 'Amethyst', color: 'from-[#7C3AED] to-[#3B82F6]' },
-                        { id: 'blue', name: 'Azure', color: 'from-[#3B82F6] to-[#22D3EE]' },
-                        { id: 'green', name: 'Emerald', color: 'from-[#10B981] to-[#34D399]' },
-                        { id: 'pink', name: 'Rose', color: 'from-[#EC4899] to-[#F472B6]' },
-                        { id: 'gold', name: 'Legacy', color: 'from-[#F5C200] to-[#FFD700]' },
-                      ].map((t) => (
-                        <button
-                          key={t.id}
-                          type="button"
-                          onClick={() => setNotificationForm({ ...notificationForm, theme: t.id })}
-                          className={cn(
-                            "group relative flex flex-col items-center gap-2 transition-all",
-                            notificationForm.theme === t.id ? "scale-105" : "opacity-40 hover:opacity-100 hover:scale-105"
-                          )}
-                        >
-                          <div className={cn(
-                            "w-full aspect-square rounded-xl bg-gradient-to-br transition-all border border-white/10",
-                            t.color,
-                            notificationForm.theme === t.id && "ring-2 ring-white ring-offset-4 ring-offset-[#1a1a1a] shadow-[0_0_20px_rgba(255,255,255,0.1)]"
-                          )} />
-                          <span className="text-[7px] font-black text-white uppercase tracking-tighter opacity-0 group-hover:opacity-100 transition-opacity">{t.name}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="pt-6 flex gap-4">
-                    <button 
-                      type="button" 
-                      onClick={() => setEditingNotification(null)}
-                      className="flex-1 py-5 bg-white/5 hover:bg-white/10 text-white rounded-[24px] font-black text-[10px] uppercase tracking-widest transition-all"
-                    >
-                      Abort
-                    </button>
-                    <button 
-                      type="submit"
-                      className="flex-[2] py-5 bg-white text-black rounded-[24px] font-black text-[10px] uppercase tracking-[0.2em] hover:bg-gray-200 transition-all active:scale-95 shadow-2xl flex items-center justify-center gap-3"
-                    >
-                      {editingNotification.id === 'new' ? 'Deploy Broadcast' : 'Commit Changes'}
-                    </button>
-                  </div>
-                </form>
               </motion.div>
            </div>
         )}

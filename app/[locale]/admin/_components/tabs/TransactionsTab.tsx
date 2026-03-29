@@ -27,7 +27,6 @@ export function TransactionsTab({
                  <th className="py-5 px-8 text-[10px] font-black uppercase tracking-widest text-gray-600">Identity</th>
                  <th className="py-5 px-8 text-[10px] font-black uppercase tracking-widest text-gray-600">Volume</th>
                  <th className="py-5 px-8 text-[10px] font-black uppercase tracking-widest text-gray-600">Category</th>
-                 <th className="py-5 px-8 text-[10px] font-black uppercase tracking-widest text-gray-600">Reference</th>
                  <th className="py-5 px-8 text-[10px] font-black uppercase tracking-widest text-gray-600">State</th>
                  <th className="py-5 px-8 text-[10px] font-black uppercase tracking-widest text-gray-600">Chronology</th>
                </tr>
