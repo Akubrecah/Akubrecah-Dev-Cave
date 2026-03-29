@@ -217,10 +217,13 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
 
     return (
         <header
-            className={`fixed top-0 z-50 w-full transition-all duration-300 ${scrolled
+            className={`relative w-full transition-all duration-300 ${scrolled
                 ? 'bg-[hsl(var(--color-background))]/80 backdrop-blur-md border-b border-[hsl(var(--color-border))/0.5] shadow-sm'
                 : 'bg-transparent border-transparent'
                 }`}
+            style={{ 
+                height: '80px'
+            }}
             role="banner"
         >
             <div className="container mx-auto px-4">

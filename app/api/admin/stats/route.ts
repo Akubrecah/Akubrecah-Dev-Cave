@@ -15,6 +15,7 @@ export async function GET() {
       revenueResult,
       recentUsers,
       activeSubscriptions,
+      recentCertificates,
     ] = await Promise.all([
       prisma.user.count(),
       prisma.transaction.count(),
@@ -32,7 +33,19 @@ export async function GET() {
       prisma.user.count({
         where: { subscriptionStatus: 'active' },
       }),
+      prisma.certificate.count({
+        where: {
+          createdAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) },
+        },
+      }),
     ]);
+
+    const certTrend = totalCertificates > 0 
+      ? Math.round((recentCertificates / totalCertificates) * 100) 
+      : 0;
+
+    const nextRefresh = new Date();
+    nextRefresh.setHours(24, 0, 0, 0);
 
     return NextResponse.json({
       totalUsers,
@@ -42,6 +55,8 @@ export async function GET() {
       totalRevenue: revenueResult._sum.amount || 0,
       recentUsers,
       activeSubscriptions,
+      certTrend,
+      nextRefresh: nextRefresh.toISOString()
     });
   } catch (error) {
     console.error('[Admin Stats]', error);

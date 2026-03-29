@@ -6,9 +6,38 @@ import { ActivityStream, type ActivityItem } from '../ActivityStream';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
+import React, { useState, useEffect } from 'react';
+
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+function RefreshCountdown({ target }: { target: string }) {
+  const [timeLeft, setTimeLeft] = useState<string>('---');
+
+  useEffect(() => {
+    if (!target) return;
+    const end = new Date(target).getTime();
+    const update = () => {
+      const now = new Date().getTime();
+      const dist = end - now;
+      if (dist < 0) {
+        setTimeLeft('00:00:00');
+        return;
+      }
+      const h = Math.floor(dist / (1000 * 60 * 60));
+      const m = Math.floor((dist % (1000 * 60 * 60)) / (1000 * 60));
+      const s = Math.floor((dist % (1000 * 60)) / 1000);
+      setTimeLeft(`${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`);
+    };
+    update();
+    const timer = setInterval(update, 1000);
+    return () => clearInterval(timer);
+  }, [target]);
+  
+  return <span className="tabular-nums">{timeLeft}</span>;
+}
+
 
 export function OverviewTab({
   stats,
@@ -45,21 +74,21 @@ export function OverviewTab({
           index={0}
         />
         <AdminMetricCard 
-          label="Revenue Volume" 
-          value={`KES ${((stats?.totalRevenue || 0) / 100).toLocaleString()}`} 
-          subText="Gross completion volume"
+          label="Credits Balance" 
+          value={stats?.totalUsers ? (stats.totalUsers * 2).toLocaleString() : '---'} 
+          subText="Daily System Capacity"
           icon={DollarSign}
-          trend="up"
-          trendValue="14%"
+          trend="neutral"
+          trendValue="LIMIT (2)"
           index={1}
         />
         <AdminMetricCard 
-          label="Deep Verifications" 
-          value={stats?.totalVerifications || 0} 
-          subText={`${stats?.activeSubscriptions} active subs`}
-          icon={Shield}
+          label="Next Credit Refresh" 
+          value={<RefreshCountdown target={stats?.nextRefresh} />} 
+          subText="Automatic System Reset"
+          icon={RefreshCw}
           trend="neutral"
-          trendValue="STABLE"
+          trendValue="24H"
           index={2}
         />
         <AdminMetricCard 
@@ -68,7 +97,7 @@ export function OverviewTab({
           subText="Official PIN certificates"
           icon={FileCheck2}
           trend="up"
-          trendValue="21%"
+          trendValue={`${stats?.certTrend || 0}%`}
           index={3}
         />
       </div>

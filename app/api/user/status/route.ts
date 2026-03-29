@@ -83,14 +83,18 @@ export async function GET() {
     const now = new Date();
     
     // Check Cyber Pro/Premium subscription (Weekly/Monthly)
-    const isCyberPro = (
-      (user.role === 'cyber' || user.role === 'admin' ||
+    // Admins always get Pro access (unlimited credits)
+    const isAdmin = user.role === 'admin';
+    const hasActiveSub = (
+      (user.role === 'cyber' || 
       user.subscriptionTier === 'weekly' || 
       user.subscriptionTier === 'monthly') && 
       user.subscriptionStatus === 'active' && 
       user.subscriptionEnd && 
       new Date(user.subscriptionEnd) > now
     );
+
+    const isCyberPro = isAdmin || hasActiveSub;
 
     // Check PDF Premium (Hourly, 3-hour, Daily) - Cyber Pro also gets PDF access
     const hasPdfPremium = isCyberPro || (user.pdfPremiumEnd && new Date(user.pdfPremiumEnd) > now) === true;
@@ -116,6 +120,9 @@ export async function GET() {
     const kraUsage = usageLimits.find((u: { type: string; count: number }) => u.type === 'KRA')?.count || 0;
     const pdfUsage = usageLimits.find((u: { type: string; count: number }) => u.type === 'PDF')?.count || 0;
 
+    const limit = 2;
+    const remainingCredits = isCyberPro ? 999999 : Math.max(0, limit - kraUsage);
+
     return NextResponse.json({ 
         isCyberPro,
         hasPdfPremium,
@@ -127,7 +134,9 @@ export async function GET() {
         usage: {
           KRA: kraUsage,
           PDF: pdfUsage,
-          limit: 2
+          limit: limit,
+          remaining: remainingCredits,
+          nextRefresh: tomorrow.toISOString()
         }
     });
 
