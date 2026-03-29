@@ -100,11 +100,17 @@ export function CheckoutContent() {
 
   useEffect(() => {
     if (transactionId && status === 'SENDING' && paymentMethod === 'PAYSTACK') {
-       // @ts-ignore
-       initializePayment(onSuccess, onClose);
-       setStatus('PENDING');
+       try {
+         // @ts-ignore
+         initializePayment(onSuccess, onClose);
+         setStatus('PENDING');
+       } catch (err: any) {
+         console.error('Paystack initialization error:', err);
+         setError(err.message || 'Failed to start payment popup');
+         setStatus('INITIAL');
+       }
     }
-  }, [transactionId]);
+  }, [transactionId, status, paymentMethod, initializePayment]);
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-center py-24 px-6 relative">
