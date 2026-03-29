@@ -43,17 +43,17 @@ export function AdminSidebar() {
     <motion.aside
       initial={{ x: -20, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
-      className="fixed left-6 top-24 bottom-6 w-64 z-50 rounded-[32px] bg-background/60 backdrop-blur-3xl border border-white/10 shadow-2xl overflow-hidden hidden lg:flex flex-col"
+      className="fixed left-6 top-24 bottom-6 w-64 z-50 rounded-[32px] glass-panel border border-white/10 shadow-2xl overflow-hidden hidden lg:flex flex-col"
     >
       {/* Brand Profile */}
-      <div className="p-8 border-b border-white/5">
+      <div className="p-8 border-b border-white/5 bg-white/[0.02]">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-accent-foreground flex items-center justify-center shadow-lg shadow-primary/20">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[var(--color-brand-red)] to-[var(--color-brand-crimson)] flex items-center justify-center shadow-lg shadow-red-900/20">
             <Shield className="w-6 h-6 text-white" strokeWidth={2.5} />
           </div>
           <div>
             <h2 className="text-sm font-black text-white tracking-tight leading-4 uppercase">Akubrecah</h2>
-            <p className="text-[10px] font-bold text-primary opacity-80 uppercase tracking-[0.2em] mt-1">Admin Ops</p>
+            <p className="text-[10px] font-bold text-[var(--color-brand-red)] opacity-80 uppercase tracking-[0.2em] mt-1">Admin Ops</p>
           </div>
         </div>
       </div>
@@ -75,21 +75,21 @@ export function AdminSidebar() {
                 className={cn(
                   "group relative flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300",
                   isActive 
-                    ? "text-[#F5C200]" 
-                    : "text-gray-400 hover:text-white hover:bg-white/[0.02] active:scale-95"
+                    ? "text-[var(--color-accent)]" 
+                    : "text-gray-400 hover:text-white hover:bg-white/[0.04] active:scale-95"
                 )}
               >
                 {isActive && (
                   <motion.div
                     layoutId="sidebar-active"
-                    className="absolute inset-0 bg-[#F5C200]/10 border border-[#F5C200]/20 rounded-2xl"
+                    className="absolute inset-0 bg-[var(--color-accent)]/10 border border-[var(--color-accent)]/20 rounded-2xl shadow-[inset_0_0_12px_rgba(245,194,0,0.1)]"
                     transition={{ type: "spring", bounce: 0.3, duration: 0.6 }}
                   />
                 )}
                 
                 <item.icon className={cn(
                   "w-5 h-5 transition-transform duration-300 group-hover:scale-110 relative z-10",
-                  isActive ? "text-[#F5C200] drop-shadow-[0_0_8px_rgba(245,194,0,0.5)]" : "text-gray-500 group-hover:text-gray-300"
+                  isActive ? "text-[var(--color-accent)] drop-shadow-[0_0_8px_rgba(245,194,0,0.5)]" : "text-gray-500 group-hover:text-gray-300"
                 )} />
                 
                 <span className="text-sm font-bold relative z-10 tracking-tight">{item.label}</span>
@@ -106,7 +106,7 @@ export function AdminSidebar() {
 
                 {/* Hover Glow Effect */}
                 {!isActive && (
-                  <div className="absolute inset-0 rounded-2xl bg-[#F5C200]/0 group-hover:bg-[#F5C200]/5 transition-colors" />
+                  <div className="absolute inset-0 rounded-2xl bg-[var(--color-accent)]/0 group-hover:bg-[var(--color-accent)]/5 transition-colors" />
                 )}
               </Link>
             </motion.div>
@@ -115,13 +115,13 @@ export function AdminSidebar() {
       </nav>
 
       {/* Bottom Actions */}
-      <div className="p-4 border-t border-white/5 bg-white/[0.01]">
+      <div className="p-4 border-t border-white/5 bg-white/[0.02]">
         <Link
           href={`/${locale}/dashboard`}
-          className="flex items-center gap-3 px-4 py-3 rounded-2xl text-gray-400 hover:text-red-400 hover:bg-red-500/5 transition-all duration-300 group"
+          className="flex items-center gap-3 px-4 py-3 rounded-2xl text-gray-400 hover:text-[var(--color-brand-red)] hover:bg-[var(--color-brand-red)]/5 transition-all duration-300 group font-bold"
         >
           <LogOut className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
-          <span className="text-sm font-medium">Exit Admin</span>
+          <span className="text-sm">Exit Admin</span>
         </Link>
       </div>
     </motion.aside>

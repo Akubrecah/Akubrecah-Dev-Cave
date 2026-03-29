@@ -14,8 +14,8 @@ export async function GET() {
         type: true,
         active: true,
         createdAt: true,
-        updatedAt: true,
-        // theme: true, // Omitted until DB syncs
+        theme: true,
+        speed: true,
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -27,34 +27,28 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const adminOrError = await requireAdmin();
-  if (adminOrError instanceof NextResponse) return adminOrError;
-
   try {
+    const adminOrError = await requireAdmin();
+    if (adminOrError instanceof NextResponse) return adminOrError;
+
     const body = await req.json();
-    const { message, type, theme, active } = body;
+    const { message, type, active, theme, speed } = body;
 
-    if (!message || !type) {
-      return NextResponse.json({ error: 'message and type are required' }, { status: 400 });
-    }
-
-    // If active is true, deactivate all other notifications
+    // If active is true, deactivate all other notifications OF THE SAME TYPE
     if (active) {
       await (prisma as any).notification.updateMany({
-        where: { active: true },
-        data: { active: false },
+        where: { type, active: true },
+        data: { active: false }
       });
     }
 
     const notificationData: any = {
       message,
       type,
-      active: active ?? true,
+      active: !!active,
+      theme: theme || 'purple',
+      speed: parseInt(speed) || 30,
     };
-
-    // Only add theme if we know the DB is ready (manual check or try/catch)
-    // For now, we omit it to prevent the crash
-    // notificationData.theme = theme || 'purple';
 
     const notification = await (prisma as any).notification.create({
       data: notificationData,
@@ -68,37 +62,34 @@ export async function POST(req: Request) {
 }
 
 export async function PATCH(req: Request) {
-  const adminOrError = await requireAdmin();
-  if (adminOrError instanceof NextResponse) return adminOrError;
-
   try {
+    const adminOrError = await requireAdmin();
+    if (adminOrError instanceof NextResponse) return adminOrError;
+
     const body = await req.json();
-    const { id, message, type, theme, active } = body;
+    const { id, message, type, active, theme, speed } = body;
 
-    if (!id) {
-      return NextResponse.json({ error: 'id is required' }, { status: 400 });
-    }
-
-    // If active is true, deactivate all other notifications
+    // If active is true, deactivate all other notifications OF THE SAME TYPE
     if (active) {
       await (prisma as any).notification.updateMany({
-        where: { NOT: { id }, active: true },
-        data: { active: false },
+        where: { 
+          type, 
+          active: true,
+          NOT: { id }
+        },
+        data: { active: false }
       });
     }
 
-    const updateData: any = {
-      message,
-      type,
-      active,
-    };
-
-    // Update theme only if it was provided and we aren't in safe mode
-    // if (theme) updateData.theme = theme;
-
     const notification = await (prisma as any).notification.update({
       where: { id },
-      data: updateData,
+      data: {
+        message,
+        type,
+        active: !!active,
+        theme: theme || 'purple',
+        speed: parseInt(speed) || 30,
+      },
     });
 
     return NextResponse.json(notification);

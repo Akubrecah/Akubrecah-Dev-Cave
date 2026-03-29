@@ -54,8 +54,13 @@ export function AlertBanner() {
         const res = await fetch('/api/notifications');
         if (res.ok) {
           const data = await res.json();
-          if (data && data.type === 'popup') {
-            setNotification(data);
+          // The API now returns an array. Find the first active popup.
+          const popup = Array.isArray(data) 
+            ? data.find((n: any) => n.type === 'popup')
+            : (data?.type === 'popup' ? data : null);
+
+          if (popup) {
+            setNotification(popup);
             const timer = setTimeout(() => setIsVisible(true), 1500);
             return () => clearTimeout(timer);
           }

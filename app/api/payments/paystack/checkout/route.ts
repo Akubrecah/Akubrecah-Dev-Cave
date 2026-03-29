@@ -3,11 +3,8 @@ import { auth } from '@clerk/nextjs/server';
 import prisma from '@/lib/prisma';
 
 const TIER_PRICES: Record<string, number> = {
-  'hourly': 10,
-  'three_hour': 20,
-  'daily': 50,
-  'weekly': 250,
-  'monthly': 800,
+  'basic': 50,
+  'pro': 100,
 };
 
 export async function POST(req: Request) {

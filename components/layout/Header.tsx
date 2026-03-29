@@ -15,6 +15,7 @@ import {
     FileStack,
     PieChart,
     MessageSquare,
+    Mail,
 } from 'lucide-react';
 import { SignInButton, UserButton, Show, useUser } from '@clerk/nextjs';
 import { type Locale } from '@/lib/i18n/config';
@@ -23,13 +24,16 @@ import { RecentFilesDropdown } from '@/components/common/RecentFilesDropdown';
 import { searchTools } from '@/lib/utils/search';
 import { getToolContent } from '@/config/tool-content';
 import { tools as allTools } from '@/config/tools';
+import { UserCreditsIndicator } from './UserCreditsIndicator';
+import { UserNotificationBell } from './UserNotificationBell';
 
 export interface HeaderProps {
     locale: Locale;
     showSearch?: boolean;
+    hasMarquee?: boolean;
 }
 
-export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch = true }) => {
+export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch = true, hasMarquee = false }) => {
     const t = useTranslations('common');
     const router = useRouter();
     const params = useParams();
@@ -212,12 +216,12 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
         { href: `/${locale}/dashboard`, label: 'KRA Solutions', icon: ShieldCheck },
         { href: `/${locale}/pdf-tools`, label: 'PDF Suite', icon: FileStack },
         { href: `/${locale}/pricing`, label: 'Pricing', icon: PieChart },
-        { href: `/${locale}/support`, label: 'AI Help', icon: MessageSquare },
+        { href: `/${locale}/contact`, label: 'Contact Us', icon: Mail },
     ];
 
     return (
         <header
-            className={`fixed top-0 z-50 w-full transition-all duration-300 ${scrolled
+            className={`fixed ${hasMarquee ? 'top-10' : 'top-0'} z-50 w-full transition-all duration-300 ${scrolled
                 ? 'bg-[hsl(var(--color-background))]/80 backdrop-blur-md border-b border-[hsl(var(--color-border))/0.5] shadow-sm'
                 : 'bg-transparent border-transparent'
                 }`}
@@ -395,7 +399,11 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                                 </SignInButton>
                             </Show>
                             <Show when="signed-in">
-                                <UserButton appearance={{ elements: { avatarBox: 'h-9 w-9' } }} />
+                                <div className="flex items-center gap-4">
+                                    <UserCreditsIndicator />
+                                    <UserNotificationBell />
+                                    <UserButton appearance={{ elements: { avatarBox: 'h-9 w-9' } }} />
+                                </div>
                             </Show>
                         </div>
 
@@ -451,6 +459,11 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                                     </Link>
                                 </li>
                             )}
+                            <li className="px-4 py-2">
+                                <Show when="signed-in">
+                                    <UserCreditsIndicator />
+                                </Show>
+                            </li>
                             <li className="pt-2 mt-2 border-t border-[hsl(var(--color-border))]/0.5">
                                 <Show when="signed-out">
                                     <SignInButton mode="modal">

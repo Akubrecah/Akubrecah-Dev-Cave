@@ -53,11 +53,11 @@ export default function About() {
               In a world where document security is often an afterthought, we envisioned a platform where privacy is the default, not an option. AkubrecaH was born in Nairobi, designed for the unique challenges of the Kenyan digital economy.
             </p>
             <p className="text-[#BEA0A0] text-lg leading-relaxed">
-              We started with a simple KRA PIN tool and expanded into a full suite of 88+ professional utilities, now used by over 1,200+ professionals across the country.
+              We started with a simple KRA PIN tool and expanded into a full suite of 88+ professional utilities, now used by professionals across the country.
             </p>
           </div>
           <div className="space-y-8">
-            <h2 className="text-4xl font-bold text-white">Why 1,200+ Professionals Trust Us</h2>
+            <h2 className="text-4xl font-bold text-white">Why Professionals Trust Us</h2>
             <div className="grid grid-cols-1 gap-6">
               {values.map((v, i) => (
                 <div key={i} className="flex gap-6 items-start p-6 rounded-2xl bg-white/5 border border-white/5 hover:border-white/10 transition-colors">

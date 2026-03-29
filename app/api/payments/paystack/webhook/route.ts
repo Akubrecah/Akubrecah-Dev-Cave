@@ -57,7 +57,7 @@ export async function POST(req: Request) {
         const tier = transaction.tier;
         const now = new Date();
         
-        let updateData: any = {};
+        const updateData: any = {};
         
         if (tier === 'hourly') {
           updateData.pdfPremiumEnd = new Date(now.getTime() + 1 * 60 * 60 * 1000);

@@ -74,7 +74,9 @@ interface NotificationRow {
   id: string;
   message: string;
   type: string;
+  theme: string;
   active: boolean;
+  speed: number;
   createdAt: string;
 }
 
@@ -120,7 +122,15 @@ export default function AdminDashboard() {
   const [notificationForm, setNotificationForm] = useState({
     message: '',
     type: 'marquee' as 'marquee' | 'popup',
-    active: true
+    theme: 'purple',
+    customTheme: {
+      from: '#7C3AED',
+      via: '#3B82F6',
+      to: '#7C3AED',
+      border: 'rgba(124, 58, 237, 0.2)'
+    },
+    active: true,
+    speed: 30
   });
 
   // Editing user
@@ -357,12 +367,57 @@ export default function AdminDashboard() {
       alert('Failed to regenerate certificate PDF.');
     }
   };
+  const handleNotificationSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const isNew = editingNotification?.id === 'new';
+      const method = isNew ? 'POST' : 'PATCH';
+      
+      const payload = {
+        ...notificationForm,
+        id: isNew ? undefined : editingNotification?.id,
+        customTheme: JSON.stringify(notificationForm.customTheme)
+      };
+      
+      const res = await fetch('/api/admin/notifications', {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      
+      if (res.ok) {
+        setEditingNotification(null);
+        fetchNotifications();
+        // Force refresh to update server-side layout
+        window.location.reload(); 
+      } else {
+        const err = await res.json();
+        alert(`Failed to deploy: ${err.error || 'Unknown error'}`);
+      }
+    } catch (e) {
+      console.error('Notification save failed:', e);
+      alert('Network error while deploying signal.');
+    }
+  };
+
+  const handleNotificationDelete = async (id: string) => {
+    if (!confirm('Are you sure?')) return;
+    try {
+      const res = await fetch(`/api/admin/notifications?id=${id}`, {
+        method: 'DELETE',
+      });
+      if (res.ok) fetchNotifications();
+    } catch (e) {
+      console.error('Notification delete failed:', e);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-[#0f0f0f] text-white selection:bg-[#F5C200]/30 overflow-x-hidden font-sans">
-      <div className="fixed top-0 left-0 w-full h-full pointer-events-none">
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#F5C200]/05 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2" />
-        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[#E30613]/05 blur-[120px] rounded-full -translate-x-1/2 translate-y-1/2" />
+    <div className="min-h-screen bg-black text-white selection:bg-[var(--color-brand-red)]/30 overflow-x-hidden font-sans">
+      {/* Background Glow */}
+      <div className="fixed top-0 left-0 w-full h-full pointer-events-none z-0">
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[var(--color-brand-red)]/10 blur-[150px] rounded-full translate-x-1/2 -translate-y-1/2" />
+        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-[var(--color-brand-yellow)]/05 blur-[150px] rounded-full -translate-x-1/2 translate-y-1/2" />
       </div>
 
       <AdminSidebar />
@@ -375,7 +430,7 @@ export default function AdminDashboard() {
           isSyncing={isSyncing}
         />
 
-        <div className="px-6 lg:px-10 py-10 max-w-[1600px] mx-auto">
+        <div className="px-6 lg:px-10 py-10 max-w-[1600px] mx-auto relative">
           {loading ? (
             <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6">
                <div className="relative">
@@ -409,7 +464,12 @@ export default function AdminDashboard() {
                   <SafaricomTab stkForm={stkForm} setStkForm={setStkForm} safaricomLoading={safaricomLoading} safaricomResult={safaricomResult} handleSafaricomAction={handleSafaricomAction} setSafaricomResult={setSafaricomResult} />
                 )}
                 {activeTab === 'notifications' && (
-                  <NotificationsTab notifications={notifications} setEditingNotification={setEditingNotification} setNotificationForm={setNotificationForm} />
+                  <NotificationsTab 
+                    notifications={notifications} 
+                    setEditingNotification={setEditingNotification} 
+                    setNotificationForm={setNotificationForm}
+                    handleNotificationDelete={handleNotificationDelete}
+                  />
                 )}
              </motion.div>
           )}
@@ -517,6 +577,88 @@ export default function AdminDashboard() {
                 </div>
               </motion.div>
             </motion.div>
+        )}
+        {editingNotification && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-8">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setEditingNotification(null)} className="absolute inset-0 bg-black/80 backdrop-blur-xl" />
+            <motion.div initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 20 }} className="relative w-full max-w-xl p-10 rounded-[48px] bg-[#1a1a1a] border border-white/5 shadow-2xl">
+               <h2 className="text-3xl font-black text-white tracking-tighter mb-8 uppercase">Broadcast Control</h2>
+               <form onSubmit={handleNotificationSubmit} className="space-y-6">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">Message (HTML Allowed)</label>
+                    <textarea 
+                      value={notificationForm.message} 
+                      onChange={e => setNotificationForm(p => ({ ...p, message: e.target.value }))}
+                      required
+                      className="w-full px-6 py-4 bg-[#0f0f0f] border border-white/5 rounded-3xl text-sm font-bold focus:outline-none focus:border-[#F5C200]/30 text-white min-h-[120px]"
+                      placeholder="e.g. <b>Update:</b> New tools deployed!"
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-8">
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">Transmission Type</label>
+                      <select value={notificationForm.type} onChange={e => setNotificationForm(p => ({ ...p, type: e.target.value as any }))} className="w-full px-6 py-4 bg-[#0f0f0f] border border-white/5 rounded-3xl text-sm font-bold focus:outline-none focus:border-[#F5C200]/30 text-white">
+                        <option value="marquee">Marquee (Scrolling)</option>
+                        <option value="popup">Popup (Overlay)</option>
+                      </select>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-1">Visual Theme</label>
+                      <select value={notificationForm.theme} onChange={e => setNotificationForm(p => ({ ...p, theme: e.target.value }))} className="w-full px-6 py-4 bg-[#0f0f0f] border border-white/5 rounded-3xl text-sm font-bold focus:outline-none focus:border-[#F5C200]/30 text-white">
+                        <option value="purple">Nexus Purple</option>
+                        <option value="gold">Kenyan Gold</option>
+                        <option value="blue">Cyber Blue</option>
+                        <option value="green">Operational Green</option>
+                        <option value="pink">Alert Pink</option>
+                      </select>
+                    </div>
+                  </div>
+                  
+                  {notificationForm.type === 'marquee' && (
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between ml-1">
+                        <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest">Scroll Duration (Lower = Faster)</label>
+                        <span className="text-[10px] font-black text-[#F5C200]">{notificationForm.speed}s</span>
+                      </div>
+                      <input 
+                        type="range" 
+                        min="5" 
+                        max="120" 
+                        step="5"
+                        value={notificationForm.speed} 
+                        onChange={e => setNotificationForm(p => ({ ...p, speed: parseInt(e.target.value) }))}
+                        className="w-full h-2 bg-[#0f0f0f] rounded-lg appearance-none cursor-pointer accent-[#F5C200] border border-white/5"
+                      />
+                      <div className="flex justify-between text-[8px] font-bold text-gray-500 uppercase tracking-tighter px-1">
+                        <span>High Velocity (5s)</span>
+                        <span>Standard (30s)</span>
+                        <span>Cinematic (120s)</span>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-3 px-1">
+                    <input 
+                      type="checkbox" 
+                      id="notif-active"
+                      checked={notificationForm.active}
+                      onChange={e => setNotificationForm(p => ({ ...p, active: e.target.checked }))}
+                      className="w-4 h-4 rounded border-white/5 bg-[#0f0f0f] text-[#F5C200] focus:ring-[#F5C200]/20"
+                    />
+                    <label htmlFor="notif-active" className="text-[10px] font-black text-gray-400 uppercase tracking-widest cursor-pointer">Live Activation</label>
+                  </div>
+
+                  <div className="flex gap-4 pt-4">
+                     {editingNotification.id !== 'new' && (
+                       <button type="button" onClick={() => handleNotificationDelete(editingNotification.id)} className="p-5 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-[24px] transition-all"><Trash2 size={20} /></button>
+                     )}
+                     <button type="button" onClick={() => setEditingNotification(null)} className="flex-1 py-5 bg-white/5 hover:bg-white/10 text-white rounded-[24px] font-black text-[10px] uppercase tracking-widest transition-all">Abort</button>
+                     <button type="submit" className="flex-[2] py-5 bg-[#F5C200] text-black rounded-[24px] font-black uppercase tracking-widest text-[10px] transition-all shadow-xl shadow-[#F5C200]/20 active:scale-95">Deploy Signal</button>
+                  </div>
+               </form>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </div>

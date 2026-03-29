@@ -40,6 +40,29 @@ export async function GET() {
       }),
     ]);
 
+    // Fetch Paystack Totals
+    let paystackRevenue = 0;
+    try {
+      const paystackSecret = process.env.PAYSTACK_SECRET_KEY;
+      if (paystackSecret) {
+        const paystackRes = await fetch('https://api.paystack.co/transaction/totals', {
+          headers: {
+            'Authorization': `Bearer ${paystackSecret}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        if (paystackRes.ok) {
+          const paystackData = await paystackRes.json();
+          // Paystack returns amounts in kobo (if NGN) or cents. 
+          // For KES it's usually the full amount or cents. 
+          // Assuming it matches the provided logic where /100 is used for display.
+          paystackRevenue = paystackData.data.total_volume || 0;
+        }
+      }
+    } catch (e) {
+      console.error('[Admin Stats] Paystack fetch failed:', e);
+    }
+
     const certTrend = totalCertificates > 0 
       ? Math.round((recentCertificates / totalCertificates) * 100) 
       : 0;
@@ -52,11 +75,14 @@ export async function GET() {
       totalTransactions,
       totalVerifications,
       totalCertificates,
-      totalRevenue: revenueResult._sum.amount || 0,
+      totalRevenue: paystackRevenue || revenueResult._sum.amount || 0,
       recentUsers,
       activeSubscriptions,
       certTrend,
-      nextRefresh: nextRefresh.toISOString()
+      nextRefresh: nextRefresh.toISOString(),
+      // Adding a placeholder for GA data
+      analyticsSource: 'Google Analytics 4',
+      status: 'operational'
     });
   } catch (error) {
     console.error('[Admin Stats]', error);

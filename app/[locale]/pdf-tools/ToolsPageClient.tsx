@@ -4,8 +4,6 @@ import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import { Search, X, Filter, Star } from 'lucide-react';
-import { Header } from '@/components/layout/Header';
-import { Footer } from '@/components/layout/Footer';
 import { ToolGrid } from '@/components/pdf-tools/ToolGrid';
 import { ToolCard } from '@/components/pdf-tools/ToolCard';
 import { Button } from '@/components/ui/Button';
@@ -106,12 +104,10 @@ export default function ToolsPageClient({ locale, localizedToolContent }: ToolsP
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col bg-[hsl(var(--color-background))]">
-      <Header locale={locale} />
-
-      <main className="flex-1">
+    <div className="w-full">
+      <div className="w-full">
         {/* Page Header */}
-        <section className="relative pt-36 pb-20 overflow-hidden">
+        <section className="relative pt-16 pb-20 overflow-hidden">
           {/* Animated Background Blobs (Subtle) */}
           <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none -z-10">
             <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[hsl(var(--color-primary)/0.05)] rounded-full mix-blend-multiply filter blur-3xl opacity-50" />
@@ -120,32 +116,32 @@ export default function ToolsPageClient({ locale, localizedToolContent }: ToolsP
 
           <div className="container mx-auto px-4 relative z-10">
             <div className="max-w-3xl mx-auto text-center">
-              <h1 className="text-4xl md:text-5xl font-bold text-[hsl(var(--color-foreground))] mb-6">
-                <span className="text-gradient">{t('toolsPage.title')}</span>
+              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6">
+                <span className="bg-clip-text text-transparent bg-gradient-to-br from-[var(--color-brand-red)] to-[var(--color-brand-yellow)]">{t('toolsPage.title')}</span>
               </h1>
-              <p className="text-lg text-[hsl(var(--color-muted-foreground))] mb-10 leading-relaxed">
+              <p className="text-xl text-[#E8D5D5] max-w-[550px] mx-auto mb-10 leading-relaxed font-sans">
                 {t('toolsPage.subtitle', { count: allTools.length })}
               </p>
 
               {/* Search Bar */}
               <div className="relative max-w-2xl mx-auto">
                 <div className="relative group">
-                  <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-[hsl(var(--color-primary))] group-focus-within:text-[hsl(var(--color-primary))] transition-colors z-10" aria-hidden="true" />
+                  <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-[var(--color-brand-red)] group-focus-within:text-[var(--color-brand-red)] transition-colors z-10" aria-hidden="true" />
                   <input
                     type="search"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder={t('tools.search.placeholder')}
-                    className="w-full pl-14 pr-12 py-4 text-lg rounded-2xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] dark:bg-[hsl(var(--color-card))] text-[hsl(var(--color-foreground))] placeholder:text-[hsl(var(--color-muted-foreground))] shadow-md focus:outline-none focus:ring-4 focus:ring-[hsl(var(--color-primary)/0.15)] focus:border-[hsl(var(--color-primary))] transition-all"
+                    className="w-full pl-14 pr-12 py-4 text-lg rounded-full border border-white/10 bg-[#0a0a0a] text-white placeholder:text-[#E8D5D5]/50 shadow-md focus:outline-none focus:ring-4 focus:ring-[var(--color-brand-red)]/15 focus:border-[var(--color-brand-red)] transition-all glass-panel"
                     aria-label="Search tools"
                   />
                   {searchQuery && (
                     <button
                       onClick={handleClearSearch}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 p-2 hover:bg-[hsl(var(--color-muted))] rounded-full transition-colors"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 p-2 hover:bg-white/10 rounded-full transition-colors"
                       aria-label="Clear search"
                     >
-                      <X className="h-5 w-5 text-[hsl(var(--color-muted-foreground))]" aria-hidden="true" />
+                      <X className="h-5 w-5 text-[var(--color-brand-red)]" aria-hidden="true" />
                     </button>
                   )}
                 </div>
@@ -155,10 +151,10 @@ export default function ToolsPageClient({ locale, localizedToolContent }: ToolsP
         </section>
 
         {/* Filters and Tools */}
-        <section className="py-8 bg-[hsl(var(--color-muted)/0.3)] min-h-[500px]">
+        <section className="py-8 min-h-[500px]">
           <div className="container mx-auto px-4">
             {/* Filter Bar */}
-            <div className="flex flex-col md:flex-row items-center gap-6 mb-10 sticky top-20 z-40 py-4 px-6 rounded-2xl glass-card transition-all">
+            <div className="flex flex-col md:flex-row items-center gap-6 mb-10 sticky top-20 z-40 py-4 px-6 rounded-3xl glass-panel transition-all border border-white/10">
               {/* Mobile Filter Toggle */}
               <Button
                 variant="outline"
@@ -183,12 +179,12 @@ export default function ToolsPageClient({ locale, localizedToolContent }: ToolsP
                     onClick={() => setSelectedCategory(cat.value)}
                     aria-pressed={selectedCategory === cat.value}
                     className={`
-                      px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 flex items-center gap-1.5
+                      px-4 py-2 rounded-full text-sm font-bold transition-all duration-200 flex items-center gap-1.5
                       ${selectedCategory === cat.value
                         ? cat.value === 'favorites'
-                          ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 shadow-md'
-                          : 'bg-[hsl(var(--color-primary))] text-white shadow-md shadow-primary/25'
-                        : 'bg-transparent text-[hsl(var(--color-muted-foreground))] hover:bg-[hsl(var(--color-muted))] hover:text-[hsl(var(--color-foreground))]'
+                          ? 'bg-amber-500/20 text-amber-500 shadow-md border border-amber-500/50'
+                          : 'bg-[var(--color-brand-red)] text-white shadow-[0_0_20px_rgba(227,6,19,0.3)]'
+                        : 'bg-white/5 text-[#E8D5D5]/70 hover:bg-white/10 hover:text-white border border-white/10'
                       }
                     `}
                   >
@@ -214,7 +210,7 @@ export default function ToolsPageClient({ locale, localizedToolContent }: ToolsP
                   variant="ghost"
                   size="sm"
                   onClick={handleClearFilters}
-                  className="ml-auto text-sm text-[hsl(var(--color-muted-foreground))]"
+                  className="ml-auto text-sm text-[#E8D5D5]/70 hover:text-white"
                 >
                   {t('toolsPage.clearAll')}
                 </Button>
@@ -223,7 +219,7 @@ export default function ToolsPageClient({ locale, localizedToolContent }: ToolsP
 
             {/* Results Count */}
             <div className="mb-6 px-2">
-              <p className="text-sm text-[hsl(var(--color-muted-foreground))]">
+              <p className="text-sm font-bold text-[#E8D5D5]/70">
                 {selectedCategory === 'favorites'
                   ? `${filteredTools.length} ${t('tools.favorite.title').toLowerCase()}`
                   : filteredTools.length === allTools.length
@@ -254,15 +250,15 @@ export default function ToolsPageClient({ locale, localizedToolContent }: ToolsP
               )
             ) : selectedCategory === 'favorites' ? (
               // Empty favorites state
-              <Card className="p-16 text-center glass-card border-dashed border-2">
+              <Card className="p-16 text-center glass-panel border-dashed border-2 border-white/10 rounded-3xl bg-[#0a0a0a]">
                 <div className="max-w-md mx-auto flex flex-col items-center">
-                  <div className="w-20 h-20 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mb-6">
+                  <div className="w-20 h-20 bg-amber-500/20 rounded-full flex items-center justify-center mb-6">
                     <Star className="h-10 w-10 text-amber-500" aria-hidden="true" />
                   </div>
-                  <h3 className="text-xl font-bold text-[hsl(var(--color-foreground))] mb-2">
+                  <h3 className="text-xl font-bold text-white mb-2">
                     {t('tools.favorite.empty')}
                   </h3>
-                  <p className="text-[hsl(var(--color-muted-foreground))] mb-8">
+                  <p className="text-[#E8D5D5]/70 mb-8">
                     {t('tools.favorite.hint')}
                   </p>
                   <Button variant="outline" onClick={() => setSelectedCategory('all')} className="px-8">
@@ -272,15 +268,15 @@ export default function ToolsPageClient({ locale, localizedToolContent }: ToolsP
               </Card>
             ) : (
               // No results
-              <Card className="p-16 text-center glass-card border-dashed border-2">
+              <Card className="p-16 text-center glass-panel border-dashed border-2 border-white/10 rounded-3xl bg-[#0a0a0a]">
                 <div className="max-w-md mx-auto flex flex-col items-center">
-                  <div className="w-20 h-20 bg-[hsl(var(--color-muted))] rounded-full flex items-center justify-center mb-6">
-                    <Search className="h-10 w-10 text-[hsl(var(--color-muted-foreground))]" aria-hidden="true" />
+                  <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-6">
+                    <Search className="h-10 w-10 text-[var(--color-brand-red)]" aria-hidden="true" />
                   </div>
-                  <h3 className="text-xl font-bold text-[hsl(var(--color-foreground))] mb-2">
+                  <h3 className="text-xl font-bold text-white mb-2">
                     {t('toolsPage.noToolsFound')}
                   </h3>
-                  <p className="text-[hsl(var(--color-muted-foreground))] mb-8">
+                  <p className="text-[#E8D5D5]/70 mb-8">
                     {t('tools.search.noResults', { query: searchQuery })}
                   </p>
                   <Button variant="outline" onClick={handleClearFilters} className="px-8">
@@ -291,9 +287,7 @@ export default function ToolsPageClient({ locale, localizedToolContent }: ToolsP
             )}
           </div>
         </section>
-      </main>
-
-      <Footer locale={locale} />
+      </div>
     </div>
   );
 }
