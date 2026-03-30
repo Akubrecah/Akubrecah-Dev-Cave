@@ -152,7 +152,7 @@ export function AuditCore({ stats, setStats, subscription }: AuditCoreProps) {
       }
       const { generateKraPdf } = await import('@/lib/pdf/generate-kra-pdf');
       const pdfBytes = await generateKraPdf({ ...formData, tillDate: formData.tillDate || 'N.A.' });
-      const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+      const blob = new Blob([pdfBytes as any], { type: 'application/pdf' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
       link.download = `KRA_Certificate_${formData.kraPin || 'Generated'}.pdf`;
