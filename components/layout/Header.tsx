@@ -213,7 +213,8 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
 
     const navItems = [
         { href: `/${locale}`, label: 'Homepage', icon: LayoutGrid },
-        { href: `/${locale}/dashboard`, label: 'KRA Solutions', icon: ShieldCheck },
+        { href: `/${locale}/dashboard`, label: 'Dashboard', icon: LayoutGrid },
+        { href: `/${locale}/kra-solutions`, label: 'KRA Solutions', icon: ShieldCheck },
         { href: `/${locale}/pdf-tools`, label: 'PDF Suite', icon: FileStack },
         { href: `/${locale}/pricing`, label: 'Pricing', icon: PieChart },
         { href: `/${locale}/contact`, label: 'Contact Us', icon: Mail },

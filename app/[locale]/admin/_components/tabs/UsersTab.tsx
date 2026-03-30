@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Search, FileCheck2, Edit2 } from 'lucide-react';
+import { Search, FileCheck2, Edit2, Zap } from 'lucide-react';
 import { Pagination } from '../Pagination';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -7,6 +7,13 @@ import { twMerge } from 'tailwind-merge';
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+const TIER_COLOR: Record<string, string> = {
+  basic: 'bg-sky-500/10 text-sky-400 border-sky-500/20',
+  pro: 'bg-[#F5C200]/10 text-[#F5C200] border-[#F5C200]/20',
+  enterprise: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+  none: 'bg-white/5 text-gray-500 border-white/10',
+};
 
 export function UsersTab({
   userSearch,
@@ -18,7 +25,8 @@ export function UsersTab({
   usersTotalPages,
   setEditingUser,
   setEditForm,
-  fetchUserCertificates
+  fetchUserCertificates,
+  setAssigningUser,
 }: {
   userSearch: string;
   setUserSearch: (val: string) => void;
@@ -30,6 +38,7 @@ export function UsersTab({
   setEditingUser: (val: any) => void;
   setEditForm: (val: any) => void;
   fetchUserCertificates: (val: any) => void;
+  setAssigningUser: (val: any) => void;
 }) {
   return (
     <div className="space-y-6">
@@ -59,6 +68,7 @@ export function UsersTab({
                  <th className="py-5 px-8 text-[10px] font-black uppercase tracking-widest text-gray-600">Identity</th>
                  <th className="py-5 px-8 text-[10px] font-black uppercase tracking-widest text-gray-600">Privileges</th>
                  <th className="py-5 px-8 text-[10px] font-black uppercase tracking-widest text-gray-600">Subscription</th>
+                 <th className="py-5 px-8 text-[10px] font-black uppercase tracking-widest text-gray-600">Expiry</th>
                  <th className="py-5 px-8 text-[10px] font-black uppercase tracking-widest text-gray-600">Credits</th>
                  <th className="py-5 px-8 text-[10px] font-black uppercase tracking-widest text-gray-600 text-right">Actions</th>
                </tr>
@@ -87,17 +97,42 @@ export function UsersTab({
                      </span>
                    </td>
                    <td className="py-5 px-8">
-                     <div className="flex flex-col">
-                       <span className="text-[10px] font-black text-gray-300 uppercase tracking-tight">{u.subscriptionTier?.replace('_', ' ') || 'NONE'}</span>
+                     <div className="flex flex-col gap-1">
                        <span className={cn(
-                         "text-[9px] font-black uppercase tracking-widest mt-0.5",
+                         "inline-flex w-fit px-2 py-0.5 rounded-lg text-[9px] font-black tracking-widest border uppercase",
+                         TIER_COLOR[u.subscriptionTier?.toLowerCase()] || TIER_COLOR['none']
+                       )}>
+                         {u.subscriptionTier?.replace('_', ' ') || 'NONE'}
+                       </span>
+                       <span className={cn(
+                         "text-[9px] font-black uppercase tracking-widest",
                          u.subscriptionStatus === 'active' ? "text-[#F5C200]" : "text-gray-700"
                        )}>{u.subscriptionStatus || 'INACTIVE'}</span>
                      </div>
                    </td>
+                   <td className="py-5 px-8">
+                     {u.subscriptionEnd && new Date(u.subscriptionEnd) > new Date() ? (
+                       <div className="flex flex-col">
+                         <span className="text-[10px] font-black text-gray-400 tabular-nums">
+                           {new Date(u.subscriptionEnd).toLocaleDateString('en-KE', { day: '2-digit', month: 'short', year: '2-digit' })}
+                         </span>
+                         <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">Active</span>
+                       </div>
+                     ) : (
+                       <span className="text-[9px] font-black text-gray-700 uppercase tracking-widest">—</span>
+                     )}
+                   </td>
                    <td className="py-5 px-8 text-xs font-black text-gray-500 tabular-nums">{u.credits}</td>
                    <td className="py-5 px-8">
                      <div className="flex items-center justify-end gap-2">
+                       {/* Quick Assign Limit */}
+                       <button 
+                         onClick={() => setAssigningUser(u)}
+                         className="p-2.5 rounded-xl border border-sky-500/20 hover:bg-sky-500/10 text-gray-600 hover:text-sky-400 transition-all group/btn"
+                         title="Quick Assign Tier"
+                       >
+                         <Zap className="w-4 h-4 transition-transform group-hover/btn:scale-110" />
+                       </button>
                        <button 
                          onClick={() => fetchUserCertificates(u)}
                          className="p-2.5 rounded-xl border border-white/5 hover:bg-white/5 text-gray-600 hover:text-white transition-all group/btn"

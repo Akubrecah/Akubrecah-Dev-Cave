@@ -162,7 +162,7 @@ export function NilReturnForm() {
     }
 
     return (
-        <div className="w-full max-w-5xl mx-auto flex flex-col lg:flex-row gap-0 border border-white/10 bg-[#0F172A] shadow-2xl rounded-none overflow-hidden">
+        <div className="w-full max-w-6xl mx-auto flex flex-col lg:flex-row gap-0 border border-white/10 bg-white/5 backdrop-blur-3xl shadow-2xl rounded-[3rem] overflow-hidden">
             {/* Terminal Sidebar */}
             <div className="w-full lg:w-80 bg-black/40 border-b lg:border-b-0 lg:border-r border-white/10 p-4 font-mono text-[10px] flex flex-col h-[600px] lg:h-auto">
                 <div className="flex items-center gap-2 mb-4 text-[#F59E0B] border-b border-[#F59E0B]/10 pb-2">
@@ -236,19 +236,19 @@ export function NilReturnForm() {
                                 initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: 0.1 }}
-                                className="flex border border-white/10 p-1 bg-black/20 w-max"
+                                className="flex border border-white/10 p-1.5 bg-white/5 rounded-2xl w-max backdrop-blur-md"
                             >
                                 <button 
                                     type="button"
                                     onClick={() => setVerifyMode('pin')}
-                                    className={`px-6 py-2 text-[10px] font-bold uppercase tracking-widest transition-all ${verifyMode === 'pin' ? 'bg-primary text-white shadow-[0_0_15px_rgba(227,6,19,0.3)]' : 'text-slate-500 hover:text-slate-300'}`}
+                                    className={`px-8 py-3 text-[10px] font-black uppercase tracking-widest transition-all rounded-xl ${verifyMode === 'pin' ? 'bg-white text-black shadow-lg' : 'text-white/40 hover:text-white'}`}
                                 >
                                     PIN Manual
                                 </button>
                                 <button 
                                     type="button"
                                     onClick={() => setVerifyMode('id')}
-                                    className={`px-6 py-2 text-[10px] font-bold uppercase tracking-widest transition-all ${verifyMode === 'id' ? 'bg-primary text-white shadow-[0_0_15px_rgba(227,6,19,0.3)]' : 'text-slate-500 hover:text-slate-300'}`}
+                                    className={`px-8 py-3 text-[10px] font-black uppercase tracking-widest transition-all rounded-xl ${verifyMode === 'id' ? 'bg-white text-black shadow-lg' : 'text-white/40 hover:text-white'}`}
                                 >
                                     ID Retrieval
                                 </button>
@@ -263,11 +263,11 @@ export function NilReturnForm() {
                                         exit={{ opacity: 0, y: -10 }}
                                         className="space-y-4 max-w-md"
                                     >
-                                        <div className="flex gap-0">
+                                        <div className="flex gap-4">
                                             <Select 
                                                 value={idType} 
                                                 onChange={e => setIdType(e.target.value)}
-                                                className="w-[140px] h-12 rounded-none border-white/20 bg-black/40 text-xs font-bold uppercase tracking-tighter"
+                                                className="w-[140px] h-14 rounded-2xl border-white/10 bg-white/5 text-[10px] font-black uppercase tracking-widest"
                                             >
                                                 <option value="KE">Kenyan</option>
                                                 <option value="NKE">Alien</option>
@@ -276,14 +276,14 @@ export function NilReturnForm() {
                                                 placeholder="ID IDENTIFIER" 
                                                 value={idNumber}
                                                 onChange={e => setIdNumber(e.target.value)}
-                                                className="flex-1 h-12 rounded-none border-l-0 border-white/20 bg-black/40 text-lg font-mono placeholder:opacity-20"
+                                                className="flex-1 h-14 rounded-2xl border-white/10 bg-white/5 text-xl font-mono placeholder:opacity-20 uppercase px-6"
                                             />
                                         </div>
                                         <Button 
                                             type="button"
                                             onClick={handleVerifyId}
                                             loading={verifying}
-                                            className="w-full bg-primary hover:bg-primary/90 text-white h-12 rounded-none font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-3"
+                                            className="w-full bg-white rounded-2xl text-black h-14 font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-3 hover:bg-[var(--color-brand-red)] hover:text-white transition-all italic"
                                         >
                                             Execute Discovery <ChevronRight size={16} />
                                         </Button>
@@ -296,13 +296,13 @@ export function NilReturnForm() {
                                         exit={{ opacity: 0, y: -10 }}
                                         className="space-y-4 max-w-md"
                                     >
-                                        <div className="space-y-1">
-                                            <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">Taxpayer PIN</label>
+                                        <div className="space-y-4">
+                                            <label className="text-[10px] font-black uppercase tracking-[0.3em] text-white/30 ml-4 italic">Taxpayer Registry PIN</label>
                                             <Input 
                                                 name="pin" 
                                                 placeholder="AXXXXXXXXX" 
                                                 required 
-                                                className="h-14 rounded-none border-white/20 bg-black/40 text-3xl font-mono uppercase tracking-[0.2em] text-primary"
+                                                className="h-20 rounded-[2rem] border-white/10 bg-white/5 text-4xl font-mono uppercase tracking-[0.2em] text-white focus:border-[var(--color-brand-red)] transition-all px-10 shadow-inner"
                                                 value={formPin}
                                                 onChange={e => setFormPin(e.target.value.toUpperCase())}
                                             />
@@ -317,26 +317,26 @@ export function NilReturnForm() {
                                 transition={{ delay: 0.3 }}
                                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
                             >
-                                <div className="space-y-1">
-                                    <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">Obligation</label>
-                                    <Select name="obligation" required defaultValue="1" className="h-12 rounded-none border-white/20 bg-black/40 text-xs font-bold uppercase tracking-tighter">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-4">Obligation</label>
+                                    <Select name="obligation" required defaultValue="1" className="h-14 rounded-2xl border-white/10 bg-white/5 text-[10px] font-black uppercase tracking-widest px-6">
                                         {OBLIGATIONS.map(opt => (
                                             <option key={opt.value} value={opt.value}>{opt.label}</option>
                                         ))}
                                     </Select>
                                 </div>
-                                <div className="space-y-1">
-                                    <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">Period Month</label>
-                                    <Select name="month" required className="h-12 rounded-none border-white/20 bg-black/40 text-xs font-bold uppercase tracking-tighter">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-4">Period Month</label>
+                                    <Select name="month" required className="h-14 rounded-2xl border-white/10 bg-white/5 text-[10px] font-black uppercase tracking-widest px-6">
                                         <option value="">-- SELECT --</option>
                                         {MONTHS.map(opt => (
                                             <option key={opt.value} value={opt.value}>{opt.label}</option>
                                         ))}
                                     </Select>
                                 </div>
-                                <div className="space-y-1">
-                                    <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">Period Year</label>
-                                    <Input name="year" type="number" placeholder="2025" defaultValue={new Date().getFullYear()} required className="h-12 rounded-none border-white/20 bg-black/40 font-mono text-center" />
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-4">Period Year</label>
+                                    <Input name="year" type="number" placeholder="2025" defaultValue={new Date().getFullYear()} required className="h-14 rounded-2xl border-white/10 bg-white/5 font-mono text-center text-lg" />
                                 </div>
                             </motion.div>
 
@@ -344,7 +344,7 @@ export function NilReturnForm() {
                                 <Button 
                                     type="submit" 
                                     loading={loading} 
-                                    className="w-full lg:w-auto px-12 h-16 bg-primary hover:bg-primary/90 text-white rounded-none font-black uppercase italic tracking-tighter text-xl shadow-[0_10px_30px_rgba(227,6,19,0.3)] transition-all hover:translate-y-[-2px] hover:shadow-[0_15px_40px_rgba(227,6,19,0.4)]"
+                                    className="w-full lg:w-auto px-16 h-18 bg-[var(--color-brand-red)] hover:bg-white hover:text-black text-white rounded-3xl font-black uppercase italic tracking-tighter text-xl shadow-[0_10px_30px_rgba(227,6,19,0.4)] transition-all hover:translate-y-[-2px]"
                                 >
                                     Authorize Filing Dispatch
                                 </Button>
@@ -380,19 +380,19 @@ export function NilReturnForm() {
                                 &quot;{result.Message}&quot;
                             </div>
 
-                            <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                             <div className="flex flex-col sm:flex-row gap-4 pt-4">
                                 <Button 
                                     onClick={handleDownload}
                                     loading={downloading}
-                                    className="px-8 h-12 bg-white text-black hover:bg-slate-100 rounded-none font-bold uppercase tracking-widest text-xs flex items-center gap-3"
+                                    className="px-8 h-14 bg-white text-black hover:bg-[var(--color-brand-red)] hover:text-white rounded-2xl font-black uppercase tracking-widest text-[10px] flex items-center gap-3 transition-all"
                                 >
                                     <Download size={16} /> Export Receipt.PDF
                                 </Button>
                                 <Button 
                                     onClick={() => setResult(null)} 
-                                    className="px-8 h-12 border border-white/10 hover:bg-white/5 rounded-none font-bold uppercase tracking-widest text-xs"
+                                    className="px-8 h-14 border border-white/10 hover:bg-white/10 rounded-2xl font-black uppercase tracking-widest text-[10px] text-white/50 hover:text-white transition-all"
                                 >
-                                    Return to Workspace
+                                    Return to Node
                                 </Button>
                             </div>
                         </motion.div>

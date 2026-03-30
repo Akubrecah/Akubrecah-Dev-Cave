@@ -81,63 +81,73 @@ export async function GET() {
     }
 
     const now = new Date();
-    
-    // Check Cyber Pro/Premium subscription (Weekly/Monthly)
-    // Admins always get Pro access (unlimited credits)
+
+    // Tier limits: free=2, basic=10, pro/enterprise/admin=unlimited
+    const TIER_LIMITS: Record<string, number> = {
+      free: 2, basic: 10, pro: 999999, enterprise: 999999,
+      weekly: 999999, monthly: 999999, daily_pro: 999999, none: 2,
+    };
+
     const isAdmin = user.role === 'admin';
-    const hasActiveSub = (
-      (user.role === 'cyber' || 
-      user.subscriptionTier === 'weekly' || 
-      user.subscriptionTier === 'monthly') && 
-      user.subscriptionStatus === 'active' && 
-      user.subscriptionEnd && 
-      new Date(user.subscriptionEnd) > now
-    );
+    const isPrivilegedRole = isAdmin || user.role === 'cyber';
 
-    const isCyberPro = isAdmin || hasActiveSub;
+    const hasActiveSub =
+      user.subscriptionStatus === 'active' &&
+      user.subscriptionEnd != null &&
+      new Date(user.subscriptionEnd) > now;
 
-    // Check PDF Premium (Hourly, 3-hour, Daily) - Cyber Pro also gets PDF access
-    const hasPdfPremium = isCyberPro || (user.pdfPremiumEnd && new Date(user.pdfPremiumEnd) > now) === true;
+    const hasPdfPremiumDate = user.pdfPremiumEnd != null && new Date(user.pdfPremiumEnd) > now;
+
+    // Active tier string
+    const activeTier = hasActiveSub
+      ? (user.subscriptionTier ?? 'free')
+      : hasPdfPremiumDate
+      ? 'pro'
+      : 'free';
+
+    const isCyberPro = isPrivilegedRole || hasActiveSub || hasPdfPremiumDate;
+    const hasPdfPremium = isCyberPro;
+
+    const dailyLimit = isPrivilegedRole
+      ? 999999
+      : (TIER_LIMITS[activeTier] ?? 2);
 
     // Fetch usage counts for today
     const tomorrow = new Date(now);
     tomorrow.setHours(0, 0, 0, 0);
     tomorrow.setDate(now.getDate() + 1);
-    
+
     const todayStart = new Date(now);
     todayStart.setHours(0, 0, 0, 0);
 
     const usageLimits = await prisma.usageLimit.findMany({
       where: {
         userId: user.id,
-        date: {
-          gte: todayStart,
-          lt: tomorrow
-        }
-      }
+        date: { gte: todayStart, lt: tomorrow },
+      },
     });
 
     const kraUsage = usageLimits.find((u: { type: string; count: number }) => u.type === 'KRA')?.count || 0;
     const pdfUsage = usageLimits.find((u: { type: string; count: number }) => u.type === 'PDF')?.count || 0;
 
-    const limit = 2;
-    const remainingCredits = isCyberPro ? 999999 : Math.max(0, limit - kraUsage);
+    const remainingCredits = dailyLimit >= 999999 ? 999999 : Math.max(0, dailyLimit - kraUsage);
 
-    return NextResponse.json({ 
-        isCyberPro,
-        hasPdfPremium,
-        subscriptionTier: user.subscriptionTier || 'free',
-        subscriptionStatus: user.subscriptionStatus || 'inactive',
-        subscriptionEnd: user.subscriptionEnd,
-        pdfPremiumEnd: user.pdfPremiumEnd,
-        role: user.role,
-        usage: {
-          KRA: kraUsage,
-          PDF: pdfUsage,
-          limit: limit,
-          remaining: remainingCredits,
-          nextRefresh: tomorrow.toISOString()
-        }
+    return NextResponse.json({
+      isCyberPro,
+      hasPdfPremium,
+      subscriptionTier: user.subscriptionTier || 'free',
+      subscriptionStatus: user.subscriptionStatus || 'inactive',
+      subscriptionEnd: user.subscriptionEnd,
+      pdfPremiumEnd: user.pdfPremiumEnd,
+      activeTier,
+      role: user.role,
+      usage: {
+        KRA: kraUsage,
+        PDF: pdfUsage,
+        limit: dailyLimit,
+        remaining: remainingCredits,
+        nextRefresh: tomorrow.toISOString(),
+      },
     });
 
   } catch (error) {
