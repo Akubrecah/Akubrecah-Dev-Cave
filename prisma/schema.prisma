@@ -57,6 +57,7 @@ model Certificate {
   kraPin       String
   taxpayerName String?
   pdfUrl       String?
+  pdfContent   String? @db.Text  // Base64 encoded PDF data
   createdAt    DateTime @default(now())
   details      Json?
   user         User     @relation(fields: [userId], references: [id])

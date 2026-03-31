@@ -7,7 +7,9 @@ import Footer from '@/components/layout/Footer';
 import { AlertBanner } from '@/components/layout/AlertBanner';
 import { MarqueeBanner } from '@/components/layout/MarqueeBanner';
 import { Analytics } from "@vercel/analytics/next";
+import Script from 'next/script';
 import prisma from '@/lib/prisma';
+import { UserActivityTracker } from '@/components/analytics/UserActivityTracker';
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -57,6 +59,25 @@ export default async function LocaleLayout({
 
   return (
     <NextIntlClientProvider messages={messages}>
+      <UserActivityTracker />
+      {process.env.NEXT_PUBLIC_GA_ID && (
+        <>
+          <Script
+            src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID}`}
+            strategy="afterInteractive"
+          />
+          <Script id="google-analytics" strategy="afterInteractive">
+            {`
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', '${process.env.NEXT_PUBLIC_GA_ID}', {
+                page_path: window.location.pathname,
+              });
+            `}
+          </Script>
+        </>
+      )}
       <div lang={locale} dir={direction} className="flex flex-col min-h-screen">
         {marquee && (
           <MarqueeBanner message={marquee.message} theme={marquee.theme} speed={marquee.speed} />

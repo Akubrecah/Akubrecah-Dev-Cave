@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Users, DollarSign, Shield, FileCheck2, RefreshCw } from 'lucide-react';
+import { Users, DollarSign, Shield, FileCheck2, RefreshCw, Activity as ActivityIcon, TrendingUp, Eye } from 'lucide-react';
 import { AdminMetricCard } from '../AdminMetricCard';
 import { PremiumAreaChart } from '../PremiumAreaChart';
 import { ActivityStream, type ActivityItem } from '../ActivityStream';
@@ -71,6 +71,39 @@ export function OverviewTab({
           trendValue="21%"
           index={3}
         />
+      </div>
+
+      {/* Google Analytics Insight Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="p-8 rounded-[32px] glass-panel border border-white/10 shadow-2xl group transition-all relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-6 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity"><ActivityIcon className="w-16 h-16 text-[var(--color-accent)]" /></div>
+          <h4 className="text-[10px] font-black text-[#BEA0A0] uppercase tracking-widest mb-2 opacity-60">ACTIVE TERMINALS</h4>
+          <div className="flex items-baseline gap-2">
+            <p className="text-3xl font-black text-white italic tracking-tighter tabular-nums">{stats?.gaSessions?.toLocaleString() || '---'}</p>
+            <span className="text-[10px] font-black text-[var(--color-accent)] uppercase">+12%</span>
+          </div>
+          <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest mt-2">Active session volume</p>
+        </div>
+
+        <div className="p-8 rounded-[32px] glass-panel border border-white/10 shadow-2xl group transition-all relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-6 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity"><TrendingUp className="w-16 h-16 text-emerald-500" /></div>
+          <h4 className="text-[10px] font-black text-[#BEA0A0] uppercase tracking-widest mb-2 opacity-60">PLATFORM ENGAGEMENT</h4>
+          <div className="flex items-baseline gap-2">
+            <p className="text-3xl font-black text-white italic tracking-tighter tabular-nums">{stats?.gaAvgDuration || '---'}</p>
+            <span className="text-[10px] font-black text-emerald-500 uppercase">optimal</span>
+          </div>
+          <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest mt-2">Retention Intelligence</p>
+        </div>
+
+        <div className="p-8 rounded-[32px] glass-panel border border-white/10 shadow-2xl group transition-all relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-6 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity"><Eye className="w-16 h-16 text-blue-500" /></div>
+          <h4 className="text-[10px] font-black text-[#BEA0A0] uppercase tracking-widest mb-2 opacity-60">TRAFFIC STABILITY</h4>
+          <div className="flex items-baseline gap-2">
+            <p className="text-3xl font-black text-white italic tracking-tighter tabular-nums">{stats?.gaBounceRate || '---'}%</p>
+            <span className="text-[10px] font-black text-emerald-500 uppercase">-4%</span>
+          </div>
+          <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest mt-2">Traffic Stability</p>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">

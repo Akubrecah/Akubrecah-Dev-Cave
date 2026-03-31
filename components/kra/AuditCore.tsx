@@ -152,17 +152,33 @@ export function AuditCore({ stats, setStats, subscription }: AuditCoreProps) {
       }
       const { generateKraPdf } = await import('@/lib/pdf/generate-kra-pdf');
       const pdfBytes = await generateKraPdf({ ...formData, tillDate: formData.tillDate || 'N.A.' });
+      
+      // Convert pdfBytes to base64 string for database storage
+      let base64Content: string;
+      try {
+        const binary = String.fromCharCode(...Array.from(pdfBytes));
+        base64Content = btoa(binary);
+      } catch (e) {
+        console.error('Base64 conversion failed, falling back to blob only', e);
+        base64Content = '';
+      }
+
       const blob = new Blob([pdfBytes as any], { type: 'application/pdf' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
       link.download = `KRA_Certificate_${formData.kraPin || 'Generated'}.pdf`;
       link.click();
 
-      // Save record
+      // Save record to DB including pdf base64 content
       fetch('/api/user/certificates', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ kraPin: formData.kraPin, taxpayerName: formData.taxpayerName, details: formData })
+        body: JSON.stringify({ 
+          kraPin: formData.kraPin, 
+          taxpayerName: formData.taxpayerName, 
+          details: formData,
+          pdfContent: base64Content
+        })
       });
 
       setStats(prev => ({ ...prev, certificates: prev.certificates + 1 }));

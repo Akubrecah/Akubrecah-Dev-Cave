@@ -108,11 +108,15 @@ export const UserCreditsIndicator = () => {
             className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all text-xs font-medium"
           >
             <Zap size={12} className={status.usage.remaining > 0 ? "text-[var(--color-brand-red)] fill-[var(--color-brand-red)]/20" : "text-white/20"} />
-            <span className="text-white/90">{status.usage.remaining} / {status.usage.limit}</span>
-            <span className="text-[10px] text-white/40 border-l border-white/10 pl-2 font-mono uppercase tracking-tighter">Credits</span>
+            <span className="text-white/90">
+              {status.usage.limit >= 999999 ? '∞' : `${status.usage.remaining} / ${status.usage.limit}`}
+            </span>
+            <span className="text-[10px] text-white/40 border-l border-white/10 pl-2 font-mono uppercase tracking-tighter">
+              {status.usage.limit >= 999999 ? 'Unlimited' : 'Credits'}
+            </span>
           </Link>
           <span className="text-[9px] text-white/30 font-mono mt-0.5 flex items-center gap-1 group-hover:text-[var(--color-brand-red)]/60 transition-colors">
-            <RefreshCcw size={8} className="group-hover:animate-spin-slow" /> Resets in {timeLeft}
+            {status.usage.limit >= 999999 ? 'Privileged Node' : `Resets in ${timeLeft}`}
           </span>
         </div>
       )}

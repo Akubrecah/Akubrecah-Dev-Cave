@@ -282,12 +282,21 @@ export default function AdminDashboard() {
       id: `t-${t.id}`,
       type: 'payment',
       title: 'Revenue Generated',
-      description: `Successfull ${t.type} of KES ${(t.amount/100).toLocaleString()}.`,
+      description: `Successful ${t.type} of KES ${(t.amount/100).toLocaleString()}.`,
       timestamp: t.createdAt
     }));
 
-    return list.sort((a,b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-  }, [users, transactions]);
+    // Recent Verifications
+    verifications.slice(0, 3).forEach(v => list.push({
+      id: `v-${v.id}`,
+      type: 'verification',
+      title: 'Deep Integrity Scan',
+      description: `KRA PIN ${v.kraPin} verified by ${v.user.name || v.user.email.split('@')[0]}.`,
+      timestamp: v.createdAt
+    }));
+
+    return list.sort((a,b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()).slice(0, 8);
+  }, [users, transactions, verifications]);
 
   const handleSyncUsers = async () => {
     try {

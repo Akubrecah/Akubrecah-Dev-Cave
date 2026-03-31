@@ -5,14 +5,46 @@ import { routing } from './i18n/routing';
 
 const intlMiddleware = createMiddleware(routing);
 
+// Simple In-memory Rate Limiter
+type RateLimitRecord = { count: number; lastReset: number };
+const globalTracker: RateLimitRecord = { count: 0, lastReset: Date.now() };
+const userTracker = new Map<string, RateLimitRecord>();
+
+const GLOBAL_LIMIT = 100;
+const FREE_USER_LIMIT = 20;
+const PRO_USER_LIMIT = 100;
+const RESET_INTERVAL = 60000; // 1 minute
+
+function isRateLimited(id: string, limit: number, tracker: Map<string, RateLimitRecord> | RateLimitRecord): boolean {
+  const now = Date.now();
+  const record = (tracker instanceof Map) 
+    ? tracker.get(id) || { count: 0, lastReset: now } 
+    : tracker;
+
+  if (now - record.lastReset > RESET_INTERVAL) {
+    record.count = 1;
+    record.lastReset = now;
+    if (tracker instanceof Map) tracker.set(id, record);
+    return false;
+  }
+
+  if (record.count >= limit) return true;
+
+  record.count++;
+  if (tracker instanceof Map) tracker.set(id, record);
+  return false;
+}
+
 const isPublicRoute = createRouteMatcher([
-  '/',                 // Root landing redirects to locale
-  '/:locale',          // Home page
-  '/:locale/about(.*)', 
-  '/:locale/contact(.*)',
-  '/:locale/pricing(.*)',
-  '/:locale/sign-in(.*)',
-  '/:locale/sign-up(.*)',
+  '/',                       // Direct root
+  '/(en|ja|ko|es|fr|de|zh|zh-TW|pt|ar|it|id)', // Locale roots
+  '/(en|ja|ko|es|fr|de|zh|zh-TW|pt|ar|it|id)/about(.*)',
+  '/(en|ja|ko|es|fr|de|zh|zh-TW|pt|ar|it|id)/contact(.*)',
+  '/(en|ja|ko|es|fr|de|zh|zh-TW|pt|ar|it|id)/pricing(.*)',
+  '/(en|ja|ko|es|fr|de|zh|zh-TW|pt|ar|it|id)/sign-in(.*)',
+  '/(en|ja|ko|es|fr|de|zh|zh-TW|pt|ar|it|id)/sign-up(.*)',
+  '/sign-in(.*)',            // Fallback unlocalized
+  '/sign-up(.*)',            // Fallback unlocalized
   '/api/stripe/webhook(.*)',
   '/api/kra/debug(.*)',
   '/api/kra/check-pin(.*)',
@@ -21,58 +53,58 @@ const isPublicRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
-  console.log(`[PROXY] Handling ${req.nextUrl.pathname}`);
-  const publicRoute = isPublicRoute(req);
+  // 1. Global Rate Limit Check
+  if (isRateLimited('global', GLOBAL_LIMIT, globalTracker)) {
+    console.warn(`[PROXY] Global rate limit reached: ${req.nextUrl.pathname}`);
+    return NextResponse.json({ error: 'Server Busy. Please wait a moment.' }, { status: 429 });
+  }
+
+  // 2. User/IP Rate Limit Check
+  const { userId, sessionClaims } = await auth();
+  const ident = userId || req.headers.get('x-forwarded-for') || 'anon';
+  
+  // Rate Limit Exemption for Admins
+  const isAdmin = (sessionClaims as any)?.publicMetadata?.role === 'admin';
+  const isPro = (sessionClaims as any)?.publicMetadata?.subscriptionStatus === 'active' || isAdmin;
+  const userLimit = isPro ? PRO_USER_LIMIT : FREE_USER_LIMIT;
+
+  if (!isAdmin && isRateLimited(ident, userLimit, userTracker)) {
+    console.warn(`[PROXY] Rate limit reached for ${ident}: ${req.nextUrl.pathname}`);
+    return NextResponse.json({ error: 'Rate limit exceeded. Please slow down.' }, { status: 429 });
+  }
+
+  const isPublic = isPublicRoute(req);
   const isApiRoute = req.nextUrl.pathname.startsWith('/api');
-  // 1. Handle API routes - Skip localization entirely
+
   if (isApiRoute) {
-    console.log(`[PROXY] API Route detected: ${req.nextUrl.pathname}`);
-    
-    // Defensive check: If it's a KRA API route, we treat it as public for the dashboard
-    const isKraApi = req.nextUrl.pathname.startsWith('/api/kra');
-    
-    if (!publicRoute && !isKraApi) {
-      try {
-        await auth.protect();
-      } catch (authErr) {
-        console.error(`[PROXY] Auth failure on API route ${req.nextUrl.pathname}:`, authErr);
-        // If auth fails on an API route, returning a JSON 401 is better than a 307 redirect
+    if (!isPublic && !req.nextUrl.pathname.startsWith('/api/kra')) {
+      if (!userId) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }
     }
-    
     const response = NextResponse.next();
-    // Use X-Content-Type-Options for safety, but avoid * CORS which conflicts with include-credentials
     response.headers.set('X-Content-Type-Options', 'nosniff');
     return response;
   }
 
-  // 2. Run next-intl middleware for all other routes
-  console.log(`[PROXY] Running intlMiddleware for ${req.nextUrl.pathname}`);
-  const response = await intlMiddleware(req);
-
-  // 3. Apply authentication protection for non-public routes
-  if (!publicRoute) {
-    await auth.protect();
+  // Handle Public vs Protected page routes
+  if (!isPublic && !userId) {
+    const pathParts = req.nextUrl.pathname.split('/').filter(Boolean);
+    const locale = (pathParts[0] && routing.locales.includes(pathParts[0] as any)) ? pathParts[0] : routing.defaultLocale;
+    
+    const signInUrl = new URL(`/${locale}/sign-in`, req.url);
+    signInUrl.searchParams.set('redirect_url', req.nextUrl.pathname);
+    return NextResponse.redirect(signInUrl);
   }
 
-  // 4. Set security headers
-  // response.headers.set('Cross-Origin-Opener-Policy', 'same-origin');
-  // response.headers.set('Cross-Origin-Embedder-Policy', 'require-corp');
-  
-  // Standard security headers
-  // response.headers.set('X-Frame-Options', 'DENY');
+  const response = await intlMiddleware(req);
   response.headers.set('X-Content-Type-Options', 'nosniff');
-  // response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-
   return response;
 });
 
 export const config = {
   matcher: [
-    // Standard Next.js matcher excluding internals and static assets
     '/((?!_next|[^?]*\\.(?:html?|css|m?js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-    // Always run for API routes
     '/(api|trpc)(.*)',
   ],
 };

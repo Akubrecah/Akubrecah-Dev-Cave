@@ -14,6 +14,8 @@ export function CheckoutContent() {
   const [error, setError] = useState<string | null>(null);
   const [phone, setPhone] = useState<string>('');
   const [transactionId, setTransactionId] = useState<string | null>(null);
+  const [userStatus, setUserStatus] = useState<any>(null);
+  const [statusLoading, setStatusLoading] = useState(true);
   
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -21,6 +23,14 @@ export function CheckoutContent() {
 
   const { user } = useUser();
   const email = user?.emailAddresses[0]?.emailAddress || '';
+
+  // Fetch current subscription status
+  useEffect(() => {
+    fetch('/api/user/status')
+      .then(res => res.json())
+      .then(data => { setUserStatus(data); setStatusLoading(false); })
+      .catch(() => setStatusLoading(false));
+  }, []);
 
   // Plan Details 
   const planDetails = {
@@ -87,6 +97,17 @@ export function CheckoutContent() {
     }
   };
 
+  // Active subscription guard
+  const hasActiveSub =
+    !statusLoading &&
+    userStatus?.subscriptionStatus === 'active' &&
+    userStatus?.subscriptionEnd &&
+    new Date(userStatus.subscriptionEnd) > new Date();
+
+  const expiryDate = userStatus?.subscriptionEnd
+    ? new Date(userStatus.subscriptionEnd).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })
+    : null;
+
   return (
     <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center py-20 px-4 relative overflow-hidden">
       {/* Background decoration */}
@@ -95,6 +116,29 @@ export function CheckoutContent() {
       <div className="absolute -bottom-20 -right-20 w-96 h-96 bg-red-600/5 blur-[120px] rounded-full"></div>
 
       <div className="wrapper max-w-5xl w-full z-10 transition-all duration-500">
+        {/* Active plan gate — block payment */}
+        {hasActiveSub ? (
+          <div className="flex flex-col items-center justify-center text-center gap-8 rounded-[2.5rem] border border-green-500/20 bg-green-500/5 backdrop-blur-xl p-16">
+            <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center">
+              <ShieldCheck className="w-10 h-10 text-green-500" />
+            </div>
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-green-500/60 mb-2">Plan Already Active</p>
+              <h2 className="text-4xl font-black italic uppercase tracking-tighter text-white mb-4">
+                {(userStatus?.activeTier || 'free').toUpperCase()} Plan
+              </h2>
+              <p className="text-white/40 text-sm font-bold uppercase tracking-widest">
+                Your plan is active until <span className="text-white">{expiryDate}</span>. It will auto-renew when it expires.
+              </p>
+            </div>
+            <button
+              onClick={() => router.back()}
+              className="px-12 py-5 bg-white rounded-2xl text-black font-black uppercase tracking-widest italic hover:bg-red-500 hover:text-white transition-all text-sm"
+            >
+              ← Return to Dashboard
+            </button>
+          </div>
+        ) : (
         <div className="checkout_wrapper grid grid-cols-1 md:grid-cols-2 gap-0 overflow-hidden rounded-[2.5rem] border border-white/10 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)] bg-black/40 backdrop-blur-xl">
           
           {/* Left Side: Product Info (Based on your snippet) */}
@@ -233,16 +277,19 @@ export function CheckoutContent() {
             </div>
           </div>
         </div>
+        )}
         
         {/* Support Section */}
-        <div className="mt-12 flex flex-col md:flex-row items-center justify-center gap-8 text-white/30 animate-in fade-in slide-in-from-bottom-4 delay-300 duration-1000">
-           <div className="flex items-center gap-3 text-sm font-medium">
-              <div className="p-2 rounded-lg bg-white/5"><Mail size={16} /></div>
-              <span>akubrecah@akubrecah.onmicrosoft.com</span>
-           </div>
-           <div className="w-1 h-1 bg-white/10 rounded-full hidden md:block"></div>
-           <p className="text-xs">Secure Payments powered by TinyPesa & Paystack</p>
-        </div>
+        {!hasActiveSub && (
+          <div className="mt-12 flex flex-col md:flex-row items-center justify-center gap-8 text-white/30 animate-in fade-in slide-in-from-bottom-4 delay-300 duration-1000">
+             <div className="flex items-center gap-3 text-sm font-medium">
+                <div className="p-2 rounded-lg bg-white/5"><Mail size={16} /></div>
+                <span>akubrecah@akubrecah.onmicrosoft.com</span>
+             </div>
+             <div className="w-1 h-1 bg-white/10 rounded-full hidden md:block"></div>
+             <p className="text-xs">Secure Payments powered by TinyPesa &amp; Paystack</p>
+          </div>
+        )}
       </div>
     </div>
   );

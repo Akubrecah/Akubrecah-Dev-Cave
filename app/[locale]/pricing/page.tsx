@@ -1,14 +1,56 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Check, Zap, Clock, Calendar, Star } from 'lucide-react';
 import { useAuth } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
+
+// Live countdown hook
+function useCountdown(targetDateStr: string | null | undefined) {
+  const [timeLeft, setTimeLeft] = useState<{ days: number; hours: number; minutes: number; expired: boolean } | null>(null);
+
+  useEffect(() => {
+    if (!targetDateStr) { setTimeLeft(null); return; }
+    const target = new Date(targetDateStr).getTime();
+
+    const tick = () => {
+      const diff = target - Date.now();
+      if (diff <= 0) { setTimeLeft({ days: 0, hours: 0, minutes: 0, expired: true }); return; }
+      const days = Math.floor(diff / 86400000);
+      const hours = Math.floor((diff % 86400000) / 3600000);
+      const minutes = Math.floor((diff % 3600000) / 60000);
+      setTimeLeft({ days, hours, minutes, expired: false });
+    };
+    tick();
+    const id = setInterval(tick, 60000);
+    return () => clearInterval(id);
+  }, [targetDateStr]);
+
+  return timeLeft;
+}
 
 export default function Pricing() {
   const { isSignedIn } = useAuth();
   const router = useRouter();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const [userStatus, setUserStatus] = useState<any>(null);
+  const [statusLoading, setStatusLoading] = useState(true);
+
+  // Fetch current subscription status
+  useEffect(() => {
+    fetch('/api/user/status')
+      .then(res => res.json())
+    .then(data => { setUserStatus(data); setStatusLoading(false); })
+    .catch(() => setStatusLoading(false));
+}, []);
+
+const countdown = useCountdown(userStatus?.subscriptionEnd);
+
+const isActive = 
+    !statusLoading &&
+    userStatus?.subscriptionStatus === 'active' &&
+    userStatus?.subscriptionEnd &&
+    new Date(userStatus.subscriptionEnd) > new Date();
 
   const handleSubscribe = async (tier: string) => {
     if (tier === 'enterprise') {
@@ -16,6 +58,8 @@ export default function Pricing() {
       return;
     }
     
+    if (isActive) return;
+
     if (!isSignedIn) {
       router.push('/sign-in?redirect_url=/pricing');
       return;
@@ -90,6 +134,41 @@ export default function Pricing() {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] pointer-events-none z-0" 
              style={{ background: 'radial-gradient(ellipse at center, rgba(227, 6, 19, 0.3) 0%, transparent 70%)' }}></div>
         <div className="relative z-10 max-w-3xl mx-auto">
+          {isActive && (
+            <div className="mb-8 p-6 rounded-3xl bg-green-500/10 border border-green-500/20 backdrop-blur-md animate-in fade-in slide-in-from-top-4">
+              <div className="flex items-center justify-center gap-3 text-green-500 mb-2">
+                <Check className="w-5 h-5" />
+                <span className="text-sm font-black uppercase tracking-widest italic">Plan Active: {userStatus?.activeTier?.toUpperCase()}</span>
+              </div>
+              <p className="text-xs text-white/40 uppercase tracking-widest mb-4">You have an active subscription. Payments are disabled until it expires.</p>
+              
+              {countdown && !countdown.expired && (
+                <div className="flex justify-center gap-4 mb-6 font-mono">
+                  <div className="text-center">
+                    <div className="text-xl font-black text-green-500">{countdown.days}</div>
+                    <div className="text-[8px] text-white/30 uppercase">days</div>
+                  </div>
+                  <div className="text-xl font-black text-white/20">:</div>
+                  <div className="text-center">
+                    <div className="text-xl font-black text-green-500">{countdown.hours}</div>
+                    <div className="text-[8px] text-white/30 uppercase">hrs</div>
+                  </div>
+                  <div className="text-xl font-black text-white/20">:</div>
+                  <div className="text-center">
+                    <div className="text-xl font-black text-green-500">{countdown.minutes}</div>
+                    <div className="text-[8px] text-white/30 uppercase">min</div>
+                  </div>
+                </div>
+              )}
+
+              <button 
+                onClick={() => router.push(`/${window.location.pathname.split('/')[1] || 'en'}/dashboard`)}
+                className="px-6 py-2 bg-white text-black text-[10px] font-black uppercase tracking-widest rounded-full hover:bg-green-500 hover:text-white transition-all"
+              >
+                Go to Dashboard
+              </button>
+            </div>
+          )}
           <h1 className="text-5xl md:text-6xl font-bold mb-6">
             Choose Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-brand-red)] to-[var(--color-brand-yellow)]">Access.</span>
           </h1>
@@ -140,14 +219,14 @@ export default function Pricing() {
               
               <button 
                 onClick={() => handleSubscribe(plan.id)}
-                disabled={loadingPlan === plan.id}
+                disabled={loadingPlan === plan.id || (isActive && plan.id !== 'enterprise')}
                 className={`w-full py-4 rounded-xl font-bold transition-all flex items-center justify-center disabled:opacity-50 text-base ${
                   plan.highlight
                     ? 'bg-white text-[var(--color-brand-red)] hover:bg-[var(--color-brand-yellow)]'
                     : 'border-2 border-white/20 hover:border-[var(--color-brand-yellow)] hover:text-[var(--color-brand-yellow)]'
                 }`}
               >
-                {loadingPlan === plan.id ? 'Processing...' : (plan.id === 'enterprise' ? 'Contact Sales' : 'Get Started')}
+                {loadingPlan === plan.id ? 'Processing...' : (isActive && plan.id !== 'enterprise' ? 'Plan Active' : (plan.id === 'enterprise' ? 'Contact Sales' : 'Get Started'))}
               </button>
             </div>
           ))}
