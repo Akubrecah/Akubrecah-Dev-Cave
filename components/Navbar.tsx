@@ -27,14 +27,11 @@ export default function Navbar() {
   ]
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-[100] bg-black/40 backdrop-blur-xl border-b border-white/10">
+    <header className="fixed top-0 left-0 right-0 z-[100] bg-[#F2F2F2]/90 backdrop-blur-xl border-b border-[#D1D5DB]">
       <nav className="max-w-[1400px] mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
         
         <Link href={`/${locale}`} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <Image src="/logo.png" alt="Akubrecah Dev Cave" width={144} height={144} className="h-9 w-auto" quality={100} priority unoptimized />
-          <span className="text-xl font-bold tracking-tight text-white hidden sm:block">
-            Akubrecah <span className="text-[var(--color-brand-yellow)]">Dev Cave</span>
-          </span>
+          <Image src="/logo.png" alt="Akubrecah Entertainment" width={180} height={60} className="h-10 w-auto" quality={100} priority unoptimized />
         </Link>
 
         {/* Desktop Nav */}
@@ -43,10 +40,10 @@ export default function Navbar() {
             <Link
               key={link.path}
               href={`/${locale}${link.path === '/' ? '' : link.path}`}
-              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors hover:text-white ${
+              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-black/5 hover:text-[#1F6F5B] ${
                 isActive(link.path) 
-                  ? 'text-white bg-white/10' 
-                  : 'text-gray-300 hover:bg-white/5'
+                  ? 'text-[#1F6F5B] bg-[#E5E7EB]' 
+                  : 'text-[#2E8B75]'
               }`}
             >
               {link.name}
@@ -57,16 +54,16 @@ export default function Navbar() {
         {/* Auth / CTA */}
         <div className="flex items-center gap-4">
           <Show when="signed-out">
-            <div className="hidden sm:block text-sm font-medium text-gray-300 hover:text-white transition-colors cursor-pointer">
+            <div className="hidden sm:block text-sm font-medium text-[#2E8B75] hover:text-[#1F6F5B] transition-colors cursor-pointer">
               <SignInButton>Login</SignInButton>
             </div>
-            <div className="btn-primary">
+            <div className="btn-primary shadow-sm hover:shadow-md transition-all">
               <SignInButton>Get Started</SignInButton>
             </div>
           </Show>
           
           <Show when="signed-in">
-            <Link href={`/${locale}/dashboard`} className="hidden sm:block text-sm font-medium text-gray-300 hover:text-white transition-colors">
+            <Link href={`/${locale}/dashboard`} className="hidden sm:block text-sm font-medium text-[#2E8B75] hover:text-[#1F6F5B] transition-colors">
               Dashboard
             </Link>
             <UserButton appearance={{ elements: { avatarBox: 'w-9 h-9' } }} />

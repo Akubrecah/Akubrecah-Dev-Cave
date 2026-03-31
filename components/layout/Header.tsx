@@ -223,8 +223,8 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
     return (
         <header
             className={`fixed ${hasMarquee ? 'top-10' : 'top-0'} z-50 w-full transition-all duration-300 ${scrolled
-                ? 'bg-[hsl(var(--color-background))]/80 backdrop-blur-md border-b border-[hsl(var(--color-border))/0.5] shadow-sm'
-                : 'bg-transparent border-transparent'
+                ? 'bg-[#F2F2F2]/90 backdrop-blur-md border-b border-[#D1D5DB] shadow-sm'
+                : 'bg-[#F2F2F2] border-b border-[#D1D5DB]/50'
                 }`}
             role="banner"
         >
@@ -234,7 +234,7 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                     <div className="flex items-center gap-2">
                         <Link
                             href={`/${locale}`}
-                            className="group flex items-center gap-4 text-xl font-bold text-[hsl(var(--color-foreground))] hover:opacity-90 transition-opacity"
+                            className="group flex items-center gap-4 text-xl font-bold text-[#2B2B2B] hover:opacity-90 transition-opacity"
                             aria-label={`${t('brand')} - ${t('navigation.home')}`}
                         >
                             <div className="relative flex h-12 items-center justify-center transition-transform group-hover:scale-105">
@@ -252,7 +252,7 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
 
                     {/* Desktop Navigation */}
                     <nav
-                        className={`hidden lg:flex items-center gap-1 rounded-full border border-[hsl(var(--color-border))/0.4] bg-[hsl(var(--color-background))/0.5] p-1.5 backdrop-blur-sm shadow-sm transition-all duration-300 ${isSearchOpen ? 'opacity-0 translate-y-[-10px] pointer-events-none' : 'opacity-100 translate-y-0'
+                        className={`hidden lg:flex items-center gap-1 rounded-full border border-[#D1D5DB] bg-white p-1.5 shadow-sm transition-all duration-300 ${isSearchOpen ? 'opacity-0 translate-y-[-10px] pointer-events-none' : 'opacity-100 translate-y-0'
                             }`}
                         role="navigation"
                         aria-label="Main navigation"
@@ -265,11 +265,11 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                                     href={item.href}
                                     className={`group flex items-center gap-2 px-4 py-1.5 text-sm font-medium rounded-full transition-all duration-300 ${
                                         active 
-                                            ? 'text-[var(--color-brand-yellow)] bg-white/10 shadow-[0_0_15px_rgba(245,194,0,0.1)]' 
-                                            : 'text-[hsl(var(--color-muted-foreground))] hover:text-white hover:bg-white/5'
+                                            ? 'text-[#1F6F5B] bg-[#E5E7EB]' 
+                                            : 'text-[#2E8B75] hover:text-[#1F6F5B] hover:bg-black/5'
                                     }`}
                                 >
-                                    <item.icon className={`w-4 h-4 transition-transform group-hover:scale-110 ${active ? 'text-[var(--color-brand-yellow)]' : ''}`} />
+                                    <item.icon className={`w-4 h-4 transition-transform group-hover:scale-110 ${active ? 'text-[#1F6F5B]' : ''}`} />
                                     <span>{item.label}</span>
                                 </Link>
                             );
@@ -284,7 +284,7 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                                 {isSearchOpen ? (
                                     <div className="fixed md:absolute left-4 right-4 md:left-auto md:right-0 top-[22px] md:top-1/2 md:-translate-y-1/2 z-50 md:origin-right animate-in fade-in slide-in-from-right-4 duration-200">
                                         <div className="relative w-full md:w-96">
-                                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[hsl(var(--color-muted-foreground))]" />
+                                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#2E8B75]" />
                                             <input
                                                 ref={searchInputRef}
                                                 type="search"
@@ -292,7 +292,7 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                                                 onChange={(e) => setSearchQuery(e.target.value)}
                                                 onKeyDown={handleKeyDown}
                                                 placeholder={t('search.placeholder') || 'Search tools...'}
-                                                className="w-full pl-10 pr-10 py-2.5 text-sm rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-background))] shadow-lg focus:outline-none focus:ring-2 focus:ring-[hsl(var(--color-primary))]"
+                                                className="w-full pl-10 pr-10 py-2.5 text-sm rounded-xl border border-[#D1D5DB] bg-white text-[#2B2B2B] shadow-lg focus:outline-none focus:ring-2 focus:ring-[#1F6F5B]"
                                                 aria-label="Search tools"
                                                 autoComplete="off"
                                             />
@@ -303,12 +303,12 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                                                 aria-label="Close search"
                                                 className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 p-0 hover:bg-transparent"
                                             >
-                                                <X className="h-4 w-4 text-[hsl(var(--color-muted-foreground))]" aria-hidden="true" />
+                                                <X className="h-4 w-4 text-[#2B2B2B]" aria-hidden="true" />
                                             </Button>
 
                                             {/* Search Results Dropdown */}
                                             {searchResults.length > 0 && (
-                                                <div className="absolute top-full left-0 right-0 mt-2 bg-[hsl(var(--color-background))] border border-[hsl(var(--color-border))] rounded-xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 max-h-[60vh] overflow-y-auto">
+                                                <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-[#D1D5DB] rounded-xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 max-h-[60vh] overflow-y-auto">
                                                     <ul className="py-2" role="listbox">
                                                         {searchResults.map((result, index) => {
                                                             const localized = localizedTools[result.tool.id];
@@ -323,8 +323,8 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                                                                         className={`
                                                                     w-full px-4 py-2.5 text-left flex items-center gap-3 transition-colors
                                                                     ${index === selectedIndex
-                                                                                ? 'bg-[hsl(var(--color-primary))/0.1] text-[hsl(var(--color-primary))]'
-                                                                                : 'hover:bg-[hsl(var(--color-muted))] text-[hsl(var(--color-foreground))]'
+                                                                                ? 'bg-[#E5E7EB] text-[#1F6F5B]'
+                                                                                : 'hover:bg-[#F3F4F6] text-[#2B2B2B]'
                                                                             }
                                                                   `}
                                                                         role="option"
@@ -335,7 +335,7 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                                                                             <div className="font-semibold text-sm truncate">
                                                                                 {toolName}
                                                                             </div>
-                                                                            <div className="text-xs text-[hsl(var(--color-muted-foreground))] truncate">
+                                                                            <div className="text-xs text-[#2E8B75] truncate">
                                                                                 {toolDescription}
                                                                             </div>
                                                                         </div>
@@ -354,10 +354,10 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                                         size="sm"
                                         onClick={handleSearchToggle}
                                         aria-label="Open search"
-                                        className="relative text-[hsl(var(--color-muted-foreground))] hover:text-[hsl(var(--color-foreground))]"
+                                        className="relative text-[#2B2B2B] hover:text-[#1F6F5B]"
                                     >
                                         <Search className="h-5 w-5" aria-hidden="true" />
-                                        <span className="ml-2 hidden lg:inline-block text-xs text-[hsl(var(--color-muted-foreground))/0.5] border border-[hsl(var(--color-border))] rounded px-1.5 py-0.5">⌘K</span>
+                                        <span className="ml-2 hidden lg:inline-block text-xs text-[#2E8B75] border border-[#D1D5DB] rounded px-1.5 py-0.5">⌘K</span>
                                     </Button>
                                 )}
                             </div>
@@ -380,7 +380,7 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                             {(isAdmin || isSuperAdmin) && (
                                 <Link
                                     href={`/${locale}/admin`}
-                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 hover:border-emerald-400/50 transition-all text-xs font-medium"
+                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#1F6F5B]/10 border border-[#1F6F5B]/30 text-[#1F6F5B] hover:bg-[#1F6F5B]/20 hover:border-[#1F6F5B]/50 transition-all text-xs font-medium"
                                     title="Admin Dashboard"
                                 >
                                     <Shield className="w-3.5 h-3.5" />
@@ -389,12 +389,12 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                             )}
                             <Show when="signed-out">
                                 <SignInButton mode="modal">
-                                    <Button variant="ghost" size="sm" className="hidden sm:inline-flex">
+                                    <Button variant="ghost" size="sm" className="hidden sm:inline-flex text-[#2B2B2B] hover:text-[#1F6F5B] hover:bg-black/5">
                                         Sign in
                                     </Button>
                                 </SignInButton>
                                 <SignInButton mode="modal">
-                                    <Button size="sm" className="hidden sm:inline-flex">
+                                    <Button size="sm" className="hidden sm:inline-flex bg-[#1F6F5B] text-white hover:bg-[#145A47]">
                                         Sign up
                                     </Button>
                                 </SignInButton>
@@ -412,7 +412,7 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                         <Button
                             variant="ghost"
                             size="sm"
-                            className="md:hidden"
+                            className="md:hidden text-[#2B2B2B] hover:text-[#1F6F5B] hover:bg-black/5"
                             onClick={handleMobileMenuToggle}
                             aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
                             aria-expanded={isMobileMenuOpen}
@@ -431,7 +431,7 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                 {isMobileMenuOpen && (
                     <nav
                         id="mobile-menu"
-                        className="md:hidden py-4 border-t border-[hsl(var(--color-border))] bg-[hsl(var(--color-background))] backdrop-blur-xl shadow-lg"
+                        className="md:hidden py-4 border-t border-[#D1D5DB] bg-white shadow-lg"
                         role="navigation"
                         aria-label="Mobile navigation"
                     >
@@ -440,10 +440,10 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                                 <li key={item.href}>
                                     <Link
                                         href={item.href}
-                                        className="flex items-center gap-3 px-4 py-3 text-base font-medium text-[hsl(var(--color-foreground))] hover:bg-[hsl(var(--color-muted))] rounded-lg transition-colors"
+                                        className="flex items-center gap-3 px-4 py-3 text-base font-medium text-[#2B2B2B] hover:bg-[#F3F4F6] rounded-lg transition-colors"
                                         onClick={() => setIsMobileMenuOpen(false)}
                                     >
-                                        <item.icon className="w-5 h-5 text-[hsl(var(--color-muted-foreground))]" />
+                                        <item.icon className="w-5 h-5 text-[#2E8B75]" />
                                         <span>{item.label}</span>
                                     </Link>
                                 </li>
@@ -452,7 +452,7 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                                 <li>
                                     <Link
                                         href={`/${locale}/admin`}
-                                        className="flex items-center gap-2 px-4 py-3 text-base font-medium text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-colors"
+                                        className="flex items-center gap-2 px-4 py-3 text-base font-medium text-[#1F6F5B] hover:bg-[#1F6F5B]/10 rounded-lg transition-colors"
                                         onClick={() => setIsMobileMenuOpen(false)}
                                     >
                                         <Shield className="w-4 h-4" />
@@ -465,10 +465,10 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                                     <UserCreditsIndicator />
                                 </Show>
                             </li>
-                            <li className="pt-2 mt-2 border-t border-[hsl(var(--color-border))]/0.5">
+                            <li className="pt-2 mt-2 border-t border-[#D1D5DB]">
                                 <Show when="signed-out">
                                     <SignInButton mode="modal">
-                                        <button className="w-full text-left px-4 py-3 text-base font-medium text-[hsl(var(--color-foreground))] hover:bg-[hsl(var(--color-muted))] rounded-lg transition-colors">
+                                        <button className="w-full text-left px-4 py-3 text-base font-medium text-[#2B2B2B] hover:bg-[#F3F4F6] rounded-lg transition-colors">
                                             Sign in
                                         </button>
                                     </SignInButton>

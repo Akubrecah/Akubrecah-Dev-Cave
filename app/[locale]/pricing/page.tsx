@@ -128,11 +128,11 @@ const isActive =
   ];
 
   return (
-    <div className="flex flex-col min-h-screen text-white bg-black">
+    <div className="flex flex-col min-h-screen text-[hsl(var(--color-foreground))] bg-[hsl(var(--color-background))]">
       {/* Hero */}
       <section className="pt-32 pb-16 px-6 text-center relative overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] pointer-events-none z-0" 
-             style={{ background: 'radial-gradient(ellipse at center, rgba(227, 6, 19, 0.3) 0%, transparent 70%)' }}></div>
+             style={{ background: 'radial-gradient(ellipse at center, hsla(var(--color-primary), 0.15) 0%, transparent 70%)' }}></div>
         <div className="relative z-10 max-w-3xl mx-auto">
           {isActive && (
             <div className="mb-8 p-6 rounded-3xl bg-green-500/10 border border-green-500/20 backdrop-blur-md animate-in fade-in slide-in-from-top-4">
@@ -169,11 +169,11 @@ const isActive =
               </button>
             </div>
           )}
-          <h1 className="text-5xl md:text-6xl font-bold mb-6">
-            Choose Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-brand-red)] to-[var(--color-brand-yellow)]">Access.</span>
+          <h1 className="text-5xl md:text-6xl font-black mb-6 uppercase tracking-tighter italic">
+            Choose Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-[hsl(var(--color-primary))] to-[hsl(var(--color-accent))]">Access.</span>
           </h1>
-          <p className="text-xl text-[#E8D5D5]">
-            Instant activation. Pay via M-Pesa.
+          <p className="text-xl text-[hsl(var(--color-muted-foreground))] uppercase tracking-widest font-bold">
+            Instant activation. Secure Checkout via Paystack.
           </p>
         </div>
       </section>
@@ -184,26 +184,26 @@ const isActive =
           {plans.map((plan) => (
             <div 
               key={plan.id}
-              className={`bg-[#111111] border rounded-3xl p-8 flex flex-col transition-all duration-300 hover:-translate-y-1 ${
+              className={`bg-[hsl(var(--color-card))] border rounded-[2.5rem] p-8 flex flex-col transition-all duration-300 hover:-translate-y-1 ${
                 plan.highlight 
-                  ? 'border-[var(--color-brand-red)] shadow-[0_0_30px_rgba(31,111,91,0.2)] bg-gradient-to-b from-[var(--color-brand-crimson)] to-[#111111]' 
-                  : 'border-white/10 hover:border-[var(--color-brand-yellow)]/50'
+                  ? 'border-[hsl(var(--color-primary))] shadow-[0_0_30px_rgba(31,111,91,0.1)] bg-gradient-to-b from-[hsl(var(--color-primary)/0.1)] to-[hsl(var(--color-card))]' 
+                  : 'border-[hsl(var(--color-border))] hover:border-[hsl(var(--color-primary))]/50'
               }`}
             >
               <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 ${plan.highlight ? 'bg-white/20' : 'bg-white/5'}`}>
                 {plan.icon}
               </div>
-              <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
-              <p className="text-sm text-[#BEA0A0] mb-6 min-h-[40px]">{plan.description}</p>
+              <h3 className="text-2xl font-black uppercase italic tracking-tighter mb-2">{plan.name}</h3>
+              <p className="text-xs text-[hsl(var(--color-muted-foreground))] font-bold uppercase tracking-widest mb-6 min-h-[40px]">{plan.description}</p>
               
               <div className="flex items-baseline gap-1 mb-8">
                 {plan.price === 'Contact Us' ? (
                   <span className="text-3xl font-black">Contact Us</span>
                 ) : (
                   <>
-                    <span className="text-sm font-bold text-[#BEA0A0]">KES</span>
-                    <span className="text-5xl font-black">{plan.price}</span>
-                    <span className="text-sm font-medium text-[#BEA0A0]">/{plan.period}</span>
+                    <span className="text-sm font-bold text-[hsl(var(--color-muted-foreground))]">KES</span>
+                    <span className="text-5xl font-black text-[hsl(var(--color-foreground))] tracking-tighter">{plan.price}</span>
+                    <span className="text-sm font-medium text-[hsl(var(--color-muted-foreground))] uppercase tracking-widest">/{plan.period}</span>
                   </>
                 )}
               </div>
@@ -220,10 +220,10 @@ const isActive =
               <button 
                 onClick={() => handleSubscribe(plan.id)}
                 disabled={loadingPlan === plan.id || (isActive && plan.id !== 'enterprise')}
-                className={`w-full py-4 rounded-xl font-bold transition-all flex items-center justify-center disabled:opacity-50 text-base ${
+                className={`w-full py-5 rounded-2xl font-black uppercase tracking-widest transition-all flex items-center justify-center disabled:opacity-50 text-sm italic ${
                   plan.highlight
-                    ? 'bg-white text-[var(--color-brand-red)] hover:bg-[var(--color-brand-yellow)]'
-                    : 'border-2 border-white/20 hover:border-[var(--color-brand-yellow)] hover:text-[var(--color-brand-yellow)]'
+                    ? 'bg-[hsl(var(--color-primary))] text-white hover:bg-[hsl(var(--color-primary-hover))] shadow-lg'
+                    : 'border-2 border-[hsl(var(--color-border))] hover:border-[hsl(var(--color-primary))] hover:text-[hsl(var(--color-primary))]'
                 }`}
               >
                 {loadingPlan === plan.id ? 'Processing...' : (isActive && plan.id !== 'enterprise' ? 'Plan Active' : (plan.id === 'enterprise' ? 'Contact Sales' : 'Get Started'))}

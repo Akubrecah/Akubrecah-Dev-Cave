@@ -133,11 +133,11 @@ export const RecentFilesDropdown: React.FC<RecentFilesDropdownProps> = ({
         aria-label={translations.title}
         aria-expanded={isOpen}
         aria-haspopup="true"
-        className="flex items-center gap-1"
+        className="flex items-center gap-1 text-[#2B2B2B] hover:text-[#1F6F5B] hover:bg-black/5"
       >
         <Clock className="h-4 w-4" aria-hidden="true" />
         {recentFiles.length > 0 && (
-          <span className="text-xs bg-[hsl(var(--color-primary))] text-white rounded-full px-1.5 py-0.5 min-w-[18px] text-center">
+          <span className="text-xs bg-[#1F6F5B] text-white rounded-full px-1.5 py-0.5 min-w-[18px] text-center">
             {recentFiles.length}
           </span>
         )}

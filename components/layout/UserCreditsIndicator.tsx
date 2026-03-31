@@ -92,12 +92,12 @@ export const UserCreditsIndicator = () => {
         <div className="flex flex-col items-end mr-1">
           <Link 
             href="/pricing"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 text-yellow-400 font-bold text-xs shadow-[0_0_15px_rgba(234,179,8,0.1)] hover:shadow-[0_0_20px_rgba(234,179,8,0.2)] transition-all"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-[#F2E600]/20 to-[#D4A017]/20 border border-[#F2E600]/40 text-[#2B2B2B] font-bold text-xs shadow-sm hover:shadow-md transition-all"
           >
-            <Star size={12} className="fill-yellow-400" />
-            <span className="uppercase tracking-widest">Premium</span>
+            <Star size={12} className="fill-[#F2E600] text-[#F2E600]" />
+            <span className="uppercase tracking-widest text-[#2B2B2B]">Premium</span>
           </Link>
-          <span className="text-[10px] text-white/40 font-mono mt-0.5 flex items-center gap-1">
+          <span className="text-[10px] text-[#2E8B75] font-mono mt-0.5 flex items-center gap-1">
              <Clock size={8} /> {timeLeft} left
           </span>
         </div>
@@ -105,17 +105,17 @@ export const UserCreditsIndicator = () => {
         <div className="flex flex-col items-end mr-1">
           <Link 
             href="/pricing"
-            className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all text-xs font-medium"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#E5E7EB] border border-[#D1D5DB] hover:bg-[#D1D5DB] transition-all text-xs font-medium"
           >
-            <Zap size={12} className={status.usage.remaining > 0 ? "text-[var(--color-brand-red)] fill-[var(--color-brand-red)]/20" : "text-white/20"} />
-            <span className="text-white/90">
+            <Zap size={12} className={status.usage.remaining > 0 ? "text-[#1F6F5B] fill-[#1F6F5B]/20" : "text-[#D1D5DB]"} />
+            <span className="text-[#2B2B2B]">
               {status.usage.limit >= 999999 ? '∞' : `${status.usage.remaining} / ${status.usage.limit}`}
             </span>
-            <span className="text-[10px] text-white/40 border-l border-white/10 pl-2 font-mono uppercase tracking-tighter">
+            <span className="text-[10px] text-[#2E8B75] border-l border-[#D1D5DB] pl-2 font-mono uppercase tracking-tighter">
               {status.usage.limit >= 999999 ? 'Unlimited' : 'Credits'}
             </span>
           </Link>
-          <span className="text-[9px] text-white/30 font-mono mt-0.5 flex items-center gap-1 group-hover:text-[var(--color-brand-red)]/60 transition-colors">
+          <span className="text-[9px] text-[#2E8B75] font-mono mt-0.5 flex items-center gap-1 group-hover:text-[#1F6F5B] transition-colors">
             {status.usage.limit >= 999999 ? 'Privileged Node' : `Resets in ${timeLeft}`}
           </span>
         </div>

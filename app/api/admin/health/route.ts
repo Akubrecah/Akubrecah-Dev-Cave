@@ -18,10 +18,11 @@ export async function GET() {
       headers: { 'Authorization': `Bearer ${process.env.CLERK_SECRET_KEY}` }
     }).then(r => r.ok ? 'up' : 'down').catch(() => 'down');
 
-    // 3. Safaricom MPesa Check (Ping Sandbox Gateway)
-    const mpesaCheck = await fetch('https://sandbox.safaricom.co.ke', { method: 'HEAD' })
-      .then(r => r.status < 500 ? 'up' : 'down')
-      .catch(() => 'down');
+    // 3. Paystack Check (Ping API)
+    const paystackCheck = await fetch('https://api.paystack.co', { 
+      method: 'GET',
+      headers: { 'Authorization': `Bearer ${process.env.PAYSTACK_SECRET_KEY}` }
+    }).then(r => r.status < 500 ? 'up' : 'down').catch(() => 'down');
 
     // 4. KRA Gateway Check (Head to SBX)
     const kraCheck = await fetch('https://sbx.kra.go.ke', { method: 'HEAD' })
@@ -31,7 +32,7 @@ export async function GET() {
     const duration = Date.now() - startTime;
     
     // Calculate overall health percentage
-    const services = [dbCheck, authCheck, mpesaCheck, kraCheck];
+    const services = [dbCheck, authCheck, paystackCheck, kraCheck];
     const upCount = services.filter(s => s === 'up').length;
     const healthScore = (upCount / services.length) * 100;
 
@@ -42,7 +43,7 @@ export async function GET() {
       nodes: {
         database: dbCheck,
         auth: authCheck,
-        payments: mpesaCheck,
+        payments: paystackCheck,
         compliance: kraCheck
       },
       timestamp: new Date().toISOString()

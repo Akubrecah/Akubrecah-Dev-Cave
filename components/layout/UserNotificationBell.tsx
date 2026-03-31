@@ -69,12 +69,12 @@ export const UserNotificationBell = () => {
         <div className="relative" ref={dropdownRef}>
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="relative p-2 rounded-xl text-[hsl(var(--color-muted-foreground))] hover:text-white hover:bg-white/5 transition-all outline-none"
+                className="relative p-2 rounded-xl text-[#2B2B2B] hover:text-[#1F6F5B] hover:bg-black/5 transition-all outline-none"
                 aria-label="Notifications"
             >
                 <Bell className="w-5 h-5" />
                 {unreadCount > 0 && (
-                    <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-[var(--color-brand-red)] text-white text-[8px] font-black rounded-full flex items-center justify-center border-2 border-[hsl(var(--color-background))] shadow-[0_0_10px_rgba(227,6,19,0.3)]">
+                    <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-[var(--color-brand-red)] text-white text-[8px] font-black rounded-full flex items-center justify-center border-2 border-[#F2F2F2] shadow-[0_0_10px_rgba(227,6,19,0.3)]">
                         {unreadCount > 9 ? '9+' : unreadCount}
                     </span>
                 )}
