@@ -151,7 +151,7 @@ export async function GET() {
       : (TIER_LIMITS[activeTier] ?? 2);
 
     // Fetch usage counts for today
-    let usageLimits = [];
+    let usageLimits: { type: string; count: number }[] = [];
     const tomorrow = new Date(now);
     tomorrow.setHours(0, 0, 0, 0);
     tomorrow.setDate(now.getDate() + 1);
