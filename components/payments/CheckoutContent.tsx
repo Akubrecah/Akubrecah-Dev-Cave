@@ -6,7 +6,6 @@ import { CheckCircle2, AlertCircle, Loader2, Loader, ShieldCheck, Mail, Phone, A
 import { usePaystackPayment } from 'react-paystack';
 import { useUser } from '@clerk/nextjs';
 import NextImage from 'next/image';
-import { type CallbackConfig } from 'react-paystack/dist/types';
 
 type CheckoutStatus = 'INITIAL' | 'SENDING' | 'PENDING' | 'SUCCESS' | 'FAILED';
 
