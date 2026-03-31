@@ -1098,7 +1098,7 @@ export function FormCreatorTool({ className = '' }: FormCreatorToolProps) {
                     </button>
                     <button
                       onClick={handleDeleteField}
-                      className="p-1.5 rounded hover:bg-red-50 text-red-500 transition-colors"
+                      className="p-1.5 rounded hover:bg-red-50 text-emerald-500 transition-colors"
                       title={tTools('formCreator.deleteTool') || 'Delete'}
                     >
                       <Trash2 className="w-4 h-4" />
@@ -1527,7 +1527,7 @@ export function FormCreatorTool({ className = '' }: FormCreatorToolProps) {
 
                       <button
                         onClick={handleDeleteField}
-                        className="w-full py-1.5 text-sm text-red-500 hover:bg-red-50 rounded border border-red-200"
+                        className="w-full py-1.5 text-sm text-emerald-500 hover:bg-red-50 rounded border border-red-200"
                       >
                         {tTools('formCreator.deleteField')}
                       </button>
@@ -1626,7 +1626,7 @@ export function FormCreatorTool({ className = '' }: FormCreatorToolProps) {
                             </button>
                             <button
                               onClick={() => handleDeleteProject(project.id)}
-                              className="p-1 text-red-500 hover:bg-red-50 rounded"
+                              className="p-1 text-emerald-500 hover:bg-red-50 rounded"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>

@@ -61,7 +61,7 @@ export function ToolCard({ tool, locale, className = '', localizedContent }: Too
       data-testid="tool-card"
     >
       <Card
-        className="h-full glass-panel hover:border-[var(--color-brand-red)] transition-all duration-500 hover:shadow-[0_0_20px_rgba(227,6,19,0.3)] hover:-translate-y-1 relative overflow-hidden border-white/10 rounded-3xl bg-[#0a0a0a]"
+        className="h-full glass-panel hover:border-[var(--color-brand-red)] transition-all duration-500 hover:shadow-[0_0_20px_rgba(31,111,91,0.3)] hover:-translate-y-1 relative overflow-hidden border-white/10 rounded-3xl bg-[#0a0a0a]"
         data-testid="tool-card-container"
       >
         <div className="absolute top-0 right-0 p-3 z-10">

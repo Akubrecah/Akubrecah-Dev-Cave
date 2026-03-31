@@ -224,7 +224,7 @@ export function PDFToMarkdownTool({ className = '' }: PDFToMarkdownToolProps) {
                             size="sm"
                             onClick={handleRemoveFile}
                             disabled={isProcessing}
-                            className="text-[hsl(var(--color-muted-foreground))] hover:text-red-500 hover:bg-red-50"
+                            className="text-[hsl(var(--color-muted-foreground))] hover:text-emerald-500 hover:bg-red-50"
                         >
                             <Trash2 className="w-5 h-5" />
                             <span className="sr-only">{t('buttons.remove') || 'Remove'}</span>

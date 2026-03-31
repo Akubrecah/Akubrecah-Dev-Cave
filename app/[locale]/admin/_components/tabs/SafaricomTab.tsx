@@ -83,7 +83,7 @@ export function SafaricomTab({
                  animate={{ opacity: 1, scale: 1 }} 
                  className="p-8 rounded-[32px] bg-black border border-white/5 shadow-2xl relative"
                >
-                  <button onClick={() => setSafaricomResult(null)} className="absolute top-4 right-4 text-xs font-black text-red-500 uppercase tracking-widest">Close Output</button>
+                  <button onClick={() => setSafaricomResult(null)} className="absolute top-4 right-4 text-xs font-black text-emerald-500 uppercase tracking-widest">Close Output</button>
                   <pre className="text-[10px] font-mono text-[#F5C200]/80 overflow-auto max-h-64 custom-scrollbar">{JSON.stringify(safaricomResult, null, 2)}</pre>
                </motion.div>
              )}

@@ -319,7 +319,7 @@ export function WorkflowControls({
                 <div className="px-4 py-3 bg-red-50 border-b border-red-200">
                     <div className="flex items-start justify-between gap-3">
                         <div className="flex items-start gap-2 flex-1">
-                            <XCircle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
+                            <XCircle className="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
                             <div className="flex-1">
                                 <p className="text-sm font-semibold text-red-700 mb-1">
                                     {tWorkflow('executionFailed') || 'Workflow execution failed'}

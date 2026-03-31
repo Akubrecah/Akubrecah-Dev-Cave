@@ -130,7 +130,7 @@ export function DeskewPDFTool({ className = '' }: DeskewPDFToolProps) {
             case 'completed':
                 return <Check className="w-4 h-4 text-green-500" />;
             case 'error':
-                return <AlertCircle className="w-4 h-4 text-red-500" />;
+                return <AlertCircle className="w-4 h-4 text-emerald-500" />;
         }
     };
 
@@ -208,7 +208,7 @@ export function DeskewPDFTool({ className = '' }: DeskewPDFToolProps) {
                                                 </span>
                                             )}
                                             {batchFile.status === 'error' && (
-                                                <span className="text-xs text-red-500">
+                                                <span className="text-xs text-emerald-500">
                                                     {batchFile.error}
                                                 </span>
                                             )}
@@ -230,7 +230,7 @@ export function DeskewPDFTool({ className = '' }: DeskewPDFToolProps) {
                                 {batchFile.status === 'pending' && !isProcessing && (
                                     <button
                                         onClick={() => removeFile(batchFile.id)}
-                                        className="p-1 text-[hsl(var(--color-muted-foreground))] hover:text-red-500 transition-colors"
+                                        className="p-1 text-[hsl(var(--color-muted-foreground))] hover:text-emerald-500 transition-colors"
                                         aria-label="Remove file"
                                     >
                                         <X className="w-4 h-4" />

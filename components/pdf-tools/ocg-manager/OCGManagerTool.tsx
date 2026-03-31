@@ -310,7 +310,7 @@ export function OCGManagerTool({ className = '' }: OCGManagerToolProps) {
                                                     className="p-1 rounded hover:bg-red-100"
                                                     title="Delete layer"
                                                 >
-                                                    <Trash2 className="w-4 h-4 text-red-500" />
+                                                    <Trash2 className="w-4 h-4 text-emerald-500" />
                                                 </button>
                                             </>
                                         )}

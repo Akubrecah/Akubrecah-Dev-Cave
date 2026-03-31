@@ -585,7 +585,7 @@ export default function AdminDashboard() {
               {/* Header */}
               <div className="flex items-center gap-5 mb-10">
                 <div className="p-4 rounded-[1.5rem] bg-white/10 border border-white/10 shadow-sm">
-                  <Zap className="w-6 h-6 text-red-500" />
+                  <Zap className="w-6 h-6 text-emerald-500" />
                 </div>
                 <div>
                   <h2 className="text-3xl font-black text-white italic tracking-tighter uppercase leading-none">Quick Assign.</h2>
@@ -617,7 +617,7 @@ export default function AdminDashboard() {
                             "relative py-8 rounded-3xl border-2 font-black transition-all group overflow-hidden",
                             assignForm.tier === tier
                               ? tier === 'basic'
-                                ? "border-red-500 bg-red-500/10 text-white shadow-[0_0_30px_rgba(227,6,19,0.2)]"
+                                ? "border-emerald-500 bg-emerald-500/10 text-white shadow-[0_0_30px_rgba(31,111,91,0.2)]"
                                 : "border-yellow-500 bg-yellow-500/10 text-white shadow-[0_0_30px_rgba(245,194,0,0.2)]"
                               : "border-white/5 bg-white/5 text-white/20 hover:border-white/20"
                           )}
@@ -703,7 +703,7 @@ export default function AdminDashboard() {
                         "flex-[2] py-5 rounded-3xl font-black uppercase tracking-[0.2em] text-[10px] transition-all shadow-xl italic",
                         assignForm.tier === 'pro'
                           ? "bg-yellow-500 text-black shadow-yellow-500/20"
-                          : "bg-red-500 text-white shadow-red-500/20",
+                          : "bg-emerald-500 text-white shadow-red-500/20",
                         assignLoading && "opacity-60 pointer-events-none"
                       )}
                     >
@@ -841,7 +841,7 @@ export default function AdminDashboard() {
 
                   <div className="flex gap-4 pt-4">
                      {editingNotification.id !== 'new' && (
-                       <button type="button" onClick={() => handleNotificationDelete(editingNotification.id)} className="p-5 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-[24px] transition-all"><Trash2 size={20} /></button>
+                       <button type="button" onClick={() => handleNotificationDelete(editingNotification.id)} className="p-5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 rounded-[24px] transition-all"><Trash2 size={20} /></button>
                      )}
                      <button type="button" onClick={() => setEditingNotification(null)} className="flex-1 py-5 bg-white/5 hover:bg-white/10 text-white rounded-[24px] font-black text-[10px] uppercase tracking-widest transition-all">Abort</button>
                      <button type="submit" className="flex-[2] py-5 bg-[#F5C200] text-black rounded-[24px] font-black uppercase tracking-widest text-[10px] transition-all shadow-xl shadow-[#F5C200]/20 active:scale-95">Deploy Signal</button>

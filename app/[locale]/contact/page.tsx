@@ -224,7 +224,7 @@ export default function Contact() {
                             </div>
 
                             {error && (
-                                <div className="text-red-500 text-sm font-bold animate-pulse">{error}</div>
+                                <div className="text-emerald-500 text-sm font-bold animate-pulse">{error}</div>
                             )}
 
                             <button 

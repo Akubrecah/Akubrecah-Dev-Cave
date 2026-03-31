@@ -183,7 +183,7 @@ export default function ToolsPageClient({ locale, localizedToolContent }: ToolsP
                       ${selectedCategory === cat.value
                         ? cat.value === 'favorites'
                           ? 'bg-amber-500/20 text-amber-500 shadow-md border border-amber-500/50'
-                          : 'bg-[var(--color-brand-red)] text-white shadow-[0_0_20px_rgba(227,6,19,0.3)]'
+                          : 'bg-[var(--color-brand-red)] text-white shadow-[0_0_20px_rgba(31,111,91,0.3)]'
                         : 'bg-white/5 text-[#E8D5D5]/70 hover:bg-white/10 hover:text-white border border-white/10'
                       }
                     `}

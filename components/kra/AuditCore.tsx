@@ -231,7 +231,7 @@ export function AuditCore({ stats, setStats, subscription }: AuditCoreProps) {
                <div className="bg-black/20 rounded-[2.5rem] p-8 border border-white/5">
                  {viewerResult ? (
                    <div className="space-y-4 font-mono text-sm">
-                     {viewerResult.error ? <div className="text-red-500 font-black">ERROR: {viewerResult.error}</div> : (
+                     {viewerResult.error ? <div className="text-emerald-500 font-black">ERROR: {viewerResult.error}</div> : (
                        Object.entries(viewerResult).map(([k, v]: any) => (
                          <div key={k} className="flex justify-between border-b border-white/5 py-2">
                            <span className="text-white/40 uppercase text-[10px]">{k}</span>
@@ -260,7 +260,7 @@ export function AuditCore({ stats, setStats, subscription }: AuditCoreProps) {
                 </div>
 
                 {statusMessage && (
-                  <div className={`p-4 rounded-2xl mb-8 flex items-center gap-3 ${isStatusError ? 'bg-red-500/10 border border-red-500/20 text-red-400' : 'bg-green-500/10 border border-green-500/20 text-green-400'}`}>
+                  <div className={`p-4 rounded-2xl mb-8 flex items-center gap-3 ${isStatusError ? 'bg-emerald-500/10 border border-emerald-500/20 text-red-400' : 'bg-green-500/10 border border-green-500/20 text-green-400'}`}>
                     {isStatusError ? <AlertCircle size={16} /> : <CheckCircle2 size={16} />}
                     <span className="text-[10px] font-black uppercase tracking-widest">{statusMessage}</span>
                   </div>

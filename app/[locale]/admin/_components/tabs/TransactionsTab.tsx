@@ -51,7 +51,7 @@ export function TransactionsTab({
                        "px-2 py-0.5 rounded-lg text-[9px] font-black tracking-widest border uppercase",
                        tx.status === 'completed' ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" :
                        tx.status === 'pending' ? "bg-amber-500/10 text-amber-500 border-amber-500/20" :
-                       "bg-red-500/10 text-red-500 border-red-500/20"
+                       "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
                      )}>
                        {tx.status}
                      </span>

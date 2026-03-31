@@ -403,7 +403,7 @@ export function NilReturnForm() {
                     <motion.div 
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="mt-8 p-4 bg-red-500/10 border-l-4 border-red-500 flex items-center gap-4 text-red-500"
+                        className="mt-8 p-4 bg-emerald-500/10 border-l-4 border-emerald-500 flex items-center gap-4 text-emerald-500"
                     >
                         <AlertCircle size={20} />
                         <div>

@@ -735,7 +735,7 @@ export function PDFMultiTool({ className = '' }: PDFMultiToolProps) {
                     </button>
                     <button
                       onClick={(e) => { e.stopPropagation(); handleDeletePage(index); }}
-                      className="w-6 h-6 bg-red-500/90 rounded shadow flex items-center justify-center hover:bg-red-600 text-white"
+                      className="w-6 h-6 bg-emerald-500/90 rounded shadow flex items-center justify-center hover:bg-red-600 text-white"
                       title="Delete"
                     >
                       <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -448,7 +448,7 @@ export function DigitalSignPDFTool({ className = '' }: { className?: string }) {
                     {sigImageFile && (
                       <div className="flex items-center gap-2 mt-1">
                         <p className="text-xs text-green-600 dark:text-green-400">{sigImageFile.name}</p>
-                        <button type="button" onClick={() => { setSigImageFile(null); setSigImageData(null); setSigImageType(null); }} className="text-xs text-red-500 hover:text-red-700 cursor-pointer">{t('buttons.remove')}</button>
+                        <button type="button" onClick={() => { setSigImageFile(null); setSigImageData(null); setSigImageType(null); }} className="text-xs text-emerald-500 hover:text-red-700 cursor-pointer">{t('buttons.remove')}</button>
                       </div>
                     )}
                   </div>

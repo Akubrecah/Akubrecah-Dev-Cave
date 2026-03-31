@@ -54,8 +54,8 @@ export default function UserDashboard() {
       description: 'Audit Core & Nil Return Node.',
       icon: ShieldCheck,
       href: `/${locale}/kra-solutions`,
-      color: 'text-red-500',
-      bg: 'bg-red-500/10'
+      color: 'text-emerald-500',
+      bg: 'bg-emerald-500/10'
     },
     {
       title: 'PDF Suite',
@@ -75,14 +75,14 @@ export default function UserDashboard() {
   return (
     <div className="min-h-screen pt-32 pb-16 px-6 relative bg-black text-white">
       <div className="absolute top-[-200px] left-1/2 -translate-x-1/2 w-[800px] h-[800px] pointer-events-none z-0"
-           style={{ background: 'radial-gradient(ellipse at center, rgba(227, 6, 19, 0.15) 0%, transparent 70%)' }} />
+           style={{ background: 'radial-gradient(ellipse at center, rgba(31, 111, 91, 0.15) 0%, transparent 70%)' }} />
 
       <div className="max-w-[1400px] mx-auto relative z-10">
         {/* Header */}
         <div className="flex flex-col lg:flex-row justify-between items-start gap-12 mb-16">
           <div className="space-y-4">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-white/60">
-              <LayoutGrid size={14} className="text-red-500" />
+              <LayoutGrid size={14} className="text-emerald-500" />
               <span className="text-[10px] font-black uppercase tracking-widest italic">Personal Command Center</span>
             </div>
             <h1 className="text-6xl md:text-8xl font-black italic tracking-tighter uppercase leading-none">DASHBOARD.</h1>
@@ -94,7 +94,7 @@ export default function UserDashboard() {
             {/* Active Tier */}
             <div className="p-8 rounded-[2rem] bg-white/5 border border-white/10 backdrop-blur-md">
               <div className="text-[10px] font-black uppercase tracking-widest text-white/30 mb-2">Active Tier</div>
-              <div className={`text-2xl font-black italic uppercase ${isActive ? 'text-red-500' : 'text-white/40'}`}>
+              <div className={`text-2xl font-black italic uppercase ${isActive ? 'text-emerald-500' : 'text-white/40'}`}>
                 {tierLabel}
               </div>
               {isActive && (
@@ -120,22 +120,22 @@ export default function UserDashboard() {
               ) : countdown && !countdown.expired ? (
                 <div className="flex gap-3 font-mono">
                   <div className="text-center">
-                    <div className="text-2xl font-black text-red-500">{countdown.days}</div>
+                    <div className="text-2xl font-black text-emerald-500">{countdown.days}</div>
                     <div className="text-[9px] text-white/30 uppercase">days</div>
                   </div>
                   <div className="text-2xl font-black text-white/20">:</div>
                   <div className="text-center">
-                    <div className="text-2xl font-black text-red-500">{countdown.hours}</div>
+                    <div className="text-2xl font-black text-emerald-500">{countdown.hours}</div>
                     <div className="text-[9px] text-white/30 uppercase">hrs</div>
                   </div>
                   <div className="text-2xl font-black text-white/20">:</div>
                   <div className="text-center">
-                    <div className="text-2xl font-black text-red-500">{countdown.minutes}</div>
+                    <div className="text-2xl font-black text-emerald-500">{countdown.minutes}</div>
                     <div className="text-[9px] text-white/30 uppercase">min</div>
                   </div>
                 </div>
               ) : countdown?.expired ? (
-                <div className="text-[10px] font-black uppercase text-red-500/70 tracking-widest">Expired</div>
+                <div className="text-[10px] font-black uppercase text-emerald-500/70 tracking-widest">Expired</div>
               ) : (
                 <div className="text-[10px] font-black uppercase text-white/20 tracking-widest">No Active Plan</div>
               )}
@@ -151,14 +151,14 @@ export default function UserDashboard() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
-                className="glass-panel p-10 rounded-[3rem] border border-white/10 bg-white/5 hover:border-red-500/50 transition-all group relative overflow-hidden"
+                className="glass-panel p-10 rounded-[3rem] border border-white/10 bg-white/5 hover:border-emerald-500/50 transition-all group relative overflow-hidden"
               >
                 <div className={`p-6 rounded-3xl ${m.bg} ${m.color} inline-block mb-6`}>
                   <m.icon size={32} />
                 </div>
                 <h2 className="text-4xl font-black italic uppercase tracking-tighter mb-4">{m.title}</h2>
                 <p className="text-[#BEA0A0] uppercase font-bold tracking-widest text-sm mb-10">{m.description}</p>
-                <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-white/40 group-hover:text-red-500 transition-colors">
+                <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-white/40 group-hover:text-emerald-500 transition-colors">
                   Enter System <ArrowRight size={14} />
                 </div>
               </motion.div>
@@ -171,13 +171,13 @@ export default function UserDashboard() {
           <div className="lg:col-span-2 glass-panel p-10 rounded-[3rem] border border-white/10 bg-white/5 relative overflow-hidden">
             <div className="flex items-center justify-between mb-8">
               <h3 className="text-xl font-black italic uppercase tracking-tighter">Identity Archive</h3>
-              <Activity size={18} className="text-red-500 animate-pulse" />
+              <Activity size={18} className="text-emerald-500 animate-pulse" />
             </div>
             <div className="space-y-4">
               {certs.length > 0 ? certs.slice(0, 5).map(cert => (
                 <div key={cert.id} className="h-16 bg-white/5 rounded-2xl border border-white/5 flex items-center px-8 justify-between hover:bg-white/10 transition-all group">
                   <div className="flex items-center gap-6">
-                    <div className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]" />
+                    <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(31,111,91,0.5)]" />
                     <div>
                       <div className="text-xs font-black text-white uppercase italic tracking-tighter">{cert.taxpayerName}</div>
                       <div className="text-[10px] text-white/40 font-mono uppercase">{cert.kraPin}</div>
@@ -187,7 +187,7 @@ export default function UserDashboard() {
                      <span className="text-[9px] font-mono text-white/20 hidden md:block">{new Date(cert.createdAt).toLocaleDateString()}</span>
                      <a 
                        href={`/api/user/certificates/${cert.id}/download`} 
-                       className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-white/40 hover:text-red-500 hover:border-red-500/50 transition-all"
+                       className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-white/40 hover:text-emerald-500 hover:border-emerald-500/50 transition-all"
                        download
                      >
                        <ArrowRight size={14} />
@@ -217,7 +217,7 @@ export default function UserDashboard() {
               className={`w-full py-5 rounded-2xl text-black font-black uppercase tracking-widest italic text-xs transition-all ${
                 isActive
                   ? 'bg-white/10 text-white/40 cursor-not-allowed pointer-events-none'
-                  : 'bg-white hover:bg-red-500 hover:text-white'
+                  : 'bg-white hover:bg-emerald-500 hover:text-white'
               }`}
             >
               {isActive ? 'Plan Active' : 'View Plans'}

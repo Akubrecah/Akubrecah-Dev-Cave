@@ -168,7 +168,7 @@ export function FB2ToPDFTool({ className = '' }: FB2ToPDFToolProps) {
                                         size="sm"
                                         onClick={() => handleRemoveFile(file.id)}
                                         disabled={isProcessing}
-                                        className="text-[hsl(var(--color-muted-foreground))] hover:text-red-500 hover:bg-red-50 flex-shrink-0"
+                                        className="text-[hsl(var(--color-muted-foreground))] hover:text-emerald-500 hover:bg-red-50 flex-shrink-0"
                                     >
                                         <Trash2 className="w-4 h-4" />
                                     </Button>

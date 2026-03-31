@@ -186,7 +186,7 @@ const isActive =
               key={plan.id}
               className={`bg-[#111111] border rounded-3xl p-8 flex flex-col transition-all duration-300 hover:-translate-y-1 ${
                 plan.highlight 
-                  ? 'border-[var(--color-brand-red)] shadow-[0_0_30px_rgba(227,6,19,0.2)] bg-gradient-to-b from-[var(--color-brand-crimson)] to-[#111111]' 
+                  ? 'border-[var(--color-brand-red)] shadow-[0_0_30px_rgba(31,111,91,0.2)] bg-gradient-to-b from-[var(--color-brand-crimson)] to-[#111111]' 
                   : 'border-white/10 hover:border-[var(--color-brand-yellow)]/50'
               }`}
             >

@@ -64,7 +64,7 @@ export function CustomEdge({
                     >
                         <button
                             onClick={onEdgeDelete}
-                            className="w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-110"
+                            className="w-6 h-6 bg-emerald-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-110"
                             title="删除连接 (Delete)"
                         >
                             <X className="w-4 h-4" />

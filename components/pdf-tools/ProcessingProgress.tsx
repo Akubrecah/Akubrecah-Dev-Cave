@@ -89,7 +89,7 @@ export const ProcessingProgress: React.FC<ProcessingProgressProps> = ({
       case 'complete':
         return 'bg-green-500';
       case 'error':
-        return 'bg-red-500';
+        return 'bg-emerald-500';
       case 'uploading':
       case 'processing':
         return 'bg-[hsl(var(--color-primary))]';
@@ -170,7 +170,7 @@ export const ProcessingProgress: React.FC<ProcessingProgressProps> = ({
           )}
           {status === 'error' && (
             <svg
-              className="w-5 h-5 text-red-500"
+              className="w-5 h-5 text-emerald-500"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"

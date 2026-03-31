@@ -416,7 +416,7 @@ export function BookmarkTool({ className = '' }: BookmarkToolProps) {
                 </button>
                 <button
                   onClick={(e) => { e.stopPropagation(); handleDeleteBookmark(bookmark.id); }}
-                  className="p-1 text-gray-400 hover:text-red-500"
+                  className="p-1 text-gray-400 hover:text-emerald-500"
                   title="Delete"
                 >
                   ×

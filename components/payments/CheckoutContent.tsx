@@ -133,7 +133,7 @@ export function CheckoutContent() {
             </div>
             <button
               onClick={() => router.back()}
-              className="px-12 py-5 bg-white rounded-2xl text-black font-black uppercase tracking-widest italic hover:bg-red-500 hover:text-white transition-all text-sm"
+              className="px-12 py-5 bg-white rounded-2xl text-black font-black uppercase tracking-widest italic hover:bg-emerald-500 hover:text-white transition-all text-sm"
             >
               ← Return to Dashboard
             </button>
@@ -231,7 +231,7 @@ export function CheckoutContent() {
               </div>
 
               {error && (
-                <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-xs animate-in slide-in-from-top-2">
+                <div className="flex items-center gap-3 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-500 text-xs animate-in slide-in-from-top-2">
                    <AlertCircle size={16} />
                    <span>{error}</span>
                 </div>

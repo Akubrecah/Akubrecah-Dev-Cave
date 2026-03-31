@@ -388,7 +388,7 @@ export function FindAndRedactTool({ className = '' }: FindAndRedactToolProps) {
                     <Card variant="outlined">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <svg className="w-10 h-10 text-red-500" viewBox="0 0 24 24" fill="currentColor">
+                                <svg className="w-10 h-10 text-emerald-500" viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" />
                                 </svg>
                                 <div>
@@ -453,7 +453,7 @@ export function FindAndRedactTool({ className = '' }: FindAndRedactToolProps) {
                                             <button
                                                 type="button"
                                                 onClick={() => setSearchTermsInput('')}
-                                                className="text-xs text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                                                className="text-xs text-emerald-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                                                 disabled={isProcessing || isSearching}
                                             >
                                                 {t('buttons.clearAll')}
@@ -622,7 +622,7 @@ export function FindAndRedactTool({ className = '' }: FindAndRedactToolProps) {
                                     {/* Preview Legend */}
                                     <div className="mb-3 flex gap-4 text-xs">
                                         <div className="flex items-center gap-1">
-                                            <span className="inline-block w-4 h-4 bg-red-500/30 border-2 border-red-500 rounded"></span>
+                                            <span className="inline-block w-4 h-4 bg-emerald-500/30 border-2 border-emerald-500 rounded"></span>
                                             <span className="text-gray-600 dark:text-gray-400">{tTools('selectedMatch') || 'Selected'}</span>
                                         </div>
                                         <div className="flex items-center gap-1">

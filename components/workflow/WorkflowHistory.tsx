@@ -90,7 +90,7 @@ export function WorkflowHistory({ onLoadFromHistory }: WorkflowHistoryProps) {
             case 'completed':
                 return <CheckCircle className="w-5 h-5 text-green-500" />;
             case 'failed':
-                return <XCircle className="w-5 h-5 text-red-500" />;
+                return <XCircle className="w-5 h-5 text-emerald-500" />;
             case 'running':
                 return <Clock className="w-5 h-5 text-blue-500 animate-spin" />;
             default:
@@ -235,7 +235,7 @@ export function WorkflowHistory({ onLoadFromHistory }: WorkflowHistoryProps) {
                                             e.stopPropagation();
                                             handleDelete(record.id);
                                         }}
-                                        className="text-gray-400 hover:text-red-500 transition-colors"
+                                        className="text-gray-400 hover:text-emerald-500 transition-colors"
                                     >
                                         <Trash2 className="w-4 h-4" />
                                     </button>

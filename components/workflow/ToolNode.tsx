@@ -45,7 +45,7 @@ const ToolNode = memo(({ id, data, selected = false, isConnectable = true }: Too
         idle: 'bg-gray-300',
         processing: 'bg-blue-500 animate-pulse',
         complete: 'bg-green-500',
-        error: 'bg-red-500',
+        error: 'bg-emerald-500',
     };
 
     // Category colors
@@ -75,7 +75,7 @@ const ToolNode = memo(({ id, data, selected = false, isConnectable = true }: Too
             {isHovered && (
                 <button
                     onClick={handleDelete}
-                    className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center shadow-md transition-colors z-10"
+                    className="absolute -top-2 -right-2 w-5 h-5 bg-emerald-500 hover:bg-red-600 rounded-full flex items-center justify-center shadow-md transition-colors z-10"
                     title="Delete node"
                 >
                     <X className="w-3 h-3 text-white" />

@@ -18,7 +18,7 @@ export default function CheckoutError({
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-center p-6 text-center">
-      <div className="w-20 h-20 bg-red-500/20 text-red-500 rounded-full flex items-center justify-center mb-6">
+      <div className="w-20 h-20 bg-emerald-500/20 text-emerald-500 rounded-full flex items-center justify-center mb-6">
         <AlertCircle size={40} />
       </div>
       
@@ -28,7 +28,7 @@ export default function CheckoutError({
       </p>
 
       {error.message && (
-        <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-xl mb-8 font-mono text-xs text-red-400">
+        <div className="bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-xl mb-8 font-mono text-xs text-red-400">
           Error: {error.message}
         </div>
       )}

@@ -79,7 +79,7 @@ export function FontToOutlineTool({ className = '' }: FontToOutlineToolProps) {
             case 'pending': return <div className="w-4 h-4 rounded-full bg-gray-300" />;
             case 'processing': return <Loader2 className="w-4 h-4 animate-spin text-blue-500" />;
             case 'completed': return <Check className="w-4 h-4 text-green-500" />;
-            case 'error': return <AlertCircle className="w-4 h-4 text-red-500" />;
+            case 'error': return <AlertCircle className="w-4 h-4 text-emerald-500" />;
         }
     };
 
@@ -129,7 +129,7 @@ export function FontToOutlineTool({ className = '' }: FontToOutlineToolProps) {
                                             <span className="text-xs text-[hsl(var(--color-muted-foreground))]">{formatSize(batchFile.file.size)}</span>
                                             {batchFile.status === 'processing' && <span className="text-xs text-blue-500">{batchFile.progress}%</span>}
                                             {batchFile.status === 'completed' && <span className="text-xs text-green-500">✓ Outlined</span>}
-                                            {batchFile.status === 'error' && <span className="text-xs text-red-500">{batchFile.error}</span>}
+                                            {batchFile.status === 'error' && <span className="text-xs text-emerald-500">{batchFile.error}</span>}
                                         </div>
                                     </div>
                                 </div>
@@ -137,7 +137,7 @@ export function FontToOutlineTool({ className = '' }: FontToOutlineToolProps) {
                                     <DownloadButton file={batchFile.result} filename={`${batchFile.file.name.replace('.pdf', '')}_outlined.pdf`} variant="ghost" size="sm" />
                                 )}
                                 {batchFile.status === 'pending' && !isProcessing && (
-                                    <button onClick={() => removeFile(batchFile.id)} className="p-1 text-[hsl(var(--color-muted-foreground))] hover:text-red-500 transition-colors">
+                                    <button onClick={() => removeFile(batchFile.id)} className="p-1 text-[hsl(var(--color-muted-foreground))] hover:text-emerald-500 transition-colors">
                                         <X className="w-4 h-4" />
                                     </button>
                                 )}

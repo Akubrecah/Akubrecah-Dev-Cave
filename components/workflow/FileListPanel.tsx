@@ -31,7 +31,7 @@ function getFileIcon(file: File) {
         return <Image className="w-5 h-5 text-blue-500" />;
     }
     if (type === 'application/pdf') {
-        return <FileText className="w-5 h-5 text-red-500" />;
+        return <FileText className="w-5 h-5 text-emerald-500" />;
     }
     return <File className="w-5 h-5 text-gray-500" />;
 }
@@ -275,7 +275,7 @@ export function FileListPanel({ files, onFilesChange, onClose }: FileListPanelPr
                                             className="p-1.5 rounded hover:bg-red-50 transition-colors"
                                             title={tWorkflow('removeFile') || 'Remove'}
                                         >
-                                            <Trash2 className="w-4 h-4 text-red-500" />
+                                            <Trash2 className="w-4 h-4 text-emerald-500" />
                                         </button>
                                     </div>
                                 </div>

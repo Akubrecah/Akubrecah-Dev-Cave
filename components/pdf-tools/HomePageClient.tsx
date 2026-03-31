@@ -52,8 +52,8 @@ export default function HomePageClient({ locale }: HomePageClientProps) {
       name: 'Merge PDF',
       description: 'Combine multiple PDFs into one document easily.',
       icon: FileStack,
-      color: 'text-red-500',
-      bg: 'bg-red-500/10'
+      color: 'text-emerald-500',
+      bg: 'bg-emerald-500/10'
     },
     {
       id: 'split-pdf',
@@ -134,7 +134,7 @@ export default function HomePageClient({ locale }: HomePageClientProps) {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 items-center">
               <div className="flex flex-col gap-2 w-full sm:w-auto">
-                <Link href={isSignedIn ? `/${locale}/dashboard` : `/${locale}/sign-in`} className="btn-primary text-base px-8 py-4 flex items-center justify-center gap-2 group shadow-[0_0_20px_rgba(227,6,19,0.3)]">
+                <Link href={isSignedIn ? `/${locale}/dashboard` : `/${locale}/sign-in`} className="btn-primary text-base px-8 py-4 flex items-center justify-center gap-2 group shadow-[0_0_20px_rgba(31,111,91,0.3)]">
                   <Search size={20} /> Verify KRA PIN <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
                 </Link>
                 <p className="text-[10px] text-white/40 text-center uppercase tracking-widest font-bold">
@@ -397,7 +397,7 @@ export default function HomePageClient({ locale }: HomePageClientProps) {
           </h1>
           <p className="text-[#BEA0A0] text-xl md:text-2xl mb-12 max-w-2xl mx-auto leading-relaxed">Join thousands using Akubrecah for secure KRA compliance and high-performance document mastery.</p>
           <div className="flex flex-col sm:flex-row justify-center gap-6">
-            <Link href={isSignedIn ? `/${locale}/dashboard` : `/${locale}/sign-in`} className="btn-primary text-xl px-12 py-5 flex items-center justify-center gap-3 group shadow-[0_0_20px_rgba(227,6,19,0.3)]">
+            <Link href={isSignedIn ? `/${locale}/dashboard` : `/${locale}/sign-in`} className="btn-primary text-xl px-12 py-5 flex items-center justify-center gap-3 group shadow-[0_0_20px_rgba(31,111,91,0.3)]">
               Get Started Free <ArrowRight className="group-hover:translate-x-2 transition-transform" />
             </Link>
             <Link href={`/${locale}/pdf-tools`} className="inline-flex items-center justify-center rounded-xl px-12 py-5 text-xl font-semibold text-white border border-white/20 hover:bg-white/10 transition-all backdrop-blur-md">

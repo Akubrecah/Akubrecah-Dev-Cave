@@ -89,7 +89,7 @@ export function UsersTab({
                    <td className="py-5 px-8">
                      <span className={cn(
                        "px-2 py-0.5 rounded-lg text-[9px] font-black tracking-widest border uppercase",
-                       u.role === 'admin' ? "bg-red-500/10 text-red-500 border-red-500/20" :
+                       u.role === 'admin' ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" :
                        u.role === 'cyber' ? "bg-[#F5C200]/10 text-[#F5C200] border-[#F5C200]/20" :
                        "bg-white/5 text-gray-500 border-white/10"
                      )}>

@@ -351,7 +351,7 @@ export function WorkflowLibrary({
                                                     className="p-1.5 rounded hover:bg-red-100 transition-colors"
                                                     title="Delete"
                                                 >
-                                                    <Trash2 className="w-3.5 h-3.5 text-red-500" />
+                                                    <Trash2 className="w-3.5 h-3.5 text-emerald-500" />
                                                 </button>
                                             </div>
                                         </div>

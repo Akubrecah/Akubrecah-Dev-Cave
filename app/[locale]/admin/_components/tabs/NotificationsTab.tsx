@@ -68,7 +68,7 @@ export function NotificationsTab({
                      </button>
                      <button 
                        onClick={() => handleNotificationDelete(n.id)}
-                       className="p-2 rounded-lg bg-white/5 text-gray-400 hover:text-red-500 transition-all"
+                       className="p-2 rounded-lg bg-white/5 text-gray-400 hover:text-emerald-500 transition-all"
                      >
                        <Trash2 className="w-4 h-4" />
                      </button>

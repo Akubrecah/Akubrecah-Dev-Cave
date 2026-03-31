@@ -63,7 +63,7 @@ export function AdminMetricCard({
           <div className={cn(
             "px-3 py-1.5 rounded-full text-[10px] font-black tracking-widest flex items-center gap-2 uppercase",
             trend === 'up' && "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.1)]",
-            trend === 'down' && "bg-red-500/10 text-red-500 border border-red-500/20 shadow-[0_0_15px_rgba(239,68,68,0.1)]",
+            trend === 'down' && "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 shadow-[0_0_15px_rgba(239,68,68,0.1)]",
             trend === 'neutral' && "bg-white/5 text-gray-400 border border-white/10"
           )}>
             {trend === 'up' && <TrendingUp size={14} strokeWidth={3} />}

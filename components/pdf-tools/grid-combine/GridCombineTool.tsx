@@ -330,7 +330,7 @@ export function GridCombineTool({ className = '' }: GridCombineToolProps) {
                     <p className="text-sm font-medium">{error}</p>
                     {errorDetails && (
                         <details className="mt-2">
-                            <summary className="text-xs cursor-pointer hover:underline text-red-500">
+                            <summary className="text-xs cursor-pointer hover:underline text-emerald-500">
                                 {tTools('gridCombine.showErrorDetails') || 'Show error details'}
                             </summary>
                             <pre className="mt-2 p-2 text-xs bg-red-100 rounded overflow-x-auto whitespace-pre-wrap break-all max-h-40 overflow-y-auto">{errorDetails}</pre>
@@ -411,7 +411,7 @@ export function GridCombineTool({ className = '' }: GridCombineToolProps) {
                                             {file.thumbnail ? (
                                                 <img src={file.thumbnail} alt={file.file.name} className="w-full h-full object-contain" />
                                             ) : (
-                                                <svg className="w-8 h-8 text-red-500" viewBox="0 0 24 24" fill="currentColor">
+                                                <svg className="w-8 h-8 text-emerald-500" viewBox="0 0 24 24" fill="currentColor">
                                                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" />
                                                     <path d="M14 2v6h6" fill="white" />
                                                     <text x="7" y="17" fontSize="6" fill="white" fontWeight="bold">PDF</text>

@@ -56,7 +56,7 @@ const FileStatusIcon: React.FC<{ status: BatchFile['status'] }> = ({ status }) =
     case 'completed':
       return <CheckCircle className="h-4 w-4 text-green-500" aria-hidden="true" />;
     case 'error':
-      return <AlertCircle className="h-4 w-4 text-red-500" aria-hidden="true" />;
+      return <AlertCircle className="h-4 w-4 text-emerald-500" aria-hidden="true" />;
     default:
       return null;
   }
