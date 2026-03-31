@@ -47,18 +47,16 @@ export async function GET() {
         ]);
 
         // Analytics Logic: 
-        // 1. "Traffic" (Proxy for Vercel Pageviews) = (Verifications + Transactions) * Variance
-        // 2. "Sessions" = Users + (Transactions * 2)
-        const variance = 10 + Math.floor(Math.random() * 5); // 10-15x activity for organic traffic simulation
-        const organicTraffic = (verificationCount + transactionCount) * variance + Math.floor(Math.random() * 20);
+        // "Traffic" (Network) = Total significant actions (Verifications + Transactions)
+        const absoluteTraffic = verificationCount + transactionCount;
         
         return {
           date: date.toISOString().split('T')[0],
           users: userCount,
           transactions: transactionCount,
           revenue: (revenueResult._sum.amount || 0) / 100,
-          traffic: organicTraffic, // Vercel Analytics Proxy
-          active_users: userCount + (verificationCount > 0 ? 1 : 0) // Simple active proxy
+          traffic: absoluteTraffic, 
+          active_users: userCount + (verificationCount > 0 ? 1 : 0)
         };
       })
     );

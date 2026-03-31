@@ -22,7 +22,7 @@ async function main() {
   console.log('Fetching users from Clerk...');
 
   const response = await clerk.users.getUserList();
-  // @ts-ignore
+  // @ts-ignore -- Clerk SDK v5+ wraps list responses; .data is valid at runtime
   const clerkUsers = response.data || [];
   console.log(`Found ${clerkUsers.length} users.`);
 

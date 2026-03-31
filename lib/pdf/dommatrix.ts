@@ -14,7 +14,7 @@ export function setupDOMMatrix() {
         
         // Try to load the dommatrix package
         // Note: Use require for direct node_modules access in CommonJS/ESM mixed environments
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
+         
         const DOMMatrix = require('dommatrix');
         
         // Assign to global

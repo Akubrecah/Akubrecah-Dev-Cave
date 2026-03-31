@@ -51,7 +51,7 @@
   --color-warning-foreground: 0 0% 100%;
   
   /* Typography */
-  --font-sans: var(--font-inter, 'Inter'), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: var(--font-plus-jakarta), 'Plus Jakarta Sans', var(--font-inter, 'Inter'), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: var(--font-jetbrains-mono, 'JetBrains Mono'), 'Fira Code', Consolas, monospace;
   
   /* Spacing Scale */
@@ -113,6 +113,18 @@
 /* Base Styles */
 * {
   border-color: hsl(var(--color-border));
+}
+
+a {
+  transition: color var(--transition-fast) ease-in-out, background-color var(--transition-fast) ease-in-out;
+}
+
+a:hover {
+  filter: brightness(1.2);
+}
+
+a:active {
+  transform: scale(0.98);
 }
 
 body {

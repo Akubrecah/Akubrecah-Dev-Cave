@@ -1,5 +1,5 @@
 generator client {
-  provider        = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -22,6 +22,8 @@ model User {
   certificates       Certificate[]
   transactions       Transaction[]
   verifications      Verification[]
+  contactMessages    ContactMessage[]
+  notifications      UserNotification[]
 }
 
 model Transaction {
@@ -30,12 +32,12 @@ model Transaction {
   amount          Int
   type            String
   status          String   @default("pending")
-  tier            String?  // Plan name (daily, weekly, monthly, etc)
-  failureReason   String?  // Description of why a transaction failed
   stripeSessionId String?  @unique
   mpesaCode       String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+  tier            String?
+  failureReason   String?
   user            User     @relation(fields: [userId], references: [id])
 }
 
@@ -55,14 +57,16 @@ model Certificate {
   kraPin       String
   taxpayerName String?
   pdfUrl       String?
+  pdfContent   String? @db.Text  // Base64 encoded PDF data
   createdAt    DateTime @default(now())
+  details      Json?
   user         User     @relation(fields: [userId], references: [id])
 }
 
 model UsageLimit {
   id     String   @id @default(uuid())
   userId String
-  type   String   // 'KRA' or 'PDF'
+  type   String
   date   DateTime @default(now())
   count  Int      @default(0)
 
@@ -73,7 +77,33 @@ model Notification {
   id        String   @id @default(uuid())
   message   String
   type      String   // 'marquee' or 'popup'
-  active    Boolean  @default(true)
+  theme     String   @default("purple")
+  customTheme String?  @db.Text
+  active    Boolean  @default(false)
+  speed     Int      @default(30)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model ContactMessage {
+  id          String   @id @default(uuid())
+  userId      String
+  name        String
+  email       String
+  subject     String
+  message     String   @db.Text
+  status      String   @default("pending") // 'pending', 'resolved'
+  resolution  String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+model UserNotification {
+  id        String   @id @default(uuid())
+  userId    String
+  message   String   @db.Text
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
 }

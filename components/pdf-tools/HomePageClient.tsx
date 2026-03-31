@@ -1,15 +1,16 @@
 'use client';
 
 import { 
-  ArrowRight, Search, ShieldCheck, Zap, Sparkles, CheckCircle2, 
+  ArrowRight, Search, ShieldCheck, Zap, Sparkles,
   Clock, FileCheck, Users, Lock, Globe, FileText, Scissors, 
-  FileStack, FileCode, Wand2, LayoutGrid, MousePointer2 
+  FileStack, Wand2, LayoutGrid
 } from 'lucide-react';
 import React from 'react';
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { Card } from '@/components/ui/Card';
 import { type Locale } from '@/lib/i18n/config';
+import FAQSection from '@/components/home/FAQSection';
 
 interface HomePageClientProps {
   locale: Locale;
@@ -131,12 +132,17 @@ export default function HomePageClient({ locale }: HomePageClientProps) {
             <p className="text-xl text-[#E8D5D5] mb-12 max-w-[550px] leading-relaxed font-sans">
               Instantly verify KRA PINs and master your documents with 88+ professional PDF tools. Professional precision meets lightning-fast speed.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link href={isSignedIn ? `/${locale}/dashboard` : `/${locale}/sign-in`} className="btn-primary text-base px-8 py-4 flex items-center justify-center gap-2 group">
-                <Search size={20} /> Verify KRA PIN <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-              </Link>
-              <Link href={`/${locale}/pdf-tools`} className="inline-flex items-center justify-center rounded-xl px-8 py-4 text-base font-semibold tracking-wide text-white bg-white/5 border border-white/20 hover:bg-white/10 hover:border-white/40 transition-all duration-300 gap-2">
-                <FileText size={20} /> Explore PDF Tools
+            <div className="flex flex-col sm:flex-row gap-4 items-center">
+              <div className="flex flex-col gap-2 w-full sm:w-auto">
+                <Link href={isSignedIn ? `/${locale}/dashboard` : `/${locale}/sign-in`} className="btn-primary text-base px-8 py-4 flex items-center justify-center gap-2 group shadow-[0_0_20px_rgba(227,6,19,0.3)]">
+                  <Search size={20} /> Verify KRA PIN <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                </Link>
+                <p className="text-[10px] text-white/40 text-center uppercase tracking-widest font-bold">
+                  Free Daily Lookups • Secure
+                </p>
+              </div>
+              <Link href={`/${locale}/pdf-tools`} className="inline-flex items-center justify-center rounded-xl px-8 py-4 text-base font-semibold tracking-wide text-white bg-white/5 border border-white/20 hover:bg-white/10 hover:border-white/40 transition-all duration-300 gap-2 w-full sm:w-auto">
+                <FileText size={20} /> Explore 88+ PDF Tools
               </Link>
             </div>
           </div>
@@ -249,6 +255,9 @@ export default function HomePageClient({ locale }: HomePageClientProps) {
                     <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl ${feature.bg} mb-8 ${feature.color} group-hover:scale-110 transition-transform duration-500`}>
                       <Icon className="h-8 w-8" aria-hidden="true" />
                     </div>
+                    <div className="text-4xl font-bold text-white mb-2">
+                      Verified
+                    </div>
                     <h3 className="text-2xl font-bold text-white mb-4">
                       {feature.title}
                     </h3>
@@ -337,10 +346,10 @@ export default function HomePageClient({ locale }: HomePageClientProps) {
           <div className="space-y-4">
             <div className="text-4xl lg:text-5xl font-bold text-white flex items-center justify-center gap-3">
               <Users size={32} className="text-[var(--color-brand-red)]" />
-              1K+
+              Verified
             </div>
             <div className="text-sm font-bold text-[var(--color-brand-red)] uppercase tracking-widest bg-[var(--color-brand-red)]/10 py-1 px-4 rounded-full inline-block">
-              Active Users
+              Daily Active Users
             </div>
           </div>
           <div className="space-y-4">
@@ -373,14 +382,20 @@ export default function HomePageClient({ locale }: HomePageClientProps) {
         </div>
       </section>
 
+      {/* FAQ Section */}
+      <FAQSection />
+      
       {/* CTA Section */}
       <section className="py-32 px-6 border-t border-white/10 bg-black">
         <div className="max-w-4xl mx-auto text-center">
           <div className="inline-block p-4 rounded-2xl bg-white/5 border border-white/10 mb-8 animate-bounce">
             <Sparkles className="text-[var(--color-brand-red)]" size={32} />
           </div>
-          <h2 className="text-4xl md:text-7xl font-black text-white mb-8 tracking-tighter">Master Your workflow today.</h2>
-          <p className="text-[#BEA0A0] text-xl md:text-2xl mb-12 max-w-2xl mx-auto leading-relaxed">Join thousands of Kenyans using Akubrecah for secure compliance and high-performance document mastery.</p>
+          <h1 className="text-4xl md:text-7xl font-black text-white mb-8 tracking-tighter italic leading-[0.9]">
+            MASTER YOUR <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white/80 to-white/40">COMPLIANCE.</span>
+          </h1>
+          <p className="text-[#BEA0A0] text-xl md:text-2xl mb-12 max-w-2xl mx-auto leading-relaxed">Join thousands using Akubrecah for secure KRA compliance and high-performance document mastery.</p>
           <div className="flex flex-col sm:flex-row justify-center gap-6">
             <Link href={isSignedIn ? `/${locale}/dashboard` : `/${locale}/sign-in`} className="btn-primary text-xl px-12 py-5 flex items-center justify-center gap-3 group shadow-[0_0_20px_rgba(227,6,19,0.3)]">
               Get Started Free <ArrowRight className="group-hover:translate-x-2 transition-transform" />

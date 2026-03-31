@@ -134,6 +134,31 @@ export const DownloadButton: React.FC<DownloadButtonProps> = ({
       if (toolSlug && file) {
         addRecentFile(filename, file.size, toolSlug, toolName);
       }
+
+      // Auto-save to Database for easy retrieval (Requirement: Generated PDFs stored on DB)
+      if (file && file.size < 10 * 1024 * 1024) { // Only save < 10MB
+        (async () => {
+          try {
+            const reader = new FileReader();
+            reader.onloadend = async () => {
+              const base64Content = (reader.result as string).split(',')[1];
+              await fetch('/api/user/certificates', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  kraPin: toolSlug || 'PDF_TOOL',
+                  taxpayerName: filename || 'Generated PDF',
+                  details: { toolSlug, toolName, timestamp: new Date().toISOString() },
+                  pdfContent: base64Content
+                })
+              });
+            };
+            reader.readAsDataURL(file);
+          } catch (dbSaveErr) {
+             console.warn('[DB-SAVE] Automatic archive failed:', dbSaveErr);
+          }
+        })();
+      }
     }, 500);
   }, [file, blobUrl, filename, isDownloading, autoRevoke, onDownloadStart, onDownloadComplete, toolSlug, toolName]);
 

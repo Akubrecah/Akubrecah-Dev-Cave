@@ -7,7 +7,16 @@ export async function GET() {
   if (adminOrError instanceof NextResponse) return adminOrError;
 
   try {
-    const notifications = await prisma.notification.findMany({
+    const notifications = await (prisma as any).notification.findMany({
+      select: {
+        id: true,
+        message: true,
+        type: true,
+        active: true,
+        createdAt: true,
+        theme: true,
+        speed: true,
+      },
       orderBy: { createdAt: 'desc' },
     });
     return NextResponse.json(notifications);
@@ -18,31 +27,31 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const adminOrError = await requireAdmin();
-  if (adminOrError instanceof NextResponse) return adminOrError;
-
   try {
+    const adminOrError = await requireAdmin();
+    if (adminOrError instanceof NextResponse) return adminOrError;
+
     const body = await req.json();
-    const { message, type, active } = body;
+    const { message, type, active, theme, speed } = body;
 
-    if (!message || !type) {
-      return NextResponse.json({ error: 'message and type are required' }, { status: 400 });
-    }
-
-    // If active is true, deactivate all other notifications
+    // If active is true, deactivate all other notifications OF THE SAME TYPE
     if (active) {
-      await prisma.notification.updateMany({
-        where: { active: true },
-        data: { active: false },
+      await (prisma as any).notification.updateMany({
+        where: { type, active: true },
+        data: { active: false }
       });
     }
 
-    const notification = await prisma.notification.create({
-      data: {
-        message,
-        type,
-        active: active ?? true,
-      },
+    const notificationData: any = {
+      message,
+      type,
+      active: !!active,
+      theme: theme || 'purple',
+      speed: parseInt(speed) || 30,
+    };
+
+    const notification = await (prisma as any).notification.create({
+      data: notificationData,
     });
 
     return NextResponse.json(notification);
@@ -53,31 +62,33 @@ export async function POST(req: Request) {
 }
 
 export async function PATCH(req: Request) {
-  const adminOrError = await requireAdmin();
-  if (adminOrError instanceof NextResponse) return adminOrError;
-
   try {
+    const adminOrError = await requireAdmin();
+    if (adminOrError instanceof NextResponse) return adminOrError;
+
     const body = await req.json();
-    const { id, message, type, active } = body;
+    const { id, message, type, active, theme, speed } = body;
 
-    if (!id) {
-      return NextResponse.json({ error: 'id is required' }, { status: 400 });
-    }
-
-    // If active is true, deactivate all other notifications
+    // If active is true, deactivate all other notifications OF THE SAME TYPE
     if (active) {
-      await prisma.notification.updateMany({
-        where: { NOT: { id }, active: true },
-        data: { active: false },
+      await (prisma as any).notification.updateMany({
+        where: { 
+          type, 
+          active: true,
+          NOT: { id }
+        },
+        data: { active: false }
       });
     }
 
-    const notification = await prisma.notification.update({
+    const notification = await (prisma as any).notification.update({
       where: { id },
       data: {
         message,
         type,
-        active,
+        active: !!active,
+        theme: theme || 'purple',
+        speed: parseInt(speed) || 30,
       },
     });
 

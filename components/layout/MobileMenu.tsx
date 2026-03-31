@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useCallback, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { X, ChevronRight, ChevronDown } from 'lucide-react';
@@ -41,6 +42,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose, locale 
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const previousActiveElement = useRef<HTMLElement | null>(null);
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
+  const pathname = usePathname();
   const [touchStart, setTouchStart] = useState<number | null>(null);
 
   const categories: CategoryItem[] = [
@@ -218,7 +220,11 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose, locale 
                         <li>
                           <Link
                             href={item.href}
-                            className="block px-4 py-2 text-sm text-[hsl(var(--color-foreground))] hover:text-[hsl(var(--color-primary))] hover:bg-[hsl(var(--color-muted))] rounded-[var(--radius-md)] transition-colors"
+                            className={`block px-4 py-2 text-sm rounded-[var(--radius-md)] transition-all duration-300 ${
+                              pathname === item.href 
+                                ? 'text-[var(--color-brand-yellow)] bg-white/10' 
+                                : 'text-[hsl(var(--color-foreground))] hover:text-white hover:bg-[hsl(var(--color-muted))]'
+                            }`}
                             onClick={handleLinkClick}
                           >
                             All Tools
@@ -239,13 +245,22 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose, locale 
                     )}
                   </div>
                 ) : (
-                  <Link
-                    href={item.href}
-                    className="block px-4 py-3 font-medium text-[hsl(var(--color-foreground))] hover:bg-[hsl(var(--color-muted))] rounded-[var(--radius-md)] transition-colors"
-                    onClick={handleLinkClick}
-                  >
-                    {item.label}
-                  </Link>
+                  (() => {
+                    const active = pathname === item.href;
+                    return (
+                      <Link
+                        href={item.href}
+                        className={`block px-4 py-3 font-medium rounded-[var(--radius-md)] transition-all duration-300 ${
+                          active 
+                            ? 'text-[var(--color-brand-yellow)] bg-white/10' 
+                            : 'text-[hsl(var(--color-foreground))] hover:bg-[hsl(var(--color-muted))]'
+                        }`}
+                        onClick={handleLinkClick}
+                      >
+                        {item.label}
+                      </Link>
+                    );
+                  })()
                 )}
               </li>
             ))}
