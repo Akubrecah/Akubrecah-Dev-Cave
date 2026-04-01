@@ -1,11 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import prisma from '@/lib/prisma';
-
-const TIER_PRICES: Record<string, number> = {
-  'basic': 50,
-  'pro': 100,
-};
+import { TIERS, isValidTier } from '@/lib/pricing';
 
 export async function POST(req: Request) {
   try {
@@ -15,13 +11,13 @@ export async function POST(req: Request) {
     }
 
     const { tier } = await req.json();
-    const amount = TIER_PRICES[tier];
 
-    if (!amount) {
+    if (!tier || !isValidTier(tier)) {
       return NextResponse.json({ error: 'Invalid tier' }, { status: 400 });
     }
 
-    // 1. Get user from DB to obtain their email
+    const amount = TIERS[tier].price;
+
     const user = await prisma.user.findUnique({
       where: { clerkId: userId },
     });
@@ -30,7 +26,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'User not found in database. Please sync your account.' }, { status: 404 });
     }
 
-    // 2. Create pending transaction
+    // Create pending transaction
     const transaction = await prisma.transaction.create({
       data: {
         userId: user.id,
@@ -44,7 +40,7 @@ export async function POST(req: Request) {
     const host = req.headers.get('origin') || `https://${req.headers.get('host')}`;
     const callback_url = `${host}/api/payments/paystack/callback`;
 
-    // 3. Initiate Paystack Transaction
+    // Initiate Paystack Transaction
     const paystackRes = await fetch('https://api.paystack.co/transaction/initialize', {
       method: 'POST',
       headers: {
@@ -53,25 +49,26 @@ export async function POST(req: Request) {
       },
       body: JSON.stringify({
         email: user.email,
-        amount: amount * 100, // Paystack requires amount in subunits (Cents/Kobos)
+        amount: amount * 100, // Paystack requires subunits (fill in KES * 100 = kobo equivalent)
         currency: 'KES',
         reference: transaction.id,
         callback_url,
         metadata: {
           tier,
-          transactionId: transaction.id
+          transactionId: transaction.id,
+          tierName: TIERS[tier].name,
+          durationMs: TIERS[tier].durationMs,
+          filings: TIERS[tier].filings,
         }
       }),
     });
 
     const paystackData = await paystackRes.json();
 
-    // 4. Handle Paystack Response
     if (paystackRes.ok && paystackData.status) {
-      // Update transaction with the reference from Paystack
       await prisma.transaction.update({
         where: { id: transaction.id },
-        data: { stripeSessionId: paystackData.data.reference }, // Reusing stripeSessionId column
+        data: { stripeSessionId: paystackData.data.reference },
       });
 
       return NextResponse.json({ 
@@ -79,7 +76,7 @@ export async function POST(req: Request) {
         authorization_url: paystackData.data.authorization_url,
         reference: paystackData.data.reference,
         transactionId: transaction.id,
-        amount: amount * 100 // Amount in subunits
+        amount: amount * 100,
       });
     } else {
       console.error('Paystack Checkout Error:', paystackData);

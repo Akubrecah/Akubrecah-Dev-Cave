@@ -48,7 +48,7 @@ export default function FAQSection() {
     {
       icon: <Globe size={20} />,
       question: "How do I verify a KRA PIN online?",
-      answer: "Simply enter the KRA PIN in our verification tool. AkubrecaH connects to official compliance nodes to retrieve real-time status, taxpayer name, and registration details in milliseconds."
+      answer: "Simply enter the KRA PIN in our verification tool. AkubrecaH connects to official compliance channels to retrieve real-time status, taxpayer name, and registration details in milliseconds."
     },
     {
       icon: <ShieldCheck size={20} />,
@@ -57,7 +57,7 @@ export default function FAQSection() {
     },
     {
       icon: <Zap size={20} />,
-      question: "What makes AkubrecaH different from Cyber Cafes?",
+      question: "What makes AkubrecaH different from traditional service centres?",
       answer: "Speed and privacy. Instead of waiting or sharing your details with third parties, you can file Nil Returns and verify pins instantly from your own device, for free, with bank-grade security."
     },
     {

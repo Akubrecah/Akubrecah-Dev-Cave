@@ -86,11 +86,11 @@ export const UserNotificationBell = () => {
                         initial={{ opacity: 0, scale: 0.95, y: 10 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                        className="absolute right-0 mt-3 w-[360px] max-w-[calc(100vw-2rem)] bg-[#0f0f0f] border border-white/10 rounded-[32px] shadow-[0_24px_48px_-12px_rgba(0,0,0,0.5)] overflow-hidden z-[100]"
+                        className="absolute right-0 mt-3 w-[360px] max-w-[calc(100vw-2rem)] bg-white border border-[#D1D5DB] rounded-[32px] shadow-[0_24px_48px_-12px_rgba(0,0,0,0.15)] overflow-hidden z-[100]"
                     >
-                        <div className="p-6 border-b border-white/5 bg-white/[0.02] flex items-center justify-between">
-                            <h3 className="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
-                                <Bell size={14} className="text-[var(--color-brand-red)]" />
+                        <div className="p-6 border-b border-black/5 bg-black/[0.02] flex items-center justify-between">
+                            <h3 className="text-xs font-black text-[#2B2B2B] uppercase tracking-widest flex items-center gap-2">
+                                <Bell size={14} className="text-[#1F6F5B]" />
                                 Notifications
                             </h3>
                             {unreadCount > 0 && (
@@ -110,7 +110,7 @@ export const UserNotificationBell = () => {
                                         key={n.id}
                                         onClick={() => !n.isRead && markAsRead(n.id)}
                                         className={`p-4 rounded-2xl transition-all cursor-pointer group relative ${
-                                            n.isRead ? 'opacity-50 grayscale-[0.5]' : 'bg-white/5 border border-white/5 hover:border-white/10'
+                                            n.isRead ? 'opacity-40 grayscale' : 'bg-[#F2F2F2]/50 border border-[#D1D5DB]/50 hover:border-[#1F6F5B]/30 hover:bg-white'
                                         }`}
                                     >
                                         <div className="flex gap-4">
@@ -120,10 +120,10 @@ export const UserNotificationBell = () => {
                                                 </div>
                                             </div>
                                             <div className="flex-1 space-y-1">
-                                                <p className="text-xs font-medium text-gray-200 leading-relaxed">
+                                                <p className="text-xs font-bold text-[#2B2B2B] leading-relaxed">
                                                     {n.message}
                                                 </p>
-                                                <div className="flex items-center gap-2 text-[10px] text-gray-500 font-bold uppercase tracking-widest">
+                                                <div className="flex items-center gap-2 text-[10px] text-[#2E8B75] font-black uppercase tracking-widest">
                                                     <Clock size={10} />
                                                     {new Date(n.createdAt).toLocaleDateString()}
                                                 </div>
@@ -146,12 +146,12 @@ export const UserNotificationBell = () => {
                             )}
                         </div>
 
-                        <div className="p-4 border-t border-white/5 bg-white/[0.01] text-center">
+                        <div className="p-4 border-t border-black/5 bg-black/[0.01] text-center">
                             <button 
                                 onClick={() => setIsOpen(false)}
-                                className="text-[10px] font-black text-gray-500 uppercase tracking-widest hover:text-white transition-all"
+                                className="text-[10px] font-black text-[#2E8B75] uppercase tracking-widest hover:text-[#1F6F5B] transition-all"
                             >
-                                Close Terminal
+                                Close Signals
                             </button>
                         </div>
                     </motion.div>

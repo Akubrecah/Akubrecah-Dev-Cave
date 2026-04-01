@@ -4,7 +4,7 @@
 export const siteConfig = {
   name: 'Akubrecah',
   description: 'Your Professional KRA Compliance & PDF Mastery Suite. Verify KRA PINs and access 88+ powerful, private PDF tools locally in your browser.',
-  url: 'https://akubrecah.vercel.app', // Update with actual URL if known, assuming vercel for now
+  url: 'https://akubrecahdevcave.vercel.app/',
   ogImage: '/images/og-image.png',
   links: {
     github: 'https://github.com/AkubrecaH',
@@ -12,6 +12,10 @@ export const siteConfig = {
   },
   creator: 'AkubrecaH Team',
   keywords: [
+    'Retrieve KRA PIN',
+    'KRA PIN certificate via email',
+    'Lost KRA PIN',
+    'Check KRA PIN using ID',
     'KRA PIN verification',
     'Kenya tax compliance',
     'PDF tools',

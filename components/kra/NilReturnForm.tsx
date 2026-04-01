@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
 import { Input, Select } from '@/components/ui/FormField';
-import { CheckCircle2, AlertCircle, Download, Terminal, ChevronRight, ShieldCheck, Cpu, Database, Network } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Download, ClipboardList, ChevronRight, ShieldCheck, User, Database, Globe } from 'lucide-react';
+import { useUser } from '@clerk/nextjs';
 import { generateReceiptPdf, ReceiptPdfData } from '@/lib/pdf/generate-receipt-pdf';
 
 const OBLIGATIONS = [
@@ -41,32 +42,50 @@ export function NilReturnForm() {
     const [idNumber, setIdNumber] = useState("");
     const [idType, setIdType] = useState("KE");
     const [verifying, setVerifying] = useState(false);
-    const [terminalLogs, setTerminalLogs] = useState<{ id: string; msg: string; type: 'info' | 'success' | 'error' | 'cmd' }[]>([]);
+    const [activityLogs, setActivityLogs] = useState<{ id: string; msg: string; type: 'info' | 'success' | 'error' | 'cmd' }[]>([]);
+    const [isAdmin, setIsAdmin] = useState(false);
+    const { user, isLoaded } = useUser();
     const logEndRef = useRef<HTMLDivElement>(null);
 
     const addLog = (msg: string, type: 'info' | 'success' | 'error' | 'cmd' = 'info') => {
-        setTerminalLogs(prev => [...prev.slice(-15), { id: Math.random().toString(36), msg, type }]);
+        setActivityLogs(prev => [...prev.slice(-15), { id: Math.random().toString(36), msg, type }]);
     };
 
     useEffect(() => {
         logEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [terminalLogs]);
+    }, [activityLogs]);
 
     useEffect(() => {
-        addLog("System initialized. Ready for KRA direct filing.", "success");
-        addLog("Security layer active: AES-256 standard.", "info");
+        if (!isLoaded || !user) return;
+        const checkAdmin = async () => {
+            try {
+                const res = await fetch('/api/user/status');
+                if (res.ok) {
+                    const data = await res.json();
+                    setIsAdmin(data.role === 'admin');
+                }
+            } catch (err) {
+                console.error("Admin check failed:", err);
+            }
+        };
+        checkAdmin();
+    }, [user, isLoaded]);
+
+    useEffect(() => {
+        addLog("Ready to assist with your KRA filing.", "success");
+        addLog("Your connection is secure.", "info");
     }, []);
 
     async function handleVerifyId() {
         if (!idNumber) {
-            setError("Identification required.");
+            setError("Please enter your ID number.");
             addLog("Error: Missing ID number.", "error");
             return;
         }
 
         setVerifying(true);
         setError(null);
-        addLog(`Initiating PIN retrieval for ID: ${idNumber}...`, "cmd");
+        addLog(`Searching for KRA PIN matching ID: ${idNumber}...`, "cmd");
         
         try {
             const res = await fetch('/api/kra/check-pin', {
@@ -82,8 +101,8 @@ export function NilReturnForm() {
                 const pin = data.TaxpayerPIN || data.PIN;
                 setFormPin(pin);
                 setVerifyMode('pin');
-                addLog(`Success: PIN ${pin} localized for ${data.TaxpayerName || 'Identity'}.`, "success");
-                addLog("System auto-filling workspace.", "info");
+                addLog(`PIN Found: ${pin} (${data.TaxpayerName || 'Verified'}).`, "success");
+                addLog("Updating form with your details...", "info");
             } else {
                 throw new Error("No record found.");
             }
@@ -100,7 +119,7 @@ export function NilReturnForm() {
         setLoading(true);
         setResult(null);
         setError(null);
-        addLog("Filing handshake initiated...", "cmd");
+        addLog("Starting the filing process...", "cmd");
 
         const formData = new FormData(e.currentTarget);
         const data = {
@@ -123,7 +142,7 @@ export function NilReturnForm() {
             if (!res.ok) throw new Error(json.errorMessage || 'Filing execution failed.');
 
             setResult(json.RESPONSE as NilReturnResult);
-            addLog("Protocol complete. Acknowledgment received.", "success");
+            addLog("Filing successful! Confirmation received.", "success");
         } catch (err: unknown) {
             setError((err as Error).message);
             addLog(`Critical: ${(err as Error).message}`, "error");
@@ -135,7 +154,7 @@ export function NilReturnForm() {
     async function handleDownload() {
         if (!result) return;
         setDownloading(true);
-        addLog("Compiling secure PDF receipt...", "cmd");
+        addLog("Preparing your receipt...", "cmd");
         try {
             const pdfData: ReceiptPdfData = {
                 kraPin: formPin,
@@ -152,7 +171,7 @@ export function NilReturnForm() {
             a.download = `KRA_ACK_${result.AckNumber}.pdf`;
             a.click();
             URL.revokeObjectURL(url);
-            addLog("Receipt dispatched successfully.", "success");
+            addLog("Receipt downloaded successfully.", "success");
         } catch (_err) {
             addLog("Error generating binary export.", "error");
             setError('Receipt generation failed.');
@@ -163,15 +182,16 @@ export function NilReturnForm() {
 
     return (
         <div className="w-full max-w-6xl mx-auto flex flex-col lg:flex-row gap-0 border border-white/10 bg-white/5 backdrop-blur-3xl shadow-2xl rounded-[3rem] overflow-hidden">
-            {/* Terminal Sidebar */}
-            <div className="w-full lg:w-80 bg-black/40 border-b lg:border-b-0 lg:border-r border-white/10 p-4 font-mono text-[10px] flex flex-col h-[600px] lg:h-auto">
+            {/* Activity Log - Admin Only */}
+            {isAdmin && (
+                <div className="w-full lg:w-80 bg-black/40 border-b lg:border-b-0 lg:border-r border-white/10 p-4 font-mono text-[10px] flex flex-col h-[300px] lg:h-auto">
                 <div className="flex items-center gap-2 mb-4 text-[#F59E0B] border-b border-[#F59E0B]/10 pb-2">
-                    <Terminal size={14} />
-                    <span className="font-bold tracking-widest uppercase">Console.log</span>
+                    <ClipboardList size={14} />
+                    <span className="font-bold tracking-widest uppercase text-white/60">Activity Log</span>
                 </div>
                 <div className="flex-1 overflow-y-auto space-y-2 scrollbar-hide">
                     <AnimatePresence initial={false}>
-                        {terminalLogs.map((log) => (
+                        {activityLogs.map((log) => (
                             <motion.div
                                 key={log.id}
                                 initial={{ opacity: 0, x: -10 }}
@@ -193,18 +213,19 @@ export function NilReturnForm() {
                 <div className="mt-4 pt-4 border-t border-white/5 space-y-3">
                     <div className="flex items-center gap-2 text-emerald-500/60">
                         <ShieldCheck size={12} />
-                        <span className="uppercase tracking-tighter">Secure Link Active</span>
+                        <span className="uppercase tracking-tighter">Connection Secure</span>
                     </div>
                     <div className="flex items-center gap-2 text-slate-500">
-                        <Cpu size={12} />
-                        <span className="uppercase tracking-tighter">Hardware Accel: ON</span>
+                        <User size={12} />
+                        <span className="uppercase tracking-tighter">Identity Verified</span>
                     </div>
                     <div className="flex items-center gap-2 text-slate-500">
-                        <Network size={12} />
-                        <span className="uppercase tracking-tighter">KRA Gateway: CONNECTED</span>
+                        <Globe size={12} />
+                        <span className="uppercase tracking-tighter">Global KRA Network</span>
                     </div>
                 </div>
             </div>
+            )}
 
             {/* Main Action Area */}
             <div className="flex-1 p-6 lg:p-10 relative overflow-hidden flex flex-col">
@@ -219,16 +240,33 @@ export function NilReturnForm() {
                         className="space-y-2"
                     >
                         <h2 className="text-3xl lg:text-5xl font-extrabold uppercase tracking-tighter text-white leading-none">
-                            KRA <span className="text-primary italic">Workspace</span>
+                            Easy KRA <span className="text-primary italic">Filing</span>
                         </h2>
                         <div className="flex items-center gap-2">
                             <span className="h-[2px] w-12 bg-primary"></span>
-                            <p className="text-xs uppercase tracking-[0.2em] text-[#F59E0B] font-bold">Protocol: Nil Return Filing</p>
+                            <p className="text-xs uppercase tracking-[0.2em] text-[#F59E0B] font-bold">Type: Nil Return</p>
                         </div>
                     </motion.div>
                 </div>
 
                 <div className="flex-1 relative z-10">
+                    {/* Detailed PIN Banner */}
+                    {formPin && verifyMode === 'pin' && (
+                        <motion.div 
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="mb-8 p-6 rounded-[2rem] bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-6"
+                        >
+                            <div className="w-14 h-14 bg-emerald-500 rounded-2xl flex items-center justify-center text-white shadow-lg">
+                                <ShieldCheck size={28} />
+                            </div>
+                            <div>
+                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-500 mb-1">PIN Successfully Found</p>
+                                <h4 className="text-2xl font-mono font-black text-white tracking-widest">{formPin}</h4>
+                            </div>
+                        </motion.div>
+                    )}
+
                     {!result ? (
                         <form onSubmit={handleSubmit} className="space-y-8">
                             {/* Mode Control - Staggered Reveal */}
@@ -243,14 +281,14 @@ export function NilReturnForm() {
                                     onClick={() => setVerifyMode('pin')}
                                     className={`px-8 py-3 text-[10px] font-black uppercase tracking-widest transition-all rounded-xl ${verifyMode === 'pin' ? 'bg-white text-black shadow-lg' : 'text-white/40 hover:text-white'}`}
                                 >
-                                    PIN Manual
+                                    Enter PIN
                                 </button>
                                 <button 
                                     type="button"
                                     onClick={() => setVerifyMode('id')}
                                     className={`px-8 py-3 text-[10px] font-black uppercase tracking-widest transition-all rounded-xl ${verifyMode === 'id' ? 'bg-white text-black shadow-lg' : 'text-white/40 hover:text-white'}`}
                                 >
-                                    ID Retrieval
+                                    Find PIN
                                 </button>
                             </motion.div>
 
@@ -263,17 +301,17 @@ export function NilReturnForm() {
                                         exit={{ opacity: 0, y: -10 }}
                                         className="space-y-4 max-w-md"
                                     >
-                                        <div className="flex gap-4">
+                                        <div className="flex flex-col sm:flex-row gap-4">
                                             <Select 
                                                 value={idType} 
                                                 onChange={e => setIdType(e.target.value)}
-                                                className="w-[140px] h-14 rounded-2xl border-white/10 bg-white/5 text-[10px] font-black uppercase tracking-widest"
+                                                className="w-full sm:w-[140px] h-14 rounded-2xl border-white/10 bg-white/5 text-[10px] font-black uppercase tracking-widest"
                                             >
                                                 <option value="KE">Kenyan</option>
                                                 <option value="NKE">Alien</option>
                                             </Select>
                                             <Input 
-                                                placeholder="ID IDENTIFIER" 
+                                                placeholder="ID NUMBER" 
                                                 value={idNumber}
                                                 onChange={e => setIdNumber(e.target.value)}
                                                 className="flex-1 h-14 rounded-2xl border-white/10 bg-white/5 text-xl font-mono placeholder:opacity-20 uppercase px-6"
@@ -285,7 +323,7 @@ export function NilReturnForm() {
                                             loading={verifying}
                                             className="w-full bg-white rounded-2xl text-black h-14 font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-3 hover:bg-[var(--color-brand-red)] hover:text-white transition-all italic"
                                         >
-                                            Execute Discovery <ChevronRight size={16} />
+                                            Find My PIN <ChevronRight size={16} />
                                         </Button>
                                     </motion.div>
                                 ) : (
@@ -297,7 +335,7 @@ export function NilReturnForm() {
                                         className="space-y-4 max-w-md"
                                     >
                                         <div className="space-y-4">
-                                            <label className="text-[10px] font-black uppercase tracking-[0.3em] text-white/30 ml-4 italic">Taxpayer Registry PIN</label>
+                                            <label className="text-[10px] font-black uppercase tracking-[0.3em] text-white/30 ml-4 italic">Your KRA PIN</label>
                                             <Input 
                                                 name="pin" 
                                                 placeholder="AXXXXXXXXX" 
@@ -346,7 +384,7 @@ export function NilReturnForm() {
                                     loading={loading} 
                                     className="w-full lg:w-auto px-16 h-18 bg-[var(--color-brand-red)] hover:bg-white hover:text-black text-white rounded-3xl font-black uppercase italic tracking-tighter text-xl shadow-[0_10px_30px_rgba(227,6,19,0.4)] transition-all hover:translate-y-[-2px]"
                                 >
-                                    Authorize Filing Dispatch
+                                    Submit My Return
                                 </Button>
                             </div>
                         </form>
@@ -361,8 +399,8 @@ export function NilReturnForm() {
                             </div>
                             
                             <div className="space-y-2">
-                                <h3 className="text-3xl font-black uppercase tracking-tighter text-emerald-500 leading-none">Status: Success</h3>
-                                <p className="text-[10px] uppercase tracking-[0.3em] text-emerald-500/60 font-medium">Record persistent in KRA infrastructure</p>
+                                <h3 className="text-3xl font-black uppercase tracking-tighter text-emerald-500 leading-none">Success!</h3>
+                                <p className="text-[10px] uppercase tracking-[0.3em] text-emerald-500/60 font-medium">Your return has been filed successfully.</p>
                             </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-4 max-w-2xl">
@@ -392,7 +430,7 @@ export function NilReturnForm() {
                                     onClick={() => setResult(null)} 
                                     className="px-8 h-14 border border-white/10 hover:bg-white/10 rounded-2xl font-black uppercase tracking-widest text-[10px] text-white/50 hover:text-white transition-all"
                                 >
-                                    Return to Node
+                                    File Another Return
                                 </Button>
                             </div>
                         </motion.div>
@@ -407,7 +445,7 @@ export function NilReturnForm() {
                     >
                         <AlertCircle size={20} />
                         <div>
-                            <p className="text-[10px] font-black uppercase tracking-widest opacity-60">System Fault Detected</p>
+                            <p className="text-[10px] font-black uppercase tracking-widest opacity-60">Filing Issue Detected</p>
                             <p className="text-sm font-bold">{error}</p>
                         </div>
                     </motion.div>

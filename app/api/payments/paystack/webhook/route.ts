@@ -1,13 +1,34 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import prisma from '@/lib/prisma';
+import { TIERS, isValidTier } from '@/lib/pricing';
+
+/**
+ * Computes subscriptionEnd = now + durationMs for the given tier.
+ * Returns the full user updateData object for prisma.user.update.
+ */
+function buildSubscriptionUpdate(tier: string): Record<string, unknown> {
+  if (!isValidTier(tier)) return {};
+
+  const { durationMs, filings } = TIERS[tier];
+  const now = new Date();
+  const subscriptionEnd = new Date(now.getTime() + durationMs);
+
+  return {
+    role: 'premium',
+    subscriptionStatus: 'active',
+    subscriptionTier: tier,
+    subscriptionEnd,
+    // Clear legacy pdfPremiumEnd
+    pdfPremiumEnd: null,
+  };
+}
 
 export async function POST(req: Request) {
   try {
     const rawBody = await req.text();
     const signature = req.headers.get('x-paystack-signature');
 
-    // 1. Validate signature
     if (!signature) {
       return NextResponse.json({ error: 'Missing signature' }, { status: 400 });
     }
@@ -20,80 +41,50 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
     }
 
-    // 2. Parse Event
     const event = JSON.parse(rawBody);
 
-    // 3. Handle charge.success
     if (event.event === 'charge.success') {
       const { reference, status, metadata } = event.data;
 
-      // Find transaction in DB
       const transaction = await prisma.transaction.findFirst({
         where: { id: metadata.transactionId },
         include: { user: true },
       });
 
       if (!transaction) {
-        console.warn('Paystack Webhook: Transaction not found for request ID:', metadata.transactionId);
-        return NextResponse.json({ success: true }); // Return 200 so Paystack stops trying
+        console.warn('Paystack Webhook: Transaction not found:', metadata.transactionId);
+        return NextResponse.json({ success: true });
       }
 
-      // If already processed via callback return early
       if (transaction.status === 'completed') {
         return NextResponse.json({ success: true });
       }
 
       if (status === 'success') {
-        // Update transaction status
         await prisma.transaction.update({
           where: { id: transaction.id },
-          data: {
-            status: 'completed',
-            stripeSessionId: reference
-          },
+          data: { status: 'completed', stripeSessionId: reference },
         });
 
-        // Grant subscription based on tier
         const tier = transaction.tier;
-        const now = new Date();
-        
-        const updateData: any = {};
-        
-        if (tier === 'hourly') {
-          updateData.pdfPremiumEnd = new Date(now.getTime() + 1 * 60 * 60 * 1000);
-        } else if (tier === 'three_hour') {
-          updateData.pdfPremiumEnd = new Date(now.getTime() + 3 * 60 * 60 * 1000);
-        } else if (tier === 'daily') {
-          updateData.pdfPremiumEnd = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-        } else if (tier === 'weekly') {
-          updateData.role = 'cyber';
-          updateData.subscriptionStatus = 'active';
-          updateData.subscriptionEnd = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-        } else if (tier === 'monthly') {
-          updateData.role = 'cyber';
-          updateData.subscriptionStatus = 'active';
-          updateData.subscriptionEnd = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
-        }
+        const updateData = buildSubscriptionUpdate(tier ?? '');
 
         if (Object.keys(updateData).length > 0) {
           await prisma.user.update({
             where: { id: transaction.userId },
             data: updateData,
           });
-          console.log(`✅ ${tier} access granted to user ${transaction.userId} via Paystack Webhook`);
+          const tierInfo = isValidTier(tier ?? '') ? TIERS[tier as keyof typeof TIERS] : null;
+          console.log(`✅ ${tierInfo?.name ?? tier} access (${tierInfo?.label}) granted to user ${transaction.userId} via Paystack Webhook`);
         }
       } else {
         await prisma.transaction.update({
           where: { id: transaction.id },
-          data: { 
-            status: 'failed',
-            failureReason: `Paystack webhook event: ${event.event}`
-          },
+          data: { status: 'failed', failureReason: `Paystack webhook event: ${event.event}` },
         });
       }
     }
 
-    // Must return 200 OK so Paystack doesn't retry
     return NextResponse.json({ success: true });
 
   } catch (error) {

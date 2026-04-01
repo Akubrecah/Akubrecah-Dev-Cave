@@ -13,9 +13,9 @@ export default function KraSolutionsHub() {
   const solutions = [
     {
       id: 'audit-core',
-      title: 'Audit Core',
+      title: 'PIN Services',
       subtitle: 'PIN Certificate',
-      description: 'Instant KRA PIN verification and professional certificate generation engine.',
+      description: 'Quick KRA PIN verification and professional certificate retrieval.',
       icon: FileCheck2,
       color: 'text-green-500',
       bg: 'bg-green-500/10',
@@ -23,9 +23,9 @@ export default function KraSolutionsHub() {
     },
     {
       id: 'nil-return',
-      title: 'Filing Node',
-      subtitle: 'Nil Return Filing',
-      description: 'Automated interactive filing interface directly synchronized with KRA databases.',
+      title: 'Filing Services',
+      subtitle: 'Nil Return',
+      description: 'Simple step-by-step filing for taxpayers with zero income.',
       icon: Activity,
       color: 'text-yellow-500',
       bg: 'bg-yellow-500/10',
@@ -34,7 +34,7 @@ export default function KraSolutionsHub() {
   ];
 
   return (
-    <div className="min-h-screen pt-32 pb-16 px-6 font-sans relative overflow-hidden bg-black text-white">
+    <div className="min-h-screen pt-24 sm:pt-32 pb-16 px-4 sm:px-6 font-sans relative overflow-hidden bg-black text-white">
       {/* Background Glows */}
       <div className="absolute top-[-200px] left-1/4 -translate-x-1/2 w-[600px] h-[600px] pointer-events-none z-0" 
            style={{ background: 'radial-gradient(ellipse at center, rgba(227, 6, 19, 0.3) 0%, transparent 70%)' }} />
@@ -49,14 +49,14 @@ export default function KraSolutionsHub() {
             <Sparkles className="h-4 w-4 text-[var(--color-brand-red)]" />
             <span className="text-xs font-black uppercase tracking-widest italic">KRA Solutions Suite</span>
           </div>
-          <h1 className="text-6xl lg:text-8xl font-black text-white leading-[0.85] mb-8 tracking-tighter italic uppercase">
-            Compliance <br/>
+          <h1 className="text-4xl sm:text-6xl lg:text-8xl font-black text-white leading-[0.85] mb-6 sm:mb-8 tracking-tighter italic uppercase">
+            Tax <br/>
             <span className="bg-clip-text text-transparent bg-gradient-to-br from-[var(--color-brand-red)] to-[var(--color-brand-yellow)]">
-              Link Path.
+              Services.
             </span>
           </h1>
           <p className="text-xl text-[#BEA0A0] max-w-[600px] mx-auto leading-relaxed font-bold uppercase tracking-wide">
-            Select an operational node to begin your secure KRA compliance protocol.
+            Choose a service below to manage your KRA compliance quickly and easily.
           </p>
         </motion.div>
 
@@ -69,7 +69,7 @@ export default function KraSolutionsHub() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: idx * 0.1 }}
-                  className="glass-panel p-12 cursor-pointer border-white/10 hover:border-[var(--color-brand-red)] transition-all duration-500 group rounded-[3rem] bg-[#0a0a0a] shadow-2xl relative overflow-hidden"
+                  className="glass-panel p-8 sm:p-12 cursor-pointer border-white/10 hover:border-[var(--color-brand-red)] transition-all duration-500 group rounded-[2rem] sm:rounded-[3rem] bg-[#0a0a0a] shadow-2xl relative overflow-hidden"
                 >
                   <div className="absolute -left-10 -top-10 w-40 h-40 bg-[var(--color-brand-red)]/5 blur-3xl rounded-full group-hover:bg-[var(--color-brand-red)]/10 transition-colors" />
                   
@@ -81,7 +81,7 @@ export default function KraSolutionsHub() {
                     <h2 className="text-4xl font-black text-white mb-6 italic tracking-tighter uppercase">{sol.subtitle}</h2>
                     <p className="text-[#BEA0A0] text-sm leading-relaxed mb-10 uppercase tracking-widest font-bold">{sol.description}</p>
                     <div className="inline-flex items-center justify-center gap-4 px-10 py-5 rounded-3xl bg-white/5 text-white font-black uppercase tracking-[0.2em] border border-white/5 group-hover:bg-[var(--color-brand-red)] transition-all">
-                      Initialize Node <ArrowRight className="h-4 w-4 group-hover:translate-x-2 transition-transform" />
+                      Start Now <ArrowRight className="h-4 w-4 group-hover:translate-x-2 transition-transform" />
                     </div>
                   </div>
                 </motion.div>

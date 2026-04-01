@@ -1,32 +1,29 @@
 import { MetadataRoute } from 'next';
+import { siteConfig } from '@/config/site';
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://yourdomain.com';
+const BASE_URL = siteConfig.url.endsWith('/') ? siteConfig.url.slice(0, -1) : siteConfig.url;
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  return [
-    {
-      url: `${BASE_URL}/`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 1,
-    },
-    {
-      url: `${BASE_URL}/about`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
-    {
-      url: `${BASE_URL}/pricing`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.9,
-    },
-    {
-      url: `${BASE_URL}/sign-up`,
-      lastModified: new Date(),
-      changeFrequency: 'yearly',
-      priority: 0.5,
-    },
+  const routes = [
+    '',
+    '/about',
+    '/pricing',
+    '/contact',
+    '/pdf-tools',
+    '/pdf-lab',
+    '/kra-solutions',
+    '/kra-solutions/nil-return',
+    '/kra-solutions/audit-core',
+    '/checkout',
+    '/dashboard',
+    '/sign-up',
+    '/sign-in',
   ];
+
+  return routes.map((route) => ({
+    url: `${BASE_URL}/en${route}`,
+    lastModified: new Date(),
+    changeFrequency: route === '' ? 'daily' : 'weekly',
+    priority: route === '' ? 1 : 0.8,
+  }));
 }

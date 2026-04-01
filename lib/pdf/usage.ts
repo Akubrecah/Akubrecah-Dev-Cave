@@ -1,23 +1,12 @@
 import prisma from '@/lib/prisma';
 import { auth } from '@clerk/nextjs/server';
+import { TIERS, isValidTier } from '@/lib/pricing';
 
 export type UsageType = 'KRA' | 'PDF';
 
-// Tier-based daily limits
-const TIER_LIMITS: Record<string, number> = {
-  free: 2,
-  basic: 10,
-  pro: 999999,
-  enterprise: 999999,
-  // Legacy / other tiers
-  weekly: 999999,
-  monthly: 999999,
-  daily_pro: 999999,
-  none: 2,
-};
-
-function getDailyLimit(tier: string | null | undefined): number {
-  return TIER_LIMITS[tier ?? 'free'] ?? 2;
+function getTierLimit(tier: string | null | undefined): number {
+  if (!tier || !isValidTier(tier)) return 0;
+  return TIERS[tier].filings;
 }
 
 export async function checkUsageLimit(type: UsageType): Promise<{
@@ -26,10 +15,14 @@ export async function checkUsageLimit(type: UsageType): Promise<{
   remaining: number;
   isPremium: boolean;
   tier: string;
-  dailyLimit: number;
+  filingLimit: number;
+  timeExpired: boolean;
+  subscriptionEnd: string | null;
 }> {
   const { userId: clerkId } = await auth();
-  if (!clerkId) return { allowed: false, count: 0, remaining: 0, isPremium: false, tier: 'free', dailyLimit: 2 };
+  if (!clerkId) {
+    return { allowed: false, count: 0, remaining: 0, isPremium: false, tier: 'free', filingLimit: 0, timeExpired: false, subscriptionEnd: null };
+  }
 
   const dbUser = await prisma.user.findUnique({
     where: { clerkId },
@@ -43,56 +36,65 @@ export async function checkUsageLimit(type: UsageType): Promise<{
     },
   });
 
-  if (!dbUser) return { allowed: false, count: 0, remaining: 0, isPremium: false, tier: 'free', dailyLimit: 2 };
+  if (!dbUser) {
+    return { allowed: false, count: 0, remaining: 0, isPremium: false, tier: 'free', filingLimit: 0, timeExpired: false, subscriptionEnd: null };
+  }
 
   const now = new Date();
 
-  // Admins & Cyber roles always premium/unlimited
-  const isPrivilegedRole = dbUser.role === 'admin' || dbUser.role === 'cyber';
+  // Admins & Premium roles are always unlimited
+  const isPrivilegedRole = dbUser.role === 'admin' || dbUser.role === 'premium' || dbUser.role === 'cyber';
 
-  // Determine active tier
-  const hasActiveSub =
+  if (isPrivilegedRole) {
+    return { allowed: true, count: 0, remaining: 999999, isPremium: true, tier: dbUser.subscriptionTier || 'admin', filingLimit: 999999, timeExpired: false, subscriptionEnd: null };
+  }
+
+  // Time-gate check: subscription must be active AND not expired
+  const hasActiveTimedSub =
     dbUser.subscriptionStatus === 'active' &&
     dbUser.subscriptionEnd != null &&
     new Date(dbUser.subscriptionEnd) > now;
 
-  const activeTier = hasActiveSub
-    ? (dbUser.subscriptionTier ?? 'free')
-    : (dbUser.pdfPremiumEnd && new Date(dbUser.pdfPremiumEnd) > now)
-    ? 'pro' // treat pdfPremiumEnd as "pro" level for PDF
-    : 'free';
+  const activeTier = hasActiveTimedSub ? (dbUser.subscriptionTier ?? 'free') : 'free';
+  const timeExpired = !hasActiveTimedSub && dbUser.subscriptionStatus === 'active' && dbUser.subscriptionEnd != null;
 
-  const isPremium = isPrivilegedRole || hasActiveSub || (dbUser.pdfPremiumEnd != null && new Date(dbUser.pdfPremiumEnd) > now);
-  const dailyLimit = isPrivilegedRole ? 999999 : getDailyLimit(activeTier);
-
-  if (dailyLimit >= 999999) {
-    return { allowed: true, count: 0, remaining: 999999, isPremium: true, tier: activeTier, dailyLimit };
+  // If time has expired, treat as free
+  if (!hasActiveTimedSub) {
+    return { allowed: false, count: 0, remaining: 0, isPremium: false, tier: 'free', filingLimit: 0, timeExpired, subscriptionEnd: dbUser.subscriptionEnd?.toISOString() ?? null };
   }
 
-  // Check daily usage count
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const filingLimit = getTierLimit(activeTier);
 
-  const usage = await prisma.usageLimit.findUnique({
+  // Unlimited tiers
+  if (filingLimit >= 999999) {
+    return { allowed: true, count: 0, remaining: 999999, isPremium: true, tier: activeTier, filingLimit, timeExpired: false, subscriptionEnd: dbUser.subscriptionEnd?.toISOString() ?? null };
+  }
+
+  // Count filings used since subscription started (not just today)
+  const subStart = dbUser.subscriptionEnd
+    ? new Date(new Date(dbUser.subscriptionEnd).getTime() - (isValidTier(activeTier) ? TIERS[activeTier].durationMs : 0))
+    : now;
+
+  const usage = await prisma.usageLimit.findMany({
     where: {
-      userId_type_date: {
-        userId: dbUser.id,
-        type,
-        date: today,
-      },
+      userId: dbUser.id,
+      type,
+      date: { gte: subStart },
     },
   });
 
-  const count = usage?.count || 0;
-  const remaining = Math.max(0, dailyLimit - count);
+  const count = usage.reduce((sum, u) => sum + u.count, 0);
+  const remaining = Math.max(0, filingLimit - count);
 
   return {
-    allowed: count < dailyLimit,
+    allowed: count < filingLimit,
     count,
     remaining,
-    isPremium,
+    isPremium: true,
     tier: activeTier,
-    dailyLimit,
+    filingLimit,
+    timeExpired: false,
+    subscriptionEnd: dbUser.subscriptionEnd?.toISOString() ?? null,
   };
 }
 

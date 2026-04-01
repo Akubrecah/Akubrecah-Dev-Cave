@@ -541,7 +541,8 @@ export default function AdminDashboard() {
                         <select value={editForm.role} onChange={e => setEditForm(p => ({ ...p, role: e.target.value }))} className="w-full px-8 py-5 bg-white/5 border border-white/10 rounded-3xl text-sm font-black italic uppercase tracking-widest focus:outline-none focus:border-[var(--color-brand-red)] text-white">
                            <option value="user">USER</option>
                            <option value="admin">ADMIN</option>
-                           <option value="cyber">CYBER</option>
+                           <option value="premium">PREMIUM</option>
+                           <option value="cyber">CYBER (Legacy)</option>
                            <option value="enterprise">ENTERPRISE</option>
                         </select>
                      </div>

@@ -6,7 +6,7 @@ import { Zap, Clock, ShieldCheck, Star, RefreshCcw } from 'lucide-react';
 import Link from 'next/link';
 
 interface UserStatus {
-  isCyberPro: boolean;
+  isPremiumUser: boolean;
   hasPdfPremium: boolean;
   subscriptionTier: string;
   subscriptionStatus: string;
@@ -51,7 +51,7 @@ export const UserCreditsIndicator = () => {
     if (!status) return;
 
     const timer = setInterval(() => {
-      const target = status.isCyberPro && status.subscriptionEnd 
+      const target = status.isPremiumUser && status.subscriptionEnd 
         ? new Date(status.subscriptionEnd) 
         : new Date(status.usage.nextRefresh);
       
@@ -82,20 +82,20 @@ export const UserCreditsIndicator = () => {
 
   if (!isLoaded || !isSignedIn) return null;
   if (loading && !status) return (
-    <div className="h-9 w-24 bg-white/5 animate-pulse rounded-full border border-white/10" />
+    <div className="h-9 w-24 bg-black/5 animate-pulse rounded-full border border-black/10" />
   );
   if (!status) return null;
 
   return (
     <div className="flex items-center gap-2 group">
-      {status.isCyberPro ? (
+      {status.isPremiumUser ? (
         <div className="flex flex-col items-end mr-1">
           <Link 
             href="/pricing"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-[#F2E600]/20 to-[#D4A017]/20 border border-[#F2E600]/40 text-[#2B2B2B] font-bold text-xs shadow-sm hover:shadow-md transition-all"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#1F6F5B] text-white font-black text-[10px] shadow-sm hover:shadow-md transition-all uppercase tracking-widest italic"
           >
-            <Star size={12} className="fill-[#F2E600] text-[#F2E600]" />
-            <span className="uppercase tracking-widest text-[#2B2B2B]">Premium</span>
+            <Star size={10} className="fill-[#F2E600] text-[#F2E600]" />
+            <span>Premium</span>
           </Link>
           <span className="text-[10px] text-[#2E8B75] font-mono mt-0.5 flex items-center gap-1">
              <Clock size={8} /> {timeLeft} left
@@ -116,7 +116,7 @@ export const UserCreditsIndicator = () => {
             </span>
           </Link>
           <span className="text-[9px] text-[#2E8B75] font-mono mt-0.5 flex items-center gap-1 group-hover:text-[#1F6F5B] transition-colors">
-            {status.usage.limit >= 999999 ? 'Privileged Node' : `Resets in ${timeLeft}`}
+            {status.usage.limit >= 999999 ? 'Enterprise Tier' : `Resets in ${timeLeft}`}
           </span>
         </div>
       )}

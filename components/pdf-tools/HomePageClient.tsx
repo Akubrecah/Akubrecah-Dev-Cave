@@ -107,14 +107,14 @@ export default function HomePageClient({ locale }: HomePageClientProps) {
     <div className="flex flex-col min-h-screen">
       
       {/* Hero Section - Dual Focus */}
-      <section className="relative min-h-[95vh] flex items-center py-24 overflow-hidden bg-black">
+      <section className="relative min-h-screen flex items-center py-16 md:py-24 overflow-hidden bg-black">
         {/* Glow Effects */}
         <div className="absolute top-[-200px] left-1/4 -translate-x-1/2 w-[600px] h-[600px] pointer-events-none z-0" 
              style={{ background: 'radial-gradient(ellipse at center, rgba(227, 6, 19, 0.3) 0%, transparent 70%)' }} aria-hidden="true"></div>
         <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[80%] pointer-events-none opacity-40"
              style={{ background: 'radial-gradient(ellipse at center, rgba(30, 60, 220, 0.2) 0%, transparent 60%)' }} aria-hidden="true"></div>
 
-        <div className="max-w-[1400px] mx-auto px-6 lg:px-12 w-full grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center relative z-10">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 w-full grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-24 items-center relative z-10">
           
           <div className="hero-text text-left">
             <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 rounded-full bg-white/5 border border-white/10 shadow-sm backdrop-blur-md text-white/90">
@@ -123,13 +123,13 @@ export default function HomePageClient({ locale }: HomePageClientProps) {
                 The Ultimate KRA & PDF Intelligence Platform
               </span>
             </div>
-            <h1 className="text-5xl lg:text-7xl font-bold text-white leading-tight mb-8 tracking-tight">
+            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-white leading-tight mb-6 sm:mb-8 tracking-tight">
               One Suite. <br/>
               <span className="bg-clip-text text-transparent bg-gradient-to-br from-[var(--color-brand-red)] to-[var(--color-brand-yellow)]">
                 Infinite Power.
               </span>
             </h1>
-            <p className="text-xl text-[#E8D5D5] mb-12 max-w-[550px] leading-relaxed font-sans">
+            <p className="text-base sm:text-xl text-[#E8D5D5] mb-8 sm:mb-12 max-w-[550px] leading-relaxed font-sans">
               Instantly verify KRA PINs and master your documents with 88+ professional PDF tools. Professional precision meets lightning-fast speed.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 items-center">
@@ -148,7 +148,7 @@ export default function HomePageClient({ locale }: HomePageClientProps) {
           </div>
 
           {/* Combined Preview Card */}
-          <div className="relative rounded-3xl border border-white/10 overflow-hidden group h-[500px] lg:h-[600px]" 
+          <div className="relative rounded-3xl border border-white/10 overflow-hidden group h-[360px] sm:h-[460px] lg:h-[600px]" 
                style={{ background: 'linear-gradient(135deg, #1A1A1A 0%, #111111 100%)' }}>
             <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-brand-red)]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             <div className="absolute top-6 left-6 bg-white/5 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold border border-white/10 text-white/60">
@@ -181,7 +181,7 @@ export default function HomePageClient({ locale }: HomePageClientProps) {
                </div>
 
                {/* PDF Component */}
-               <div className="glass-panel p-6 w-full max-w-[340px] border border-white/10 shadow-2xl transform hover:scale-[1.02] transition-transform duration-500 space-y-4 translate-x-4 lg:translate-x-8"
+               <div className="glass-panel p-5 w-full max-w-[300px] border border-white/10 shadow-2xl transform hover:scale-[1.02] transition-transform duration-500 space-y-4 lg:translate-x-8"
                     style={{ background: 'rgba(30, 30, 30, 0.6)', backdropFilter: 'blur(20px)' }}>
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-2 text-white/50 text-xs">
@@ -237,10 +237,10 @@ export default function HomePageClient({ locale }: HomePageClientProps) {
       `}} />
 
       {/* Main Features Grid */}
-      <section className="py-32 px-6 bg-[#0a0a0a]" aria-label="Features">
+      <section className="py-16 sm:py-24 lg:py-32 px-4 sm:px-6 bg-[#0a0a0a]" aria-label="Features">
           <div className="max-w-[1400px] mx-auto w-full">
-            <div className="text-center mb-20">
-              <h2 className="text-4xl lg:text-6xl font-bold text-white mb-6">
+            <div className="text-center mb-10 sm:mb-16 lg:mb-20">
+              <h2 className="text-3xl sm:text-4xl lg:text-6xl font-bold text-white mb-4 sm:mb-6">
                 Engineered for Professionals
               </h2>
               <p className="text-[#E8D5D5]/70 max-w-2xl mx-auto text-xl font-sans">
@@ -272,14 +272,14 @@ export default function HomePageClient({ locale }: HomePageClientProps) {
       </section>
 
       {/* PDF Tools Secondary Hero Section */}
-      <section className="py-32 px-6 bg-[#111111] overflow-hidden relative">
+      <section className="py-16 sm:py-24 lg:py-32 px-4 sm:px-6 bg-[#111111] overflow-hidden relative">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full opacity-20 pointer-events-none"
              style={{ background: 'radial-gradient(circle at center, var(--color-brand-red) 0%, transparent 60%)' }}></div>
         
         <div className="max-w-[1400px] mx-auto w-full relative z-10">
-          <div className="flex flex-col lg:flex-row items-center gap-20">
+          <div className="flex flex-col lg:flex-row items-center gap-10 lg:gap-20">
             <div className="flex-1 text-left">
-              <h2 className="text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight">
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 sm:mb-6 leading-tight">
                 Master Your PDFs <br/>
                 <span className="text-[var(--color-brand-red)]">Private. Fast. Powerful.</span>
               </h2>
@@ -309,10 +309,10 @@ export default function HomePageClient({ locale }: HomePageClientProps) {
       </section>
 
       {/* How It Works Section */}
-      <section className="py-32 px-6 bg-[#0a0a0a]" aria-labelledby="how-it-works-heading">
+      <section className="py-16 sm:py-24 lg:py-32 px-4 sm:px-6 bg-[#0a0a0a]" aria-labelledby="how-it-works-heading">
         <div className="max-w-[1400px] mx-auto w-full">
-          <div className="text-center mb-20">
-            <h2 id="how-it-works-heading" className="text-4xl lg:text-5xl font-bold text-white mb-4">
+          <div className="text-center mb-10 sm:mb-16 lg:mb-20">
+            <h2 id="how-it-works-heading" className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4">
               Streamlined Workflow
             </h2>
             <p className="text-[#E8D5D5]/70 max-w-2xl mx-auto text-xl font-sans">
@@ -341,11 +341,11 @@ export default function HomePageClient({ locale }: HomePageClientProps) {
       </section>
 
       {/* Stats Section */}
-      <section className="py-24 border-t border-white/5 bg-[#0a0a0a]" aria-label="Statistics">
-        <div className="max-w-[1400px] mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-12 text-center">
+      <section className="py-12 sm:py-20 lg:py-24 border-t border-white/5 bg-[#0a0a0a]" aria-label="Statistics">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-10 lg:gap-12 text-center">
           <div className="space-y-4">
-            <div className="text-4xl lg:text-5xl font-bold text-white flex items-center justify-center gap-3">
-              <Users size={32} className="text-[var(--color-brand-red)]" />
+            <div className="text-2xl sm:text-4xl lg:text-5xl font-bold text-white flex items-center justify-center gap-2 sm:gap-3">
+              <Users size={24} className="sm:w-8 sm:h-8 text-[var(--color-brand-red)]" />
               Verified
             </div>
             <div className="text-sm font-bold text-[var(--color-brand-red)] uppercase tracking-widest bg-[var(--color-brand-red)]/10 py-1 px-4 rounded-full inline-block">
@@ -353,8 +353,8 @@ export default function HomePageClient({ locale }: HomePageClientProps) {
             </div>
           </div>
           <div className="space-y-4">
-            <div className="text-4xl lg:text-5xl font-bold text-white flex items-center justify-center gap-3">
-              <ShieldCheck size={32} className="text-green-500" />
+            <div className="text-2xl sm:text-4xl lg:text-5xl font-bold text-white flex items-center justify-center gap-2 sm:gap-3">
+              <ShieldCheck size={24} className="sm:w-8 sm:h-8 text-green-500" />
               100%
             </div>
             <div className="text-sm font-bold text-green-500 uppercase tracking-widest bg-green-500/10 py-1 px-4 rounded-full inline-block">
@@ -362,8 +362,8 @@ export default function HomePageClient({ locale }: HomePageClientProps) {
             </div>
           </div>
           <div className="space-y-4">
-            <div className="text-4xl lg:text-5xl font-bold text-white flex items-center justify-center gap-3">
-              <Zap size={32} className="text-yellow-500" />
+            <div className="text-2xl sm:text-4xl lg:text-5xl font-bold text-white flex items-center justify-center gap-2 sm:gap-3">
+              <Zap size={24} className="sm:w-8 sm:h-8 text-yellow-500" />
               88+
             </div>
             <div className="text-sm font-bold text-yellow-500 uppercase tracking-widest bg-yellow-500/10 py-1 px-4 rounded-full inline-block">
@@ -371,8 +371,8 @@ export default function HomePageClient({ locale }: HomePageClientProps) {
             </div>
           </div>
           <div className="space-y-4">
-            <div className="text-4xl lg:text-5xl font-bold text-white flex items-center justify-center gap-3">
-              <Globe size={32} className="text-blue-500" />
+            <div className="text-2xl sm:text-4xl lg:text-5xl font-bold text-white flex items-center justify-center gap-2 sm:gap-3">
+              <Globe size={24} className="sm:w-8 sm:h-8 text-blue-500" />
               24/7
             </div>
             <div className="text-sm font-bold text-blue-500 uppercase tracking-widest bg-blue-500/10 py-1 px-4 rounded-full inline-block">
@@ -386,21 +386,21 @@ export default function HomePageClient({ locale }: HomePageClientProps) {
       <FAQSection />
       
       {/* CTA Section */}
-      <section className="py-32 px-6 border-t border-white/10 bg-black">
+      <section className="py-16 sm:py-24 lg:py-32 px-4 sm:px-6 border-t border-white/10 bg-black">
         <div className="max-w-4xl mx-auto text-center">
           <div className="inline-block p-4 rounded-2xl bg-white/5 border border-white/10 mb-8 animate-bounce">
             <Sparkles className="text-[var(--color-brand-red)]" size={32} />
           </div>
-          <h1 className="text-4xl md:text-7xl font-black text-white mb-8 tracking-tighter italic leading-[0.9]">
+          <h1 className="text-4xl sm:text-5xl md:text-7xl font-black text-white mb-6 sm:mb-8 tracking-tighter italic leading-[0.9]">
             MASTER YOUR <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white/80 to-white/40">COMPLIANCE.</span>
           </h1>
-          <p className="text-[#BEA0A0] text-xl md:text-2xl mb-12 max-w-2xl mx-auto leading-relaxed">Join thousands using Akubrecah for secure KRA compliance and high-performance document mastery.</p>
-          <div className="flex flex-col sm:flex-row justify-center gap-6">
-            <Link href={isSignedIn ? `/${locale}/dashboard` : `/${locale}/sign-in`} className="btn-primary text-xl px-12 py-5 flex items-center justify-center gap-3 group shadow-[0_0_20px_rgba(31,111,91,0.3)]">
+          <p className="text-[#BEA0A0] text-base sm:text-xl md:text-2xl mb-8 sm:mb-12 max-w-2xl mx-auto leading-relaxed">Join thousands using Akubrecah for secure KRA compliance and high-performance document mastery.</p>
+          <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6">
+            <Link href={isSignedIn ? `/${locale}/dashboard` : `/${locale}/sign-in`} className="btn-primary text-base sm:text-xl px-8 sm:px-12 py-4 sm:py-5 flex items-center justify-center gap-3 group shadow-[0_0_20px_rgba(31,111,91,0.3)]">
               Get Started Free <ArrowRight className="group-hover:translate-x-2 transition-transform" />
             </Link>
-            <Link href={`/${locale}/pdf-tools`} className="inline-flex items-center justify-center rounded-xl px-12 py-5 text-xl font-semibold text-white border border-white/20 hover:bg-white/10 transition-all backdrop-blur-md">
+            <Link href={`/${locale}/pdf-tools`} className="inline-flex items-center justify-center rounded-xl px-8 sm:px-12 py-4 sm:py-5 text-base sm:text-xl font-semibold text-white border border-white/20 hover:bg-white/10 transition-all backdrop-blur-md">
               Browse Tools
             </Link>
           </div>

@@ -25,33 +25,35 @@ export function SubscriptionBanner() {
     return () => clearInterval(interval);
   }, []);
 
-  // Timer for Subscription duration
+  // Timer for Subscription duration (time-based access)
   useEffect(() => {
-    if (!status?.subscriptionEnd && !status?.pdfPremiumEnd) {
+    const end = status?.subscriptionEnd
+      ? new Date(status.subscriptionEnd).getTime()
+      : null;
+
+    if (!end) {
       setSubscriptionTimeLeft(null);
       return;
     }
 
-    const end = new Date(status.pdfPremiumEnd || status.subscriptionEnd).getTime();
-    
     function updateSubscriptionTimer() {
-      const now = new Date().getTime();
-      const distance = end - now;
+      const now = Date.now();
+      const distance = end! - now;
 
-      if (distance < 0) {
-        setSubscriptionTimeLeft(null);
+      if (distance <= 0) {
+        setSubscriptionTimeLeft('Expired');
         return;
       }
 
-      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+      const days = Math.floor(distance / 86400000);
+      const hours = Math.floor((distance % 86400000) / 3600000);
+      const minutes = Math.floor((distance % 3600000) / 60000);
+      const seconds = Math.floor((distance % 60000) / 1000);
 
-      if (hours > 24) {
-        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-        setSubscriptionTimeLeft(`${days}d ${hours % 24}h`);
+      if (days > 0) {
+        setSubscriptionTimeLeft(`${days}d ${hours}h ${String(minutes).padStart(2,'0')}m`);
       } else {
-        setSubscriptionTimeLeft(`${hours}h ${minutes}m ${seconds}s`);
+        setSubscriptionTimeLeft(`${String(hours).padStart(2,'0')}:${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`);
       }
     }
 
@@ -96,21 +98,24 @@ export function SubscriptionBanner() {
       {/* Credits Section */}
       <div className="flex items-center gap-2 relative z-10">
         <CreditCard className="w-3 h-3" />
-        <span>Remaining Credits: <span className="tabular-nums text-[11px] underline">
-          {status.isCyberPro ? 'UNLIMITED' : status.usage?.remaining ?? 0}
+        <span>Remaining Filings: <span className="tabular-nums text-[11px] underline">
+          {status.usage?.remaining >= 999999 ? 'Unlimited' : status.usage?.remaining ?? 0}
         </span></span>
       </div>
 
       {/* Subscription Duration (Only if active) */}
       {subscriptionTimeLeft && (
         <div className="flex items-center gap-2 relative z-10 border-l border-black/20 pl-6">
-          <Zap className="w-3 h-3 fill-current animate-pulse" />
-          <span>{status.subscriptionTier?.replace('_', ' ')}: <span className="tabular-nums text-[10px]">{subscriptionTimeLeft}</span></span>
+          <Timer className="w-3 h-3 animate-pulse" />
+          <span>
+            {status.subscriptionTier?.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())}:
+            {' '}<span className="tabular-nums text-[10px] font-mono">{subscriptionTimeLeft}</span>
+          </span>
         </div>
       )}
 
       {/* Refresh Countdown */}
-      {!status.isCyberPro && refreshTimeLeft && (
+      {!status.isPremiumUser && refreshTimeLeft && (
         <div className="flex items-center gap-2 relative z-10 border-l border-black/20 pl-6">
           <RefreshCw className="w-3 h-3" />
           <span>Next Refresh: <span className="tabular-nums text-[10px]">{refreshTimeLeft}</span></span>

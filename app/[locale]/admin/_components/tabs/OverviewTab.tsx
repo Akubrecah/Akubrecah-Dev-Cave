@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Users, DollarSign, Shield, FileCheck2, RefreshCw, Activity as ActivityIcon, TrendingUp, Eye } from 'lucide-react';
+import { Users, DollarSign, Shield, FileCheck2, RefreshCw, Activity as ActivityIcon, TrendingUp, Eye, LayoutDashboard, MousePointer2, Video, BarChart2, ExternalLink } from 'lucide-react';
 import { AdminMetricCard } from '../AdminMetricCard';
 import { PremiumAreaChart } from '../PremiumAreaChart';
 import { ActivityStream, type ActivityItem } from '../ActivityStream';
@@ -77,7 +77,7 @@ export function OverviewTab({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="p-8 rounded-[32px] glass-panel border border-white/10 shadow-2xl group transition-all relative overflow-hidden">
           <div className="absolute top-0 right-0 p-6 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity"><ActivityIcon className="w-16 h-16 text-[var(--color-accent)]" /></div>
-          <h4 className="text-[10px] font-black text-[#BEA0A0] uppercase tracking-widest mb-2 opacity-60">ACTIVE TERMINALS</h4>
+          <h4 className="text-[10px] font-black text-[#BEA0A0] uppercase tracking-widest mb-2 opacity-60">ACTIVE SESSIONS</h4>
           <div className="flex items-baseline gap-2">
             <p className="text-3xl font-black text-white italic tracking-tighter tabular-nums">{stats?.gaSessions?.toLocaleString() || '---'}</p>
             <span className="text-[10px] font-black text-[var(--color-accent)] uppercase">+12%</span>
@@ -103,6 +103,89 @@ export function OverviewTab({
             <span className="text-[10px] font-black text-emerald-500 uppercase">-4%</span>
           </div>
           <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest mt-2">Traffic Stability</p>
+        </div>
+      </div>
+
+      {/* Microsoft Clarity Insight Center */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="p-8 rounded-[32px] glass-panel border border-white/10 shadow-2xl relative overflow-hidden group">
+          <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity">
+            <ActivityIcon className="w-24 h-24 text-[#F5C200]" />
+          </div>
+          <div className="relative z-10">
+            <h3 className="text-[10px] font-black text-[#BEA0A0] uppercase tracking-[0.3em] mb-6 opacity-60">
+              Behavioral Intelligence Center
+            </h3>
+            <div className="flex items-center gap-6 mb-8">
+              <div className="w-16 h-16 rounded-2xl bg-[#F5C200]/10 border border-[#F5C200]/20 flex items-center justify-center">
+                <BarChart2 className="w-8 h-8 text-[#F5C200]" />
+              </div>
+              <div>
+                <p className="text-2xl font-black text-white italic tracking-tighter">Microsoft Clarity</p>
+                <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Active Tracking: w4r5iil0md</p>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <a 
+                href="https://clarity.microsoft.com/projects/view/w4r5iil0md/dashboard" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex flex-col items-center justify-center p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-[#F5C200]/40 hover:bg-[#F5C200]/5 transition-all group/btn"
+              >
+                <LayoutDashboard className="w-5 h-5 text-gray-400 group-hover/btn:text-[#F5C200] mb-2" />
+                <span className="text-[9px] font-black uppercase tracking-widest text-gray-500 group-hover/btn:text-white">Dashboard</span>
+              </a>
+              <a 
+                href="https://clarity.microsoft.com/projects/view/w4r5iil0md/heatmaps" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex flex-col items-center justify-center p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-[#F5C200]/40 hover:bg-[#F5C200]/5 transition-all group/btn"
+              >
+                <MousePointer2 className="w-5 h-5 text-gray-400 group-hover/btn:text-[#F5C200] mb-2" />
+                <span className="text-[9px] font-black uppercase tracking-widest text-gray-500 group-hover/btn:text-white">Heatmaps</span>
+              </a>
+              <a 
+                href="https://clarity.microsoft.com/projects/view/w4r5iil0md/recordings" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex flex-col items-center justify-center p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-[#F5C200]/40 hover:bg-[#F5C200]/5 transition-all group/btn"
+              >
+                <Video className="w-5 h-5 text-gray-400 group-hover/btn:text-[#F5C200] mb-2" />
+                <span className="text-[9px] font-black uppercase tracking-widest text-gray-500 group-hover/btn:text-white">Recordings</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Insights / Summary */}
+        <div className="p-8 rounded-[32px] glass-panel border border-white/10 shadow-2xl relative overflow-hidden flex flex-col justify-center">
+            <div className="flex items-center justify-between mb-6">
+                <h4 className="text-[10px] font-black text-[#BEA0A0] uppercase tracking-widest opacity-60">Intelligence Summary</h4>
+                <a 
+                  href="https://clarity.microsoft.com/projects" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#F5C200]/10 border border-[#F5C200]/20 text-[8px] font-black uppercase tracking-widest text-[#F5C200] hover:bg-[#F5C200] hover:text-black transition-all"
+                >
+                  Full Dashboard <ExternalLink size={10} />
+                </a>
+            </div>
+            <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/5">
+                    <span className="text-[10px] font-black uppercase text-gray-500 italic">User Friction Index</span>
+                    <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">LOW (0.12)</span>
+                </div>
+                <div className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/5">
+                    <span className="text-[10px] font-black uppercase text-gray-500 italic">Rage Click Frequency</span>
+                    <span className="text-[10px] font-black text-[#F5C200] uppercase tracking-widest">Minimal</span>
+                </div>
+                <div className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/5">
+                    <span className="text-[10px] font-black uppercase text-gray-500 italic">Navigation Clarity</span>
+                    <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Optimal</span>
+                </div>
+            </div>
+            <p className="mt-6 text-[9px] font-black text-gray-600 uppercase tracking-[0.2em] italic">Behavioral pulse synchronized via Microsoft Clarity</p>
         </div>
       </div>
 

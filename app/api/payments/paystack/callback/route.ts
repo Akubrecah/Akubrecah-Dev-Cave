@@ -1,5 +1,22 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { TIERS, isValidTier } from '@/lib/pricing';
+
+function buildSubscriptionUpdate(tier: string): Record<string, unknown> {
+  if (!isValidTier(tier)) return {};
+
+  const { durationMs } = TIERS[tier];
+  const now = new Date();
+  const subscriptionEnd = new Date(now.getTime() + durationMs);
+
+  return {
+    role: 'premium',
+    subscriptionStatus: 'active',
+    subscriptionTier: tier,
+    subscriptionEnd,
+    pdfPremiumEnd: null,
+  };
+}
 
 export async function GET(req: Request) {
   try {
@@ -10,7 +27,7 @@ export async function GET(req: Request) {
       return NextResponse.redirect(new URL('/checkout?error=MissingReference', req.url));
     }
 
-    // 1. Verify the transaction with Paystack API
+    // Verify transaction with Paystack
     const verifyRes = await fetch(`https://api.paystack.co/transaction/verify/${reference}`, {
       method: 'GET',
       headers: {
@@ -27,72 +44,43 @@ export async function GET(req: Request) {
 
     const { status, metadata } = verifyData.data;
 
-    // 2. Find transaction by reference in DB
     const transaction = await prisma.transaction.findFirst({
       where: { id: metadata.transactionId },
       include: { user: true },
     });
 
     if (!transaction) {
-      console.warn('Paystack Callback: Transaction not found for request ID:', metadata.transactionId);
+      console.warn('Paystack Callback: Transaction not found:', metadata.transactionId);
       return NextResponse.redirect(new URL(`/checkout?error=TransactionNotFound`, req.url));
     }
 
     if (status === 'success') {
-      // 3. Update transaction status
-      // Only grant if it hasn't already been completed (in case webhook hit first)
       if (transaction.status !== 'completed') {
         await prisma.transaction.update({
           where: { id: transaction.id },
-          data: {
-            status: 'completed',
-            stripeSessionId: reference
-          },
+          data: { status: 'completed', stripeSessionId: reference },
         });
 
-        // 4. Grant subscription based on tier
         const tier = transaction.tier;
-        const now = new Date();
-        
-        const updateData: any = {};
-        
-        if (tier === 'hourly') {
-          updateData.pdfPremiumEnd = new Date(now.getTime() + 1 * 60 * 60 * 1000); // 1 hour
-        } else if (tier === 'three_hour') {
-          updateData.pdfPremiumEnd = new Date(now.getTime() + 3 * 60 * 60 * 1000); // 3 hours
-        } else if (tier === 'daily') {
-          updateData.pdfPremiumEnd = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 hours
-        } else if (tier === 'weekly') {
-          updateData.role = 'cyber';
-          updateData.subscriptionStatus = 'active';
-          updateData.subscriptionEnd = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-        } else if (tier === 'monthly') {
-          updateData.role = 'cyber';
-          updateData.subscriptionStatus = 'active';
-          updateData.subscriptionEnd = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
-        }
+        const updateData = buildSubscriptionUpdate(tier ?? '');
 
         if (Object.keys(updateData).length > 0) {
           await prisma.user.update({
             where: { id: transaction.userId },
             data: updateData,
           });
-          console.log(`✅ ${tier} access granted to user ${transaction.userId} via Paystack`);
+          const tierInfo = isValidTier(tier ?? '') ? TIERS[tier as keyof typeof TIERS] : null;
+          console.log(`✅ ${tierInfo?.name ?? tier} access (${tierInfo?.label}) granted to user ${transaction.userId} via Paystack Callback`);
         }
       }
 
-      // Redirect to Dashboard on success
       return NextResponse.redirect(new URL('/dashboard', req.url));
 
     } else {
-      // Payment Failed or Pending
-      console.warn(`❌ Paystack Callback: Failed or incomplete status - ${status}`);
+      console.warn(`❌ Paystack Callback: Failed status - ${status}`);
       await prisma.transaction.update({
         where: { id: transaction.id },
-        data: { 
-          status: 'failed',
-          failureReason: `Paystack status: ${status}`
-        },
+        data: { status: 'failed', failureReason: `Paystack status: ${status}` },
       });
       return NextResponse.redirect(new URL(`/checkout?error=PaymentFailed`, req.url));
     }

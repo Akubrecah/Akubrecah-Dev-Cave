@@ -99,7 +99,7 @@ export async function POST(req: Request) {
       const isMonthly = finalType.includes('monthly');
       const isDaily = finalType === 'daily';
       
-      const isCyberTier = isPremium || isWeekly || isMonthly;
+      const isPremiumTier = isPremium || isWeekly || isMonthly;
       
       const endDate = new Date();
       if (isDaily) {
@@ -118,11 +118,11 @@ export async function POST(req: Request) {
         data: {
           subscriptionStatus: 'active',
           subscriptionTier: finalType,
-          role: isCyberTier ? 'cyber' : 'personal',
+          role: isPremiumTier ? 'premium' : 'personal',
           [isDaily ? 'pdfPremiumEnd' : 'subscriptionEnd']: endDate
         }
       });
-      console.log('User subscription updated successfully:', finalClerkId, 'tier:', finalType, 'role:', isCyberTier ? 'cyber' : 'personal');
+      console.log('User subscription updated successfully:', finalClerkId, 'tier:', finalType, 'role:', isPremiumTier ? 'premium' : 'personal');
     }
   }
 

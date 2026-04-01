@@ -1,6 +1,7 @@
 import { MetadataRoute } from 'next';
+import { siteConfig } from '@/config/site';
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://yourdomain.com';
+const BASE_URL = siteConfig.url.endsWith('/') ? siteConfig.url.slice(0, -1) : siteConfig.url;
 
 export default function robots(): MetadataRoute.Robots {
   return {

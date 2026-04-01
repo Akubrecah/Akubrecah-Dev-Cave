@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth, currentUser } from '@clerk/nextjs/server';
 import prisma from '@/lib/prisma';
+import { TIERS, isValidTier } from '@/lib/pricing';
 
 const SUPER_ADMIN_EMAIL = 'poweldayck@gmail.com';
 
@@ -28,18 +29,18 @@ export async function GET() {
       });
     } catch (dbError) {
       console.error('[STATUS API] Database fetch failed:', dbError);
-      // If DB is down, we fallback to a safe guest-like response for admin check
       return NextResponse.json({
-          isCyberPro: false,
+          isPremiumUser: false,
           hasPdfPremium: false,
           subscriptionTier: 'free',
           subscriptionStatus: 'inactive',
           activeTier: 'free',
           role: 'personal',
+          timeExpired: false,
           usage: {
             KRA: 0,
             PDF: 0,
-            limit: 2,
+            limit: 0,
             remaining: 0,
             nextRefresh: new Date().toISOString(),
           },
@@ -54,7 +55,6 @@ export async function GET() {
     const username = (clerkUser?.username || '').toLowerCase();
     const fullName = `${firstName} ${lastName}`.trim();
     
-    // Check if "akubrecah" is anywhere in the user's data
     const isAdminIdentified = 
         email === SUPER_ADMIN_EMAIL.toLowerCase() || 
         email.includes('akubrecah') ||
@@ -65,7 +65,6 @@ export async function GET() {
 
     if (!user) {
         try {
-            // User hasn't been synced to DB yet — try to auto-create
             user = await prisma.user.create({
               data: {
                 clerkId: userId,
@@ -85,12 +84,12 @@ export async function GET() {
             });
         } catch (createError) {
             console.error('[STATUS API] Database create failed:', createError);
-            // Return degraded status if create fails
              return NextResponse.json({
-                isCyberPro: isAdminIdentified,
+                isPremiumUser: isAdminIdentified,
                 hasPdfPremium: isAdminIdentified,
                 role: isAdminIdentified ? 'admin' : 'personal',
-                usage: { KRA: 0, PDF: 0, limit: 2, remaining: 2, nextRefresh: new Date().toISOString() },
+                timeExpired: false,
+                usage: { KRA: 0, PDF: 0, limit: 0, remaining: 0, nextRefresh: new Date().toISOString() },
                 db_status: 'create_failed'
             });
         }
@@ -114,81 +113,119 @@ export async function GET() {
           });
       } catch (updateError) {
           console.error('[STATUS API] Database update failed:', updateError);
-          // Just proceed with current user state if update fails
       }
     }
 
     const now = new Date();
 
-    // Tier limits: free=2, basic=10, pro/enterprise/admin=unlimited
-    const TIER_LIMITS: Record<string, number> = {
-      free: 2, basic: 10, pro: 999999, enterprise: 999999,
-      weekly: 999999, monthly: 999999, daily_pro: 999999, none: 2,
-    };
-
     const isAdmin = user.role === 'admin';
-    const isPrivilegedRole = isAdmin || user.role === 'cyber';
+    const isPrivilegedRole = isAdmin || user.role === 'premium' || user.role === 'cyber';
 
-    const hasActiveSub =
+    // Time-gate: subscription must be active AND not expired
+    const hasActiveTimedSub =
       user.subscriptionStatus === 'active' &&
       user.subscriptionEnd != null &&
       new Date(user.subscriptionEnd) > now;
 
-    const hasPdfPremiumDate = user.pdfPremiumEnd != null && new Date(user.pdfPremiumEnd) > now;
+    // Detect expired subscription (had one but it ran out)
+    const timeExpired =
+      !hasActiveTimedSub &&
+      user.subscriptionStatus === 'active' &&
+      user.subscriptionEnd != null &&
+      new Date(user.subscriptionEnd) <= now;
 
-    // Active tier string - Prioritize admin-assigned tier if present
-    const activeTier = (user.subscriptionTier && user.subscriptionTier !== 'none')
+    // Active tier string
+    const activeTier = hasActiveTimedSub && user.subscriptionTier
       ? user.subscriptionTier
-      : hasPdfPremiumDate
-      ? 'pro'
       : 'free';
 
-    const isCyberPro = isPrivilegedRole || hasActiveSub || hasPdfPremiumDate;
-    const hasPdfPremium = isCyberPro;
+    const isPremiumUser = isPrivilegedRole || hasActiveTimedSub;
+    const hasPdfPremium = isPremiumUser;
 
-    const dailyLimit = isPrivilegedRole
+    // Filing limits from pricing config
+    const filingLimit = isPrivilegedRole
       ? 999999
-      : (TIER_LIMITS[activeTier] ?? 2);
+      : (isValidTier(activeTier) ? TIERS[activeTier].filings : 0);
 
-    // Fetch usage counts for today
-    let usageLimits: { type: string; count: number }[] = [];
-    const tomorrow = new Date(now);
-    tomorrow.setHours(0, 0, 0, 0);
-    tomorrow.setDate(now.getDate() + 1);
+    // For unlimited tiers skip usage counting
+    if (isPrivilegedRole || filingLimit >= 999999) {
+      return NextResponse.json({
+        isPremiumUser,
+        hasPdfPremium,
+        subscriptionTier: user.subscriptionTier || 'free',
+        subscriptionStatus: user.subscriptionStatus || 'inactive',
+        subscriptionEnd: user.subscriptionEnd,
+        activeTier,
+        role: user.role,
+        timeExpired: false,
+        usage: {
+          KRA: 0,
+          PDF: 0,
+          limit: 999999,
+          remaining: 999999,
+          nextRefresh: user.subscriptionEnd?.toISOString() ?? new Date().toISOString(),
+        },
+      });
+    }
+
+    // If expired or free, return blocked state
+    if (!hasActiveTimedSub) {
+      return NextResponse.json({
+        isPremiumUser: false,
+        hasPdfPremium: false,
+        subscriptionTier: user.subscriptionTier || 'free',
+        subscriptionStatus: user.subscriptionStatus || 'inactive',
+        subscriptionEnd: user.subscriptionEnd,
+        activeTier: 'free',
+        role: user.role,
+        timeExpired,
+        usage: {
+          KRA: 0,
+          PDF: 0,
+          limit: 0,
+          remaining: 0,
+          nextRefresh: user.subscriptionEnd?.toISOString() ?? new Date().toISOString(),
+        },
+      });
+    }
+
+    // Count filings used since sub started
+    const subDurationMs = isValidTier(activeTier) ? TIERS[activeTier].durationMs : 0;
+    const subStart = new Date(new Date(user.subscriptionEnd!).getTime() - subDurationMs);
     const todayStart = new Date(now);
     todayStart.setHours(0, 0, 0, 0);
 
+    let usageLimits: { type: string; count: number }[] = [];
     try {
         usageLimits = await prisma.usageLimit.findMany({
           where: {
             userId: user.id,
-            date: { gte: todayStart, lt: tomorrow },
+            date: { gte: subStart < todayStart ? subStart : todayStart },
           },
         });
     } catch (usageError) {
         console.error('[STATUS API] Usage fetch failed:', usageError);
     }
 
-    const kraUsage = usageLimits.find((u: { type: string; count: number }) => u.type === 'KRA')?.count || 0;
-    const pdfUsage = usageLimits.find((u: { type: string; count: number }) => u.type === 'PDF')?.count || 0;
-
-    const remainingCredits = dailyLimit >= 999999 ? 999999 : Math.max(0, dailyLimit - kraUsage);
+    const kraUsage = usageLimits.filter((u) => u.type === 'KRA').reduce((sum, u) => sum + u.count, 0);
+    const pdfUsage = usageLimits.filter((u) => u.type === 'PDF').reduce((sum, u) => sum + u.count, 0);
+    const remainingCredits = Math.max(0, filingLimit - kraUsage);
 
     return NextResponse.json({
-      isCyberPro,
+      isPremiumUser,
       hasPdfPremium,
       subscriptionTier: user.subscriptionTier || 'free',
       subscriptionStatus: user.subscriptionStatus || 'inactive',
       subscriptionEnd: user.subscriptionEnd,
-      pdfPremiumEnd: user.pdfPremiumEnd,
       activeTier,
       role: user.role,
+      timeExpired: false,
       usage: {
         KRA: kraUsage,
         PDF: pdfUsage,
-        limit: dailyLimit,
+        limit: filingLimit,
         remaining: remainingCredits,
-        nextRefresh: tomorrow.toISOString(),
+        nextRefresh: user.subscriptionEnd?.toISOString() ?? new Date().toISOString(),
       },
     });
 

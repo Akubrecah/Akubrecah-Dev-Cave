@@ -146,7 +146,7 @@ export const RecentFilesDropdown: React.FC<RecentFilesDropdownProps> = ({
 
       {isOpen && (
         <div
-          className="absolute right-0 top-full mt-2 w-80 max-h-96 overflow-auto rounded-[var(--radius-lg)] border border-[hsl(var(--color-border))] bg-[hsl(var(--color-background))] shadow-lg z-50"
+          className="absolute right-0 top-full mt-2 w-80 max-h-96 overflow-auto rounded-[2.5rem] border border-[#D1D5DB] bg-white shadow-[0_24px_48px_-12px_rgba(0,0,0,0.15)] z-50"
           role="menu"
           aria-label={translations.title}
         >

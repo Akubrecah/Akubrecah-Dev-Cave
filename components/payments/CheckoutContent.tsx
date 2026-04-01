@@ -32,20 +32,27 @@ export function CheckoutContent() {
 
   // Plan Details 
   const planDetails = {
-    'basic': { name: 'Basic Plan', price: 50, billing: 'Single filing content', image: '/logo.png' },
-    'pro': { name: 'Pro Plan', price: 100, billing: 'Multiple returns up to 10', image: '/logo.png' },
+    'mobile':       { name: 'Mobile Plan',        price: 5,   billing: '1 filing · 30-minute access',        image: '/logo.png' },
+    'basic':        { name: 'Basic Plan',          price: 10,  billing: '2 filings · 2-hour access',           image: '/logo.png' },
+    'standard':     { name: 'Standard Plan',       price: 20,  billing: '3 filings · 6-hour access',           image: '/logo.png' },
+    'standard_plus':{ name: 'Standard Plus Plan',  price: 30,  billing: '5 filings · 12-hour access',          image: '/logo.png' },
+    'pro':          { name: 'Pro Plan',             price: 50,  billing: 'Unlimited filings · 24-hour access',  image: '/logo.png' },
+    'pro_plus':     { name: 'Pro Plus Plan',        price: 100, billing: 'Unlimited filings · 3-day access',    image: '/logo.png' },
+    'premium':      { name: 'Premium Plan',         price: 200, billing: 'Unlimited filings · 1-week access',   image: '/logo.png' },
+    'premium_plus': { name: 'Premium Plus Plan',    price: 700, billing: 'Unlimited filings · 1-month access',  image: '/logo.png' },
   };
   
   const currentPlan = planDetails[tier as keyof typeof planDetails] || planDetails['basic'];
 
-  // Verify tier exists
   useEffect(() => {
     if (!tier) {
       router.push('/pricing');
       return;
     }
-    if (tier === 'enterprise') {
-      router.push(`/${window.location.pathname.split('/')[1] || 'en'}/contact`);
+    // Redirect if tier is not in our valid list
+    const validTiers = ['mobile', 'basic', 'standard', 'standard_plus', 'pro', 'pro_plus', 'premium', 'premium_plus'];
+    if (!validTiers.includes(tier)) {
+      router.push('/pricing');
       return;
     }
   }, [tier, router]);
@@ -194,7 +201,7 @@ export function CheckoutContent() {
                           Transaction <br/> <span className="text-[#1F6F5B]">Confirmed</span>
                        </h2>
                        <p className="text-[#2E8B75] font-bold uppercase tracking-widest text-xs leading-relaxed">
-                          Your {currentPlan.name} has been successfully activated. Terminal access granted.
+                          Your {currentPlan.name} has been successfully activated. All pro features are now ready.
                        </p>
                     </div>
 
@@ -278,7 +285,7 @@ export function CheckoutContent() {
                  </div>
                  <div className="flex flex-col items-center gap-1 opacity-40 hover:opacity-100 transition-opacity">
                     <CreditCardIcon />
-                    <span className="text-[8px] uppercase tracking-widest text-[#2B2B2B]">Secure Terminal</span>
+                    <span className="text-[8px] uppercase tracking-widest text-[#2B2B2B]">Secure Checkout</span>
                  </div>
               </div>
             </div>

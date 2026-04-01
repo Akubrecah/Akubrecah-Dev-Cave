@@ -48,7 +48,7 @@ export function UsersTab({
                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600" />
                <input 
                  type="text" 
-                 placeholder="Search citizens..." 
+                 placeholder="Search users..." 
                  value={userSearch}
                  onChange={e => { setUserSearch(e.target.value); setUsersPage(1); }}
                  className="w-80 pl-12 pr-4 py-2.5 bg-[#0f0f0f] border border-white/5 rounded-xl text-sm focus:outline-none focus:border-[#F5C200]/30 transition-all font-bold placeholder:text-gray-700 text-white"
@@ -56,7 +56,7 @@ export function UsersTab({
              </div>
              <div className="flex items-center gap-2">
                <div className="w-1.5 h-1.5 rounded-full bg-[#F5C200]" />
-               <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">{usersTotal} Total Identities</span>
+               <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">{usersTotal} Total Members</span>
              </div>
           </div>
        </div>
@@ -65,7 +65,7 @@ export function UsersTab({
           <table className="w-full text-left">
              <thead>
                <tr className="bg-white/[0.02] border-b border-white/5">
-                 <th className="py-5 px-8 text-[10px] font-black uppercase tracking-widest text-gray-600">Identity</th>
+                 <th className="py-5 px-8 text-[10px] font-black uppercase tracking-widest text-gray-600">Member</th>
                  <th className="py-5 px-8 text-[10px] font-black uppercase tracking-widest text-gray-600">Privileges</th>
                  <th className="py-5 px-8 text-[10px] font-black uppercase tracking-widest text-gray-600">Subscription</th>
                  <th className="py-5 px-8 text-[10px] font-black uppercase tracking-widest text-gray-600">Expiry</th>
@@ -90,10 +90,10 @@ export function UsersTab({
                      <span className={cn(
                        "px-2 py-0.5 rounded-lg text-[9px] font-black tracking-widest border uppercase",
                        u.role === 'admin' ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" :
-                       u.role === 'cyber' ? "bg-[#F5C200]/10 text-[#F5C200] border-[#F5C200]/20" :
+                       (u.role === 'premium' || u.role === 'cyber') ? "bg-[#F5C200]/10 text-[#F5C200] border-[#F5C200]/20" :
                        "bg-white/5 text-gray-500 border-white/10"
                      )}>
-                       {u.role}
+                       {u.role === 'cyber' ? 'premium' : u.role}
                      </span>
                    </td>
                    <td className="py-5 px-8">

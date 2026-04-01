@@ -24,11 +24,11 @@ export const Footer: React.FC<FooterProps> = ({ locale }) => {
 
   return (
     <footer
-      className="w-full border-t border-[#D1D5DB] bg-[#F2F2F2] pt-16 pb-8"
+      className="w-full border-t border-[#D1D5DB] bg-[#F2F2F2] pt-10 sm:pt-16 pb-8"
       role="contentinfo"
     >
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-12 mb-8 md:mb-12">
           {/* Brand Column */}
         <div className="col-span-1 md:col-span-1 flex flex-col gap-6">
             <Link
@@ -49,14 +49,14 @@ export const Footer: React.FC<FooterProps> = ({ locale }) => {
             </p>
 
             <div className="flex gap-4">
-              <a href="https://github.com/PDFCraftTool/pdfcraft" className="p-2 rounded-full bg-[#E5E7EB] text-[#2E8B75] hover:bg-[hsl(var(--color-primary))] hover:text-white transition-all">
-                <Github className="w-4 h-4" />
+              <a href="https://github.com/PDFCraftTool/pdfcraft" className="p-2.5 rounded-full bg-[#1F6F5B]/10 text-[#1F6F5B] hover:bg-[#1F6F5B] hover:text-white transition-all shadow-sm">
+                <Github className="w-5 h-5" />
               </a>
-              <a href="https://x.com/PDFCraftTool" className="p-2 rounded-full bg-[#E5E7EB] text-[#2E8B75] hover:bg-[hsl(var(--color-primary))] hover:text-white transition-all">
-                <Twitter className="w-4 h-4" />
+              <a href="https://x.com/PDFCraftTool" className="p-2.5 rounded-full bg-[#1F6F5B]/10 text-[#1F6F5B] hover:bg-[#1F6F5B] hover:text-white transition-all shadow-sm">
+                <Twitter className="w-5 h-5" />
               </a>
-              <a href="#" className="p-2 rounded-full bg-[#E5E7EB] text-[#2E8B75] hover:bg-[hsl(var(--color-primary))] hover:text-white transition-all">
-                <Mail className="w-4 h-4" />
+              <a href="#" className="p-2.5 rounded-full bg-[#1F6F5B]/10 text-[#1F6F5B] hover:bg-[#1F6F5B] hover:text-white transition-all shadow-sm">
+                <Mail className="w-5 h-5" />
               </a>
             </div>
           </div>
@@ -114,14 +114,14 @@ export const Footer: React.FC<FooterProps> = ({ locale }) => {
               Compliance
             </h3>
             <div
-              className="flex items-center gap-3 p-4 bg-white border border-[#D1D5DB] rounded-xl shadow-sm"
+              className="flex items-center gap-3 p-4 bg-white border border-[#1F6F5B]/30 rounded-xl shadow-lg"
             >
-              <div className="h-10 w-10 rounded-full bg-[hsl(var(--color-success)/0.1)] flex items-center justify-center flex-shrink-0">
-                <Shield className="h-5 w-5 text-[hsl(var(--color-success))]" aria-hidden="true" />
+              <div className="h-10 w-10 rounded-full bg-[#1F6F5B]/10 flex items-center justify-center flex-shrink-0">
+                <Shield className="h-5 w-5 text-[#1F6F5B]" aria-hidden="true" />
               </div>
-              <div>
-                <div className="text-sm font-bold text-[#2B2B2B]">GDPR Compliant</div>
-                <div className="text-xs text-[#2E8B75]">{t('footer.privacyBadge')}</div>
+              <div className="flex-1">
+                <div className="text-sm font-black text-[#2B2B2B] uppercase tracking-tighter italic">GDPR Compliant</div>
+                <div className="text-[10px] text-[#2E8B75] uppercase font-black tracking-widest">{t('footer.privacyBadge')}</div>
               </div>
             </div>
           </div>

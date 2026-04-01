@@ -107,7 +107,7 @@ export default function ToolsPageClient({ locale, localizedToolContent }: ToolsP
     <div className="w-full">
       <div className="w-full">
         {/* Page Header */}
-        <section className="relative pt-16 pb-20 overflow-hidden">
+        <section className="relative pt-10 sm:pt-16 pb-12 sm:pb-20 overflow-hidden">
           {/* Animated Background Blobs (Subtle) */}
           <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none -z-10">
             <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[hsl(var(--color-primary)/0.05)] rounded-full mix-blend-multiply filter blur-3xl opacity-50" />
@@ -116,10 +116,10 @@ export default function ToolsPageClient({ locale, localizedToolContent }: ToolsP
 
           <div className="container mx-auto px-4 relative z-10">
             <div className="max-w-3xl mx-auto text-center">
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6">
+              <h1 className="text-2xl sm:text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-4 sm:mb-6 leading-tight">
                 <span className="bg-clip-text text-transparent bg-gradient-to-br from-[var(--color-brand-red)] to-[var(--color-brand-yellow)]">{t('toolsPage.title')}</span>
               </h1>
-              <p className="text-xl text-[#E8D5D5] max-w-[550px] mx-auto mb-10 leading-relaxed font-sans">
+              <p className="text-base sm:text-xl text-[#E8D5D5] max-w-[550px] mx-auto mb-8 sm:mb-10 leading-relaxed font-sans">
                 {t('toolsPage.subtitle', { count: allTools.length })}
               </p>
 

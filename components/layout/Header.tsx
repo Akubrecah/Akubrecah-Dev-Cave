@@ -231,7 +231,7 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
             <div className="container mx-auto px-4">
                 <div className="flex h-20 items-center justify-between">
                     {/* Logo and Brand */}
-                    <div className="flex items-center gap-2">
+                    <div className={`flex items-center gap-2 ${isSearchOpen ? 'max-md:hidden' : 'flex'}`}>
                         <Link
                             href={`/${locale}`}
                             className="group flex items-center gap-4 text-xl font-bold text-[#2B2B2B] hover:opacity-90 transition-opacity"
@@ -282,9 +282,11 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                         {showSearch && (
                             <div className="relative" ref={searchContainerRef}>
                                 {isSearchOpen ? (
-                                    <div className="fixed md:absolute left-4 right-4 md:left-auto md:right-0 top-[22px] md:top-1/2 md:-translate-y-1/2 z-50 md:origin-right animate-in fade-in slide-in-from-right-4 duration-200">
-                                        <div className="relative w-full md:w-96">
-                                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#2E8B75]" />
+                                    <div className="fixed md:absolute left-4 right-4 md:left-auto md:right-0 top-[18px] md:top-1/2 md:-translate-y-1/2 z-[60] md:origin-right animate-in fade-in slide-in-from-right-4 duration-200">
+                                        <div className="relative w-full md:w-96 shadow-2xl rounded-2xl overflow-hidden border border-[#1F6F5B]/30 bg-white group-focus-within:border-[#1F6F5B]">
+                                            <div className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#1F6F5B] flex items-center justify-center">
+                                                <Search className="h-4 w-4" />
+                                            </div>
                                             <input
                                                 ref={searchInputRef}
                                                 type="search"
@@ -292,7 +294,7 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                                                 onChange={(e) => setSearchQuery(e.target.value)}
                                                 onKeyDown={handleKeyDown}
                                                 placeholder={t('search.placeholder') || 'Search tools...'}
-                                                className="w-full pl-10 pr-10 py-2.5 text-sm rounded-xl border border-[#D1D5DB] bg-white text-[#2B2B2B] shadow-lg focus:outline-none focus:ring-2 focus:ring-[#1F6F5B]"
+                                                className="w-full pl-12 pr-12 py-4 text-sm bg-white text-[#2B2B2B] focus:outline-none border-none"
                                                 aria-label="Search tools"
                                                 autoComplete="off"
                                             />
@@ -301,14 +303,14 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                                                 size="sm"
                                                 onClick={handleSearchToggle}
                                                 aria-label="Close search"
-                                                className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 p-0 hover:bg-transparent"
+                                                className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 hover:bg-black/5 text-[#2B2B2B]"
                                             >
-                                                <X className="h-4 w-4 text-[#2B2B2B]" aria-hidden="true" />
+                                                <X className="h-4 w-4" aria-hidden="true" />
                                             </Button>
 
                                             {/* Search Results Dropdown */}
                                             {searchResults.length > 0 && (
-                                                <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-[#D1D5DB] rounded-xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 max-h-[60vh] overflow-y-auto">
+                                                <div className="absolute top-full left-0 right-0 mt-3 bg-white border border-[#D1D5DB] rounded-2xl shadow-2xl overflow-hidden z-[70] animate-in fade-in slide-in-from-top-2 duration-200 max-h-[70vh] overflow-y-auto">
                                                     <ul className="py-2" role="listbox">
                                                         {searchResults.map((result, index) => {
                                                             const localized = localizedTools[result.tool.id];
@@ -354,10 +356,10 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                                         size="sm"
                                         onClick={handleSearchToggle}
                                         aria-label="Open search"
-                                        className="relative text-[#2B2B2B] hover:text-[#1F6F5B]"
+                                        className="relative group flex items-center gap-2 px-3 py-2 rounded-xl bg-[#1F6F5B]/5 border border-[#1F6F5B]/20 text-[#2B2B2B] hover:text-[#1F6F5B] hover:bg-[#1F6F5B]/10 transition-all font-bold"
                                     >
-                                        <Search className="h-5 w-5" aria-hidden="true" />
-                                        <span className="ml-2 hidden lg:inline-block text-xs text-[#2E8B75] border border-[#D1D5DB] rounded px-1.5 py-0.5">⌘K</span>
+                                        <Search className="h-5 w-5 md:h-4 md:w-4 transition-transform group-hover:scale-110 text-[#1F6F5B]" aria-hidden="true" />
+                                        <span className="hidden lg:inline-block text-[10px] text-[#1F6F5B] uppercase tracking-widest bg-white border border-[#1F6F5B]/30 rounded px-1.5 py-0.5 shadow-sm font-black italic">⌘K</span>
                                     </Button>
                                 )}
                             </div>
@@ -465,11 +467,16 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                                     <UserCreditsIndicator />
                                 </Show>
                             </li>
-                            <li className="pt-2 mt-2 border-t border-[#D1D5DB]">
+                            <li className="pt-2 mt-2 border-t border-[#D1D5DB] flex flex-col gap-2 px-4 pb-2">
                                 <Show when="signed-out">
                                     <SignInButton mode="modal">
-                                        <button className="w-full text-left px-4 py-3 text-base font-medium text-[#2B2B2B] hover:bg-[#F3F4F6] rounded-lg transition-colors">
+                                        <button className="w-full text-center px-4 py-3 text-base font-medium text-[#2B2B2B] hover:bg-[#F3F4F6] rounded-lg transition-colors border border-[#D1D5DB]">
                                             Sign in
+                                        </button>
+                                    </SignInButton>
+                                    <SignInButton mode="modal">
+                                        <button className="w-full text-center px-4 py-3 text-base font-medium text-white bg-[#1F6F5B] hover:bg-[#145A47] rounded-lg transition-colors">
+                                            Sign up
                                         </button>
                                     </SignInButton>
                                 </Show>
