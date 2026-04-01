@@ -40,10 +40,10 @@ export const TIERS = {
   pro: {
     name: 'Pro',
     price: 50,
-    filings: 999999,
+    filings: 15,
     durationMs: 24 * 60 * 60 * 1000, // 24 hours
     label: '24 Hours',
-    description: 'Unlimited daily access',
+    description: 'Extended daily access',
   },
   pro_plus: {
     name: 'Pro Plus',

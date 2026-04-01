@@ -36,7 +36,7 @@ export function CheckoutContent() {
     'basic':        { name: 'Basic Plan',          price: 10,  billing: '2 filings · 2-hour access',           image: '/logo.png' },
     'standard':     { name: 'Standard Plan',       price: 20,  billing: '3 filings · 6-hour access',           image: '/logo.png' },
     'standard_plus':{ name: 'Standard Plus Plan',  price: 30,  billing: '5 filings · 12-hour access',          image: '/logo.png' },
-    'pro':          { name: 'Pro Plan',             price: 50,  billing: 'Unlimited filings · 24-hour access',  image: '/logo.png' },
+    'pro':          { name: 'Pro Plan',             price: 50,  billing: '15 filings · 24-hour access',         image: '/logo.png' },
     'pro_plus':     { name: 'Pro Plus Plan',        price: 100, billing: 'Unlimited filings · 3-day access',    image: '/logo.png' },
     'premium':      { name: 'Premium Plan',         price: 200, billing: 'Unlimited filings · 1-week access',   image: '/logo.png' },
     'premium_plus': { name: 'Premium Plus Plan',    price: 700, billing: 'Unlimited filings · 1-month access',  image: '/logo.png' },

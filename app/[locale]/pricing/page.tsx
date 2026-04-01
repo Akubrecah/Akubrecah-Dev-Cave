@@ -74,7 +74,7 @@ const TIER_FEATURES: Record<TierKey, string[]> = {
     'Secure data handling',
   ],
   pro: [
-    'Unlimited KRA filings',
+    'Up to 15 KRA nil return filings',
     '24-hour access window',
     'Instant activation',
     'Priority processing',
