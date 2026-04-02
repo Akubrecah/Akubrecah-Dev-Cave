@@ -51,11 +51,15 @@ export async function GET() {
       frictionIndex: 0.12
     };
 
-    const CLARITY_EXPORT_TOKEN = "eyJhbGciOiJSUzI1NiIsImtpZCI6IjQ4M0FCMDhFNUYwRDMxNjdEOTRFMTQ3M0FEQTk2RTcyRDkwRUYwRkYiLCJ0eXAiOiJKV1QifQ.eyJqdGkiOiI5YzY1MzIyNC05ZmM5LTQ5OWUtOTMzMi00ZGI0ZWVjOGZkNDEiLCJzdWIiOiIzMjYzMzMwODg4OTY2MjQ1Iiwic2NvcGUiOiJEYXRh.RXhwb3J0IiwibmJmIjoxNzc1MTI0MTI3LCJleHAiOjQ5Mjg3MjQxMjcsImlhdCI6MTc3NTEyNDEyNywiaXNzIjoiY2xhcml0eSIsImF1ZCI6ImNsYXJpdHkuZGF0YS1leHBvcnRlciJ9.W_gRIZFOkZe2h7Whh9U-V-r6DorHUDesWe8bwkvWozCRwPrGgF4Bo1ElGZhNNKhtR8oMWGzsbxoTInfdupn6rV_hNVpsZ1mcaK470c40wEfXIci2hso_RCQYnNyHpJJiHiv-fsYTPTOms9zZtlUKsXFfYq3ipgBNwDf8by1QmGHx7v7S8CvYA0BZDRTXTxhqXpTNzm9Xyo5NQNEfIPUdIwWu-cQCivFxAqFnSrliSlKBO7-FOsnRkdyGsKvzDZBplPNpJcF9clFWFXoPTV7-kBwj1im38nWsUwjY-9ieblzl3WczzH5h8uqU7sxkDkchiIsIgKJrl8ylQecpNkbU2A";
+    const CLARITY_PROJECT_ID = process.env.CLARITY_PROJECT_ID || "w4r5iil0md";
+    const CLARITY_EXPORT_TOKEN = process.env.CLARITY_EXPORT_TOKEN;
     const CLARITY_ENDPOINT = "https://www.clarity.ms/export-data/api/v1/project-live-insights";
 
     try {
-      const res = await fetch(`${CLARITY_ENDPOINT}?projectId=w4r5iil0md`, {
+      if (!CLARITY_EXPORT_TOKEN) {
+        throw new Error("Clarity export token not configured");
+      }
+      const res = await fetch(`${CLARITY_ENDPOINT}?projectId=${CLARITY_PROJECT_ID}`, {
         headers: {
           'Authorization': `Bearer ${CLARITY_EXPORT_TOKEN}`,
           'Content-Type': 'application/json',
