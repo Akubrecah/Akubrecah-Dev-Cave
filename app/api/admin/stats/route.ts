@@ -48,6 +48,7 @@ export async function GET() {
       bounceRate: 15.5 + (Math.random() * 5),
       avgDuration: '2m 14s',
       rageClicks: 0,
+      deadClicks: 0,
       frictionIndex: 0.12
     };
 
@@ -71,6 +72,7 @@ export async function GET() {
           bounceRate: rawClarity.bounceRate || clarityData.bounceRate,
           avgDuration: rawClarity.avgDuration || clarityData.avgDuration,
           rageClicks: rawClarity.rageClicks || clarityData.rageClicks,
+          deadClicks: rawClarity.deadClicks || clarityData.deadClicks,
           frictionIndex: rawClarity.frictionIndex || clarityData.frictionIndex,
         };
       }
@@ -101,6 +103,7 @@ export async function GET() {
       gaBounceRate: clarityData.bounceRate,
       clarityFriction: clarityData.frictionIndex,
       clarityRageClicks: clarityData.rageClicks,
+      clarityDeadClicks: clarityData.deadClicks || 0,
       analyticsSource: 'Microsoft Clarity (Live API)',
       status: 'operational',
       activeNow: clarityData.activeUsers || recentUsers || 0
