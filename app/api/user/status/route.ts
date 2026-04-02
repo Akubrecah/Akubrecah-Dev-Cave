@@ -139,6 +139,11 @@ export async function GET() {
       ? user.subscriptionTier
       : 'free';
 
+    // ADMIN OVERRIDE: Admin tier should NOT be free
+    if (isAdmin) {
+      activeTier = 'premium_plus';
+    }
+
     let subscriptionEnd = user.subscriptionEnd;
 
     // ADMIN OVERRIDE: Admin tier should NOT be free
@@ -165,10 +170,10 @@ export async function GET() {
       return NextResponse.json({
         isPremiumUser,
         hasPdfPremium,
-        subscriptionTier: isAdmin ? 'premium_plus' : (user.subscriptionTier || 'free'),
-        subscriptionStatus: isAdmin ? 'active' : (user.subscriptionStatus || 'inactive'),
+        subscriptionTier: isPrivilegedRole ? 'premium_plus' : (user.subscriptionTier || 'free'),
+        subscriptionStatus: isPrivilegedRole ? 'active' : (user.subscriptionStatus || 'inactive'),
         subscriptionEnd,
-        activeTier,
+        activeTier: isPrivilegedRole ? 'premium_plus' : activeTier,
         role: user.role,
         timeExpired: false,
         usage: {
