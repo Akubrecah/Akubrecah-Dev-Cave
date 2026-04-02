@@ -141,20 +141,15 @@ export async function GET() {
 
     // ADMIN OVERRIDE: Admin tier should NOT be free
     if (isAdmin) {
-      activeTier = 'premium_plus';
+      activeTier = 'admin';
     }
 
     let subscriptionEnd = user.subscriptionEnd;
 
-    // ADMIN OVERRIDE: Admin tier should NOT be free
+    // ADMIN OVERRIDE: Provide a virtual long-term end if none exists 
+    // unless the user specifically wants "No Active Plan" (null)
     if (isAdmin) {
-      activeTier = 'premium_plus';
-      // Provide a virtual long-term end if none exists
-      if (!subscriptionEnd) {
-        const farFuture = new Date();
-        farFuture.setFullYear(farFuture.getFullYear() + 10);
-        subscriptionEnd = farFuture;
-      }
+       subscriptionEnd = null;
     }
 
     const isPremiumUser = isAdmin || hasActiveTimedSub || user.role === 'premium' || user.role === 'cyber';
@@ -170,10 +165,10 @@ export async function GET() {
       return NextResponse.json({
         isPremiumUser,
         hasPdfPremium,
-        subscriptionTier: isPrivilegedRole ? 'premium_plus' : (user.subscriptionTier || 'free'),
+        subscriptionTier: isAdmin ? 'admin' : (isPrivilegedRole ? 'premium_plus' : (user.subscriptionTier || 'free')),
         subscriptionStatus: isPrivilegedRole ? 'active' : (user.subscriptionStatus || 'inactive'),
         subscriptionEnd,
-        activeTier: isPrivilegedRole ? 'premium_plus' : activeTier,
+        activeTier: isAdmin ? 'admin' : (isPrivilegedRole ? 'premium_plus' : activeTier),
         role: user.role,
         timeExpired: false,
         usage: {
