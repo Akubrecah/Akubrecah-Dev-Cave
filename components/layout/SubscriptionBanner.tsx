@@ -97,35 +97,23 @@ export function SubscriptionBanner() {
       
       {/* Credits Section */}
       <div className="flex items-center gap-2 relative z-10">
-        <CreditCard className="w-3 h-3" />
-        <span>Remaining Filings: <span className="tabular-nums text-[11px] underline">
-          {status.usage?.remaining >= 999999 ? 'Unlimited' : status.usage?.remaining ?? 0}
+        <Zap className="w-3 h-3 text-current" />
+        <span>Remaining Filings: <span className="tabular-nums">
+          {status.usage?.remaining >= 15 ? 'Unlimited' : status.usage?.remaining ?? 0}
         </span></span>
       </div>
 
-      {/* Subscription Duration (Only if active) */}
+      {/* Subscription Duration Countdown */}
       {subscriptionTimeLeft && (
         <div className="flex items-center gap-2 relative z-10 border-l border-black/20 pl-6">
           <Timer className="w-3 h-3 animate-pulse" />
-          <span>
-            {status.subscriptionTier?.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())}:
-            {' '}<span className="tabular-nums text-[10px] font-mono">{subscriptionTimeLeft}</span>
-          </span>
+          <span className="tabular-nums font-mono">{subscriptionTimeLeft}</span>
         </div>
       )}
 
-      {/* Refresh Countdown */}
-      {!status.isPremiumUser && refreshTimeLeft && (
-        <div className="flex items-center gap-2 relative z-10 border-l border-black/20 pl-6">
-          <RefreshCw className="w-3 h-3" />
-          <span>Next Refresh: <span className="tabular-nums text-[10px]">{refreshTimeLeft}</span></span>
-        </div>
-      )}
-
-      {/* Admin Highlight */}
+      {/* Admin Toggle */}
       {status.role === 'admin' && (
-        <div className="flex items-center gap-2 relative z-10 border-l border-black/20 pl-6 text-red-700">
-          <Zap className="w-3 h-3 fill-current" />
+        <div className="flex items-center gap-2 relative z-10 border-l border-black/20 pl-6 text-red-600 font-black">
           <span>ADMIN ACCESS</span>
         </div>
       )}
