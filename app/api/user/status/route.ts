@@ -118,14 +118,14 @@ export async function GET() {
 
     const now = new Date();
 
-    const isAdmin = user.role === 'admin';
+    const isAdmin = user.role === 'admin' || isAdminIdentified;
     const isPrivilegedRole = isAdmin || user.role === 'premium' || user.role === 'cyber';
 
     // Time-gate: subscription must be active AND not expired
     const hasActiveTimedSub =
-      user.subscriptionStatus === 'active' &&
+      (user.subscriptionStatus === 'active' &&
       user.subscriptionEnd != null &&
-      new Date(user.subscriptionEnd) > now;
+      new Date(user.subscriptionEnd) > now) || isAdmin; // Admin always has active sub
 
     // Detect expired subscription (had one but it ran out)
     const timeExpired =

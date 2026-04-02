@@ -38,7 +38,8 @@ export default function UserDashboard() {
   const [certs, setCerts] = useState<any[]>([]);
 
   useEffect(() => {
-    fetch('/api/user/status')
+    // Add cache buster to status check
+    fetch(`/api/user/status?t=${Date.now()}`, { cache: 'no-store' })
       .then(res => res.json())
       .then(data => setSubscription(data));
     
