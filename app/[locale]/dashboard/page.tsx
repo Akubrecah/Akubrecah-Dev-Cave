@@ -8,7 +8,7 @@ import { useParams } from 'next/navigation';
 
 // Live countdown hook
 function useCountdown(targetDateStr: string | null | undefined) {
-  const [timeLeft, setTimeLeft] = useState<{ days: number; hours: number; minutes: number; expired: boolean } | null>(null);
+  const [timeLeft, setTimeLeft] = useState<{ days: number; hours: number; minutes: number; seconds: number; expired: boolean } | null>(null);
 
   useEffect(() => {
     if (!targetDateStr) { setTimeLeft(null); return; }
@@ -16,14 +16,15 @@ function useCountdown(targetDateStr: string | null | undefined) {
 
     const tick = () => {
       const diff = target - Date.now();
-      if (diff <= 0) { setTimeLeft({ days: 0, hours: 0, minutes: 0, expired: true }); return; }
+      if (diff <= 0) { setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0, expired: true }); return; }
       const days = Math.floor(diff / 86400000);
       const hours = Math.floor((diff % 86400000) / 3600000);
       const minutes = Math.floor((diff % 3600000) / 60000);
-      setTimeLeft({ days, hours, minutes, expired: false });
+      const seconds = Math.floor((diff % 60000) / 1000);
+      setTimeLeft({ days, hours, minutes, seconds, expired: false });
     };
     tick();
-    const id = setInterval(tick, 60000);
+    const id = setInterval(tick, 1000);
     return () => clearInterval(id);
   }, [targetDateStr]);
 
@@ -132,6 +133,11 @@ export default function UserDashboard() {
                   <div className="text-center">
                     <div className="text-2xl font-black text-emerald-500">{countdown.minutes}</div>
                     <div className="text-[9px] text-white/30 uppercase">min</div>
+                  </div>
+                  <div className="text-2xl font-black text-white/20">:</div>
+                  <div className="text-center">
+                    <div className="text-2xl font-black text-emerald-500">{countdown.seconds}</div>
+                    <div className="text-[9px] text-white/30 uppercase">sec</div>
                   </div>
                 </div>
               ) : countdown?.expired ? (

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
 import { Input, Select } from '@/components/ui/FormField';
-import { CheckCircle2, AlertCircle, Download, ClipboardList, ChevronRight, ShieldCheck, User, Database, Globe } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Download, ClipboardList, ChevronRight, ShieldCheck, User, Database, Globe, Clock } from 'lucide-react';
 import { useUser } from '@clerk/nextjs';
 import { generateReceiptPdf, ReceiptPdfData } from '@/lib/pdf/generate-receipt-pdf';
 
@@ -42,6 +42,8 @@ export function NilReturnForm() {
     const [idNumber, setIdNumber] = useState("");
     const [idType, setIdType] = useState("KE");
     const [verifying, setVerifying] = useState(false);
+    const [subscription, setSubscription] = useState<any>(null);
+    const [timeLeft, setTimeLeft] = useState<{ h: number; m: number; s: number; expired: boolean } | null>(null);
     const [activityLogs, setActivityLogs] = useState<{ id: string; msg: string; type: 'info' | 'success' | 'error' | 'cmd' }[]>([]);
     const [isAdmin, setIsAdmin] = useState(false);
     const { user, isLoaded } = useUser();
@@ -57,19 +59,43 @@ export function NilReturnForm() {
 
     useEffect(() => {
         if (!isLoaded || !user) return;
-        const checkAdmin = async () => {
+        const checkStatus = async () => {
             try {
                 const res = await fetch('/api/user/status');
                 if (res.ok) {
                     const data = await res.json();
                     setIsAdmin(data.role === 'admin');
+                    setSubscription(data);
                 }
             } catch (err) {
-                console.error("Admin check failed:", err);
+                console.error("Status check failed:", err);
             }
         };
-        checkAdmin();
+        checkStatus();
     }, [user, isLoaded]);
+
+    useEffect(() => {
+        if (!subscription?.subscriptionEnd) return;
+        const target = new Date(subscription.subscriptionEnd).getTime();
+        
+        const tick = () => {
+            const now = Date.now();
+            const diff = target - now;
+            if (diff <= 0) {
+                setTimeLeft({ h: 0, m: 0, s: 0, expired: true });
+                return;
+            }
+            setTimeLeft({
+                h: Math.floor((diff / (1000 * 60 * 60)) % 24),
+                m: Math.floor((diff / (1000 * 60)) % 60),
+                s: Math.floor((diff / 1000) % 60),
+                expired: false
+            });
+        };
+        tick();
+        const id = setInterval(tick, 1000);
+        return () => clearInterval(id);
+    }, [subscription]);
 
     useEffect(() => {
         addLog("Ready to assist with your KRA filing.", "success");
@@ -237,11 +263,25 @@ export function NilReturnForm() {
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="space-y-2"
+                        className="space-y-4"
                     >
-                        <h2 className="text-3xl lg:text-5xl font-extrabold uppercase tracking-tighter text-white leading-none">
-                            Easy KRA <span className="text-primary italic">Filing</span>
-                        </h2>
+                        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                            <h2 className="text-3xl lg:text-5xl font-extrabold uppercase tracking-tighter text-white leading-none">
+                                Easy KRA <span className="text-primary italic">Filing</span>
+                            </h2>
+                            
+                            {timeLeft && !timeLeft.expired && (
+                                <div className="flex items-center gap-3 px-6 py-3 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl backdrop-blur-xl">
+                                    <Clock size={16} className="text-emerald-500 animate-pulse" />
+                                    <div className="flex items-center gap-1 font-mono text-lg font-black text-emerald-500">
+                                        <span>{timeLeft.h.toString().padStart(2, '0')}</span>:
+                                        <span>{timeLeft.m.toString().padStart(2, '0')}</span>:
+                                        <span>{timeLeft.s.toString().padStart(2, '0')}</span>
+                                    </div>
+                                    <span className="text-[9px] font-black uppercase tracking-widest text-emerald-500/50">Remain</span>
+                                </div>
+                            )}
+                        </div>
                         <div className="flex items-center gap-2">
                             <span className="h-[2px] w-12 bg-primary"></span>
                             <p className="text-xs uppercase tracking-[0.2em] text-[#F59E0B] font-bold">Type: Nil Return</p>
