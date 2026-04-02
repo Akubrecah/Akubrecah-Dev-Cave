@@ -135,11 +135,24 @@ export async function GET() {
       new Date(user.subscriptionEnd) <= now;
 
     // Active tier string
-    const activeTier = hasActiveTimedSub && user.subscriptionTier
+    let activeTier = hasActiveTimedSub && user.subscriptionTier
       ? user.subscriptionTier
       : 'free';
 
-    const isPremiumUser = isPrivilegedRole || hasActiveTimedSub;
+    let subscriptionEnd = user.subscriptionEnd;
+
+    // ADMIN OVERRIDE: Admin tier should NOT be free
+    if (isAdmin) {
+      activeTier = 'premium_plus';
+      // Provide a virtual long-term end if none exists
+      if (!subscriptionEnd) {
+        const farFuture = new Date();
+        farFuture.setFullYear(farFuture.getFullYear() + 10);
+        subscriptionEnd = farFuture;
+      }
+    }
+
+    const isPremiumUser = isAdmin || hasActiveTimedSub || user.role === 'premium' || user.role === 'cyber';
     const hasPdfPremium = isPremiumUser;
 
     // Filing limits from pricing config
@@ -148,13 +161,13 @@ export async function GET() {
       : (isValidTier(activeTier) ? TIERS[activeTier].filings : 0);
 
     // For unlimited tiers skip usage counting
-    if (isPrivilegedRole || filingLimit >= 999999) {
+    if (isAdmin || isPrivilegedRole || filingLimit >= 999999) {
       return NextResponse.json({
         isPremiumUser,
         hasPdfPremium,
-        subscriptionTier: user.subscriptionTier || 'free',
-        subscriptionStatus: user.subscriptionStatus || 'inactive',
-        subscriptionEnd: user.subscriptionEnd,
+        subscriptionTier: isAdmin ? 'premium_plus' : (user.subscriptionTier || 'free'),
+        subscriptionStatus: isAdmin ? 'active' : (user.subscriptionStatus || 'inactive'),
+        subscriptionEnd,
         activeTier,
         role: user.role,
         timeExpired: false,
@@ -163,7 +176,7 @@ export async function GET() {
           PDF: 0,
           limit: 999999,
           remaining: 999999,
-          nextRefresh: user.subscriptionEnd?.toISOString() ?? new Date().toISOString(),
+          nextRefresh: subscriptionEnd?.toISOString() ?? new Date().toISOString(),
         },
       });
     }
