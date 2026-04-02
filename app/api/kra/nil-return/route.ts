@@ -4,19 +4,7 @@ import { checkUsageLimit, incrementUsage } from '@/lib/pdf/usage';
 
 export async function POST(req: Request) {
     try {
-        // Enforce usage limit
-        try {
-            const limit = await checkUsageLimit('KRA');
-            if (!limit.allowed) {
-                return NextResponse.json({ 
-                    errorMessage: 'Daily limit reached. Please upgrade to premium for unlimited filings.',
-                    limitReached: true,
-                    count: limit.count 
-                }, { status: 429 });
-            }
-        } catch (usageErr) {
-            console.warn('[NIL-RETURN] Usage check failed:', usageErr);
-        }
+        // Rate limiting disabled - Always allowed
 
         const body: NilReturnData = await req.json();
         

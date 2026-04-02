@@ -8,18 +8,7 @@ export async function POST(req: Request) {
     try {
         const { pin } = await req.json();
 
-        // Enforcement: Check daily limit (best-effort, don't block KRA on DB failure)
-        try {
-          const { allowed, remaining } = await checkUsageLimit('KRA');
-          if (!allowed) {
-            return NextResponse.json({ 
-                errorMessage: 'Daily limit reached. Please upgrade to Cyber Pro for unlimited verifications.',
-                remaining 
-            }, { status: 429 });
-          }
-        } catch (usageErr) {
-          console.warn('[KRA-PIN] Usage check failed, allowing request:', usageErr);
-        }
+        // Rate limiting disabled - Always allowed
 
         const token = await getAccessToken('pinByPIN');
         const BASE_URL = process.env.KRA_API_BASE_URL || 'https://sbx.kra.go.ke';

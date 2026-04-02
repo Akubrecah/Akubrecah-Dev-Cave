@@ -3,27 +3,18 @@ import { checkUsageLimit, incrementUsage } from '@/lib/pdf/usage';
 
 export async function POST(req: Request) {
   try {
-    // Enforcement: Check daily limit for KRA Certificate Generation
-    const { allowed, remaining, isPremium } = await checkUsageLimit('KRA');
-    
-    if (!allowed) {
-      return NextResponse.json({ 
-        error: 'Daily generation limit reached. Please upgrade to Cyber Pro for unlimited certificates.',
-        remaining 
-      }, { status: 429 });
-    }
-
+    // Rate limiting disabled - Always allowed
     // Since generation logic is handled on the client (html2pdf), 
-    // this API acts as a gatekeeper and incrementer.
+    // this API acts as a gatekeeper and incrementer for tracking only.
     
-    // Increment usage
+    // Increment usage for analytics
     await incrementUsage('KRA');
 
     return NextResponse.json({ 
       success: true, 
       allowed: true,
-      remaining: isPremium ? 9999 : remaining - 1,
-      message: isPremium ? 'Premium access granted' : 'Generation authorized'
+      remaining: 999999,
+      message: 'Access granted'
     });
 
   } catch (error: unknown) {
