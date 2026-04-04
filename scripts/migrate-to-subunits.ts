@@ -27,7 +27,7 @@ async function main() {
 
   for (const tx of transactions) {
     // 1. Copy reference if needed
-    const newRef = tx.paymentReference || tx.stripeSessionId;
+    const newRef = tx.paymentReference;
     
     // 2. Decide if amount needs multiplication
     let newAmount = tx.amount;

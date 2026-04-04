@@ -81,7 +81,7 @@ export async function POST(req: Request) {
         amount: Math.floor(parseInt(amount) / 100), // Stripe gives amount in cents
         type: finalType || 'unknown',
         status: 'completed',
-        stripeSessionId: sessionId,
+        paymentReference: sessionId,
       }
     });
 
