@@ -69,7 +69,7 @@ export async function POST(req: Request) {
         const tier = transaction.tier;
         const updateData = buildSubscriptionUpdate(tier ?? '');
 
-        if (Object.keys(updateData).length > 0) {
+        if (Object.keys(updateData).length > 0 && transaction.userId) {
           await prisma.user.update({
             where: { id: transaction.userId },
             data: updateData,
