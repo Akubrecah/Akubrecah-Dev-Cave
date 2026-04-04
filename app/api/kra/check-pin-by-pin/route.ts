@@ -46,10 +46,13 @@ export async function POST(req: Request) {
 
                 console.log(`[KRA-PIN] Response status: ${response.status}, body: ${rawText.substring(0, 500)}`);
 
-                if (!response.ok) {
-                    const errorBody = data?.errorMessage || data?.ErrorMessage || data?.error || data?.message || `KRA API error ${response.status}`;
-                    console.error(`[KRA-PIN] API Error: ${errorBody}`, data);
-                    return NextResponse.json({ errorMessage: errorBody }, { status: response.status });
+                if (!response.ok || (data && (data.ErrorCode || data.errorMessage || data.ErrorMessage))) {
+                    const errorBody = data?.errorMessage || data?.ErrorMessage || data?.error || data?.message || data?.ErrorMessage || `KRA API error ${data?.ErrorCode || response.status}`;
+                    // If error is 0 or "0", it's not an error (some APIs use ErrorCode: "0" for success)
+                    if (data?.ErrorCode !== "0" && data?.ErrorCode !== 0) {
+                        console.error(`[KRA-PIN] API Error: ${errorBody}`, data);
+                        return NextResponse.json({ errorMessage: errorBody, data }, { status: response.ok ? 400 : response.status });
+                    }
                 }
 
                 console.log(`[KRA-PIN] Success data keys: ${Object.keys(data).join(', ')}`);

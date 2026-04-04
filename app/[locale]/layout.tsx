@@ -40,20 +40,28 @@ export default async function LocaleLayout({
   const direction = localeConfig[locale as Locale]?.direction || 'ltr';
 
   // Fetch active notifications
-  const activeNotifications = await (prisma as any).notification?.findMany({
-    where: { active: true },
-    select: {
-      id: true,
-      message: true,
-      type: true,
-      theme: true,
-      active: true,
-      createdAt: true,
-      updatedAt: true,
-      speed: true,
-    },
-    orderBy: { createdAt: 'desc' }
-  }) || [];
+  let activeNotifications: any[] = [];
+  try {
+    const rawNotifications = await (prisma as any).notification?.findMany({
+      where: { active: true },
+      select: {
+        id: true,
+        message: true,
+        type: true,
+        theme: true,
+        active: true,
+        createdAt: true,
+        updatedAt: true,
+        speed: true,
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+    if (rawNotifications) {
+      activeNotifications = rawNotifications;
+    }
+  } catch (error) {
+    console.warn('Failed to fetch notifications (this is expected during build if DB is unreachable):', error);
+  }
 
   const marquee = activeNotifications.find((n: any) => n.type === 'marquee');
   const hasMarquee = !!marquee;

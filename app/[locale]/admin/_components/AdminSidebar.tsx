@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useParams, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -23,7 +24,7 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-const navItems = [
+const coreNavItems = [
   { id: 'overview', label: 'Overview', icon: Activity, href: '/admin' },
   { id: 'users', label: 'Users', icon: Users, href: '/admin?tab=users' },
   { id: 'transactions', label: 'Transactions', icon: DollarSign, href: '/admin?tab=transactions' },
@@ -32,36 +33,41 @@ const navItems = [
   { id: 'notifications', label: 'Notifications', icon: Bell, href: '/admin?tab=notifications' },
 ];
 
+const biNavItems = [
+  { id: 'executive', label: 'Executive', icon: LayoutDashboard, href: '/admin/executive' },
+  { id: 'sales', label: 'Sales', icon: DollarSign, href: '/admin/sales' },
+  { id: 'support', label: 'Support', icon: Settings, href: '/admin/support' },
+  { id: 'financial', label: 'Financial', icon: Activity, href: '/admin/financial' },
+  { id: 'marketing', label: 'Marketing', icon: Users, href: '/admin/marketing' },
+  { id: 'operations', label: 'Operations', icon: LayoutDashboard, href: '/admin/operations' },
+];
+
 export function AdminSidebar() {
   const pathname = usePathname();
   const params = useParams();
   const searchParams = useSearchParams();
-  const currentTab = searchParams.get('tab') || 'overview';
+  const currentTab = searchParams.get('tab');
   const locale = params?.locale as string || 'en';
+  
+  // Custom active state logic to handle both tabs and separate routes
+  const isItemActive = (item: { id: string, href: string }) => {
+    if (item.href.includes('?tab=')) {
+      return currentTab === item.id;
+    }
+    if (item.href === '/admin' && !currentTab && pathname === `/${locale}/admin`) {
+      return true;
+    }
+    return pathname.includes(item.href);
+  };
 
-  return (
-    <motion.aside
-      initial={{ x: -20, opacity: 0 }}
-      animate={{ x: 0, opacity: 1 }}
-      className="fixed left-6 top-24 bottom-6 w-64 z-50 rounded-[32px] glass-panel border border-white/10 shadow-2xl overflow-hidden hidden lg:flex flex-col"
-    >
-      {/* Brand Profile */}
-      <div className="p-8 border-b border-white/5 bg-white/[0.02]">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[var(--color-brand-red)] to-[var(--color-brand-crimson)] flex items-center justify-center shadow-lg shadow-red-900/20">
-            <Shield className="w-6 h-6 text-white" strokeWidth={2.5} />
-          </div>
-          <div>
-            <h2 className="text-sm font-black text-white tracking-tight leading-4 uppercase">Akubrecah</h2>
-            <p className="text-[10px] font-bold text-[var(--color-brand-red)] opacity-80 uppercase tracking-[0.2em] mt-1">Admin Ops</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Nav Section */}
-      <nav className="flex-1 p-4 space-y-1 mt-4 overflow-y-auto custom-scrollbar">
-        {navItems.map((item, idx) => {
-          const isActive = currentTab === item.id;
+  const renderNavGroup = (title: string, items: typeof coreNavItems) => (
+    <div className="mb-6">
+      <h3 className="px-4 text-[10px] font-black text-[#BEA0A0] uppercase tracking-[0.2em] mb-2 opacity-60">
+        {title}
+      </h3>
+      <div className="space-y-1">
+        {items.map((item, idx) => {
+          const isActive = isItemActive(item);
           
           return (
             <motion.div
@@ -112,6 +118,39 @@ export function AdminSidebar() {
             </motion.div>
           );
         })}
+      </div>
+    </div>
+  );
+
+  return (
+    <motion.aside
+      initial={{ x: -20, opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      className="fixed left-6 top-24 bottom-6 w-64 z-50 rounded-[32px] glass-panel border border-white/10 shadow-2xl overflow-hidden hidden lg:flex flex-col"
+    >
+      {/* Brand Profile */}
+      <div className="p-8 border-b border-white/5 bg-white/[0.02]">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 overflow-hidden relative group">
+            <Image 
+              src="/logo.png" 
+              alt="Akubrecah" 
+              fill 
+              className="object-contain p-2"
+              priority
+            />
+          </div>
+          <div>
+            <h2 className="text-sm font-black text-white tracking-tight leading-4 uppercase">Akubrecah</h2>
+            <p className="text-[10px] font-bold text-[var(--color-brand-red)] opacity-80 uppercase tracking-[0.2em] mt-1">Admin Ops</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Nav Section */}
+      <nav className="flex-1 p-4 mt-4 overflow-y-auto custom-scrollbar">
+        {renderNavGroup('Core Ops', coreNavItems)}
+        {renderNavGroup('Business Intelligence', biNavItems)}
       </nav>
 
       {/* Bottom Actions */}

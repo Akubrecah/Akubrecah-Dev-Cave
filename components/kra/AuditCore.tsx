@@ -102,7 +102,7 @@ export function AuditCore({ stats, setStats, subscription }: AuditCoreProps) {
       
       setFormData(prev => ({
         ...prev,
-        kraPin: getKRAValue(result, 'TaxpayerPIN', 'PIN') || prev.kraPin,
+        kraPin: getKRAValue(result, 'KRAPIN', 'TaxpayerPIN', 'PIN') || prev.kraPin,
         taxpayerName: (getKRAValue(result, 'TaxpayerName', 'Name') || prev.taxpayerName || '').toUpperCase(),
         obligation: getKRAValue(result, 'Type', 'TaxpayerType') || prev.obligation,
         status: getKRAValue(result, 'Status') || prev.status

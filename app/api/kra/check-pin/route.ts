@@ -57,10 +57,13 @@ export async function POST(req: Request) {
                     throw new Error(`KRA returned non-JSON response (${response.status}): ${rawText.substring(0, 100)}`);
                 }
 
-                if (!response.ok) {
-                    const errorBody = data?.ErrorMessage || data?.errorMessage || data?.error || data?.message || `KRA API error ${response.status}`;
-                    console.error(`[KRA-ID] API Error: ${errorBody}`, data);
-                    return NextResponse.json({ errorMessage: errorBody }, { status: response.status });
+                if (!response.ok || (data && (data.ErrorCode || data.errorMessage || data.ErrorMessage))) {
+                    const errorBody = data?.ErrorMessage || data?.errorMessage || data?.error || data?.message || `KRA API error ${data?.ErrorCode || response.status}`;
+                    // If error is 0 or "0", it's not an error (some APIs use ErrorCode: "0" for success)
+                    if (data?.ErrorCode !== "0" && data?.ErrorCode !== 0) {
+                        console.error(`[KRA-ID] API Error: ${errorBody}`, data);
+                        return NextResponse.json({ errorMessage: errorBody, data }, { status: response.ok ? 400 : response.status });
+                    }
                 }
 
                 console.log(`[KRA-ID] Success data keys: ${Object.keys(data).join(', ')}`);
