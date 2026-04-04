@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { AdminAIAssistant } from './AdminAIAssistant';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -123,46 +124,49 @@ export function AdminSidebar() {
   );
 
   return (
-    <motion.aside
-      initial={{ x: -20, opacity: 0 }}
-      animate={{ x: 0, opacity: 1 }}
-      className="fixed left-6 top-24 bottom-6 w-64 z-50 rounded-[32px] glass-panel border border-white/10 shadow-2xl overflow-hidden hidden lg:flex flex-col"
-    >
-      {/* Brand Profile */}
-      <div className="p-8 border-b border-white/5 bg-white/[0.02]">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 overflow-hidden relative group">
-            <Image 
-              src="/logo.png" 
-              alt="Akubrecah" 
-              fill 
-              className="object-contain p-2"
-              priority
-            />
-          </div>
-          <div>
-            <h2 className="text-sm font-black text-white tracking-tight leading-4 uppercase">Akubrecah</h2>
-            <p className="text-[10px] font-bold text-[var(--color-brand-red)] opacity-80 uppercase tracking-[0.2em] mt-1">Admin Ops</p>
+    <>
+      <motion.aside
+        initial={{ x: -20, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        className="fixed left-6 top-24 bottom-6 w-64 z-50 rounded-[32px] glass-panel border border-white/10 shadow-2xl overflow-hidden hidden lg:flex flex-col"
+      >
+        {/* Brand Profile */}
+        <div className="p-8 border-b border-white/5 bg-white/[0.02]">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 overflow-hidden relative group">
+              <Image 
+                src="/logo.png" 
+                alt="Akubrecah" 
+                fill 
+                className="object-contain p-2"
+                priority
+              />
+            </div>
+            <div>
+              <h2 className="text-sm font-black text-white tracking-tight leading-4 uppercase">Akubrecah</h2>
+              <p className="text-[10px] font-bold text-[var(--color-brand-red)] opacity-80 uppercase tracking-[0.2em] mt-1">Admin Ops</p>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Nav Section */}
-      <nav className="flex-1 p-4 mt-4 overflow-y-auto custom-scrollbar">
-        {renderNavGroup('Core Ops', coreNavItems)}
-        {renderNavGroup('Business Intelligence', biNavItems)}
-      </nav>
+        {/* Nav Section */}
+        <nav className="flex-1 p-4 mt-4 overflow-y-auto custom-scrollbar">
+          {renderNavGroup('Core Ops', coreNavItems)}
+          {renderNavGroup('Business Intelligence', biNavItems)}
+        </nav>
 
-      {/* Bottom Actions */}
-      <div className="p-4 border-t border-white/5 bg-white/[0.02]">
-        <Link
-          href={`/${locale}/dashboard`}
-          className="flex items-center gap-3 px-4 py-3 rounded-2xl text-gray-400 hover:text-[var(--color-brand-red)] hover:bg-[var(--color-brand-red)]/5 transition-all duration-300 group font-bold"
-        >
-          <LogOut className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
-          <span className="text-sm">Exit Admin</span>
-        </Link>
-      </div>
-    </motion.aside>
+        {/* Bottom Actions */}
+        <div className="p-4 border-t border-white/5 bg-white/[0.02]">
+          <Link
+            href={`/${locale}/dashboard`}
+            className="flex items-center gap-3 px-4 py-3 rounded-2xl text-gray-400 hover:text-[var(--color-brand-red)] hover:bg-[var(--color-brand-red)]/5 transition-all duration-300 group font-bold"
+          >
+            <LogOut className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
+            <span className="text-sm">Exit Admin</span>
+          </Link>
+        </div>
+      </motion.aside>
+      <AdminAIAssistant />
+    </>
   );
 }

@@ -30,7 +30,7 @@ export async function POST(req: Request) {
     const transaction = await prisma.transaction.create({
       data: {
         userId: user.id,
-        amount,
+        amount: amount * 100, // Store in subunits (cents/kobo)
         type: 'paystack',
         status: 'pending',
         tier,
@@ -49,7 +49,7 @@ export async function POST(req: Request) {
       },
       body: JSON.stringify({
         email: user.email,
-        amount: amount * 100, // Paystack requires subunits (fill in KES * 100 = kobo equivalent)
+        amount: amount * 100, // Paystack requires subunits
         currency: 'KES',
         reference: transaction.id,
         callback_url,
@@ -68,7 +68,7 @@ export async function POST(req: Request) {
     if (paystackRes.ok && paystackData.status) {
       await prisma.transaction.update({
         where: { id: transaction.id },
-        data: { stripeSessionId: paystackData.data.reference },
+        data: { paymentReference: paystackData.data.reference },
       });
 
       return NextResponse.json({ 

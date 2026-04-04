@@ -63,7 +63,7 @@ export async function POST(req: Request) {
       if (status === 'success') {
         await prisma.transaction.update({
           where: { id: transaction.id },
-          data: { status: 'completed', stripeSessionId: reference },
+          data: { status: 'completed', paymentReference: reference },
         });
 
         const tier = transaction.tier;

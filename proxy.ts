@@ -53,18 +53,17 @@ const isPublicRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
-  // 1. Global Rate Limit Check
-  if (isRateLimited('global', GLOBAL_LIMIT, globalTracker)) {
+  const { userId, sessionClaims } = await auth();
+  const isAdmin = (sessionClaims as any)?.publicMetadata?.role === 'admin';
+  const ident = userId || req.headers.get('x-forwarded-for') || 'anon';
+
+  // 1. Global Rate Limit Check (Skipped for Admins)
+  if (!isAdmin && isRateLimited('global', GLOBAL_LIMIT, globalTracker)) {
     console.warn(`[PROXY] Global rate limit reached: ${req.nextUrl.pathname}`);
     return NextResponse.json({ error: 'Server Busy. Please wait a moment.' }, { status: 429 });
   }
 
-  // 2. User/IP Rate Limit Check
-  const { userId, sessionClaims } = await auth();
-  const ident = userId || req.headers.get('x-forwarded-for') || 'anon';
-  
-  // Rate Limit Exemption for Admins
-  const isAdmin = (sessionClaims as any)?.publicMetadata?.role === 'admin';
+  // 2. User/IP Rate Limit Check (Skipped for Admins)
   const isPro = (sessionClaims as any)?.publicMetadata?.subscriptionStatus === 'active' || isAdmin;
   const userLimit = isPro ? PRO_USER_LIMIT : FREE_USER_LIMIT;
 

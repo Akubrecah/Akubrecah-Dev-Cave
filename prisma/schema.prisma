@@ -28,17 +28,17 @@ model User {
 
 model Transaction {
   id              String   @id @default(uuid())
-  userId          String
-  amount          Int
+  userId          String?
+  amount          Int      // Amount in subunits (e.g. cents for USD, kobo/subunit for KES)
   type            String
   status          String   @default("pending")
-  stripeSessionId String?  @unique
+  paymentReference String?  @unique
   mpesaCode       String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   tier            String?
   failureReason   String?
-  user            User     @relation(fields: [userId], references: [id])
+  user            User?     @relation(fields: [userId], references: [id])
 }
 
 model Verification {
