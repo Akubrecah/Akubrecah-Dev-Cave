@@ -30,7 +30,7 @@ export async function POST(req: Request) {
 
     const stats = {
       totalUsers,
-      premiumUsers: await prisma.user.count({ where: { isPremium: true } }),
+      premiumUsers: await prisma.user.count({ where: { subscriptionStatus: 'active' } }),
       totalRevenue: revenueResult._sum.amount || 0,
       activeSupportTickets: supportPending,
       totalSupportTickets: await prisma.contactMessage.count(),
