@@ -7,7 +7,7 @@ export async function GET() {
   if (adminOrError instanceof NextResponse) return adminOrError;
 
   try {
-    const notifications = await (prisma as any).notification.findMany({
+    const notifications = await prisma.notification.findMany({
       select: {
         id: true,
         message: true,
@@ -36,22 +36,20 @@ export async function POST(req: Request) {
 
     // If active is true, deactivate all other notifications OF THE SAME TYPE
     if (active) {
-      await (prisma as any).notification.updateMany({
+      await prisma.notification.updateMany({
         where: { type, active: true },
         data: { active: false }
       });
     }
 
-    const notificationData: any = {
-      message,
-      type,
-      active: !!active,
-      theme: theme || 'purple',
-      speed: parseInt(speed) || 30,
-    };
-
-    const notification = await (prisma as any).notification.create({
-      data: notificationData,
+    const notification = await prisma.notification.create({
+      data: {
+        message,
+        type,
+        active: !!active,
+        theme: theme || 'purple',
+        speed: parseInt(speed) || 30,
+      },
     });
 
     return NextResponse.json(notification);
@@ -71,7 +69,7 @@ export async function PATCH(req: Request) {
 
     // If active is true, deactivate all other notifications OF THE SAME TYPE
     if (active) {
-      await (prisma as any).notification.updateMany({
+      await prisma.notification.updateMany({
         where: { 
           type, 
           active: true,
@@ -81,7 +79,7 @@ export async function PATCH(req: Request) {
       });
     }
 
-    const notification = await (prisma as any).notification.update({
+    const notification = await prisma.notification.update({
       where: { id },
       data: {
         message,
