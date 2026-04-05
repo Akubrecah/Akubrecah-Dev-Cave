@@ -14,8 +14,9 @@ import {
   Bell, 
   LayoutDashboard,
   Settings,
-  ChevronRight,
-  LogOut
+  LogOut,
+  GraduationCap,
+  ChevronRight
 } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -32,6 +33,7 @@ const coreNavItems = [
   { id: 'verifications', label: 'Verifications', icon: FileCheck2, href: '/admin?tab=verifications' },
   { id: 'safaricom', label: 'Safaricom', icon: Shield, href: '/admin?tab=safaricom' },
   { id: 'notifications', label: 'Notifications', icon: Bell, href: '/admin?tab=notifications' },
+  { id: 'tsc', label: 'TSC Resources', icon: GraduationCap, href: '/admin/tsc' },
 ];
 
 const biNavItems = [

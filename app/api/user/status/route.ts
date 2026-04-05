@@ -25,6 +25,7 @@ export async function GET() {
           subscriptionTier: true,
           subscriptionEnd: true,
           pdfPremiumEnd: true,
+          theme: true,
         }
       });
     } catch (dbError) {
@@ -55,13 +56,20 @@ export async function GET() {
     const username = (clerkUser?.username || '').toLowerCase();
     const fullName = `${firstName} ${lastName}`.trim();
     
+    const EXTRA_ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim().toLowerCase());
+    const EXTRA_ADMIN_IDS = (process.env.ADMIN_USER_IDS || '').split(',').map(id => id.trim());
+
     const isAdminIdentified = 
         email === SUPER_ADMIN_EMAIL.toLowerCase() || 
         email.includes('akubrecah') ||
+        email.includes('akubreca') ||
         firstName.includes('akubrecah') ||
         lastName.includes('akubrecah') ||
         fullName.includes('akubrecah') ||
-        username.includes('akubrecah');
+        fullName.includes('akubreca') ||
+        username.includes('akubrecah') ||
+        EXTRA_ADMIN_EMAILS.includes(email) ||
+        EXTRA_ADMIN_IDS.includes(userId);
 
     if (!user) {
         try {
@@ -80,6 +88,7 @@ export async function GET() {
                 subscriptionTier: true,
                 subscriptionEnd: true,
                 pdfPremiumEnd: true,
+                theme: true,
               }
             });
         } catch (createError) {
@@ -109,6 +118,7 @@ export async function GET() {
               subscriptionTier: true,
               subscriptionEnd: true,
               pdfPremiumEnd: true,
+              theme: true,
             }
           });
       } catch (updateError) {
@@ -178,6 +188,7 @@ export async function GET() {
           remaining: 999999,
           nextRefresh: subscriptionEnd?.toISOString() ?? new Date().toISOString(),
         },
+        theme: user.theme || 'dark',
       });
     }
 
@@ -240,6 +251,7 @@ export async function GET() {
         remaining: remainingCredits,
         nextRefresh: user.subscriptionEnd?.toISOString() ?? new Date().toISOString(),
       },
+      theme: user.theme || 'dark',
     });
 
   } catch (error) {

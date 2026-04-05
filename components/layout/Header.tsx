@@ -11,12 +11,20 @@ import {
     X,
     Shield,
     LayoutGrid,
+    GraduationCap,
+    ChevronDown,
     ShieldCheck,
     FileStack,
     PieChart,
-    MessageSquare,
     Mail,
+    Settings,
 } from 'lucide-react';
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+
+function cn(...inputs: ClassValue[]) {
+    return twMerge(clsx(inputs));
+}
 import { SignInButton, UserButton, Show, useUser } from '@clerk/nextjs';
 import { type Locale } from '@/lib/i18n/config';
 import { Button } from '@/components/ui/Button';
@@ -44,6 +52,8 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedIndex, setSelectedIndex] = useState(-1);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [isResourcesOpen, setIsResourcesOpen] = useState(false);
+    const resourcesRef = useRef<HTMLDivElement>(null);
     const pathname = usePathname();
     const [scrolled, setScrolled] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
@@ -57,9 +67,11 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
         const superAdminEmail = 'poweldayck@gmail.com';
         
         return email === superAdminEmail || 
-               email.includes('akubrecah') || 
-               username.includes('akubrecah') || 
-               fullName.includes('akubrecah');
+               email.toLowerCase().includes('akubrecah') || 
+               username.toLowerCase().includes('akubrecah') || 
+               fullName.toLowerCase().includes('akubrecah') ||
+               fullName.toLowerCase().includes('akubreca') ||
+               email.toLowerCase().includes('akubreca');
     }, [user]);
 
     const searchInputRef = useRef<HTMLInputElement>(null);
@@ -130,20 +142,22 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
         return results.slice(0, 8);
     }, [searchQuery, localizedTools]);
 
-    // Close search when clicking outside
+    // Close search/resources when clicking outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+            const target = event.target as Node;
+            if (searchContainerRef.current && !searchContainerRef.current.contains(target)) {
                 setIsSearchOpen(false);
                 setSearchQuery('');
             }
+            if (resourcesRef.current && !resourcesRef.current.contains(target)) {
+                setIsResourcesOpen(false);
+            }
         };
 
-        if (isSearchOpen) {
-            document.addEventListener('mousedown', handleClickOutside);
-            return () => document.removeEventListener('mousedown', handleClickOutside);
-        }
-    }, [isSearchOpen]);
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     const navigateToTool = useCallback((slug: string) => {
         router.push(`/${locale}/pdf-tools/${slug}`);
@@ -211,13 +225,20 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
         return icons[category] || '📄';
     };
 
-    const navItems = [
-        { href: `/${locale}`, label: 'Homepage', icon: LayoutGrid },
-        ...(user ? [{ href: `/${locale}/dashboard`, label: 'Dashboard', icon: LayoutGrid }] : []),
+    const mainNavItems = [
+        { href: `/${locale}`, label: 'Home', icon: LayoutGrid },
         { href: `/${locale}/kra-solutions`, label: 'KRA Solutions', icon: ShieldCheck },
+        ...(user ? [{ href: `/${locale}/dashboard`, label: 'Dashboard', icon: LayoutGrid }] : []),
+    ];
+
+    const complianceItems = [
+        { href: `/${locale}/tsc`, label: 'TSC Resources', icon: GraduationCap, desc: 'Teacher Management' },
+    ];
+
+    const otherNavItems = [
         { href: `/${locale}/pdf-tools`, label: 'PDF Suite', icon: FileStack },
         { href: `/${locale}/pricing`, label: 'Pricing', icon: PieChart },
-        { href: `/${locale}/contact`, label: 'Contact Us', icon: Mail },
+        { href: `/${locale}/contact`, label: 'Contact', icon: Mail },
     ];
 
     return (
@@ -252,24 +273,75 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
 
                     {/* Desktop Navigation */}
                     <nav
-                        className={`hidden lg:flex items-center gap-1 rounded-full border border-[#D1D5DB] bg-white p-1.5 shadow-sm transition-all duration-300 ${isSearchOpen ? 'opacity-0 translate-y-[-10px] pointer-events-none' : 'opacity-100 translate-y-0'
+                        className={`hidden lg:flex items-center gap-1 rounded-full border border-[#D1D5DB] bg-white p-1 shadow-sm transition-all duration-300 ${isSearchOpen ? 'opacity-0 translate-y-[-10px] pointer-events-none' : 'opacity-100 translate-y-0'
                             }`}
                         role="navigation"
-                        aria-label="Main navigation"
                     >
-                        {navItems.map((item) => {
-                            const active = pathname === item.href || (item.href !== `/${locale}` && pathname.startsWith(item.href));
+                        {mainNavItems.map((item) => {
+                            const active = pathname === item.href;
                             return (
                                 <Link
                                     key={item.href}
                                     href={item.href}
-                                    className={`group flex items-center gap-2 px-4 py-1.5 text-sm font-medium rounded-full transition-all duration-300 ${
-                                        active 
-                                            ? 'text-[#1F6F5B] bg-[#E5E7EB]' 
-                                            : 'text-[#2E8B75] hover:text-[#1F6F5B] hover:bg-black/5'
-                                    }`}
+                                    className={cn(
+                                        "group flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full transition-all duration-300",
+                                        active ? "text-[#1F6F5B] bg-[#E5E7EB]" : "text-[#2E8B75] hover:text-[#1F6F5B] hover:bg-black/5"
+                                    )}
                                 >
-                                    <item.icon className={`w-4 h-4 transition-transform group-hover:scale-110 ${active ? 'text-[#1F6F5B]' : ''}`} />
+                                    <item.icon className="w-3.5 h-3.5" />
+                                    <span>{item.label}</span>
+                                </Link>
+                            );
+                        })}
+
+                        {/* Compliance Dropdown */}
+                        <div className="relative" ref={resourcesRef}>
+                            <button
+                                onClick={() => setIsResourcesOpen(!isResourcesOpen)}
+                                className={cn(
+                                    "group flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full transition-all duration-300",
+                                    complianceItems.some(i => pathname.startsWith(i.href)) ? "text-[#1F6F5B] bg-[#E5E7EB]" : "text-[#2E8B75] hover:text-[#1F6F5B] hover:bg-black/5"
+                                )}
+                            >
+                                <ShieldCheck className="w-3.5 h-3.5" />
+                                <span>Resources</span>
+                                <ChevronDown className={cn("w-3 h-3 transition-transform duration-300", isResourcesOpen ? "rotate-180" : "")} />
+                            </button>
+
+                            {isResourcesOpen && (
+                                <div className="absolute top-full left-0 mt-3 w-64 bg-white border border-[#D1D5DB] rounded-2xl shadow-xl p-2 animate-in fade-in zoom-in-95 duration-200 z-[100]">
+                                    {complianceItems.map((item) => (
+                                        <Link
+                                            key={item.href}
+                                            href={item.href}
+                                            onClick={() => setIsResourcesOpen(false)}
+                                            className="flex items-center gap-3 p-3 rounded-xl hover:bg-[#F3F4F6] transition-colors group"
+                                        >
+                                            <div className="p-2 rounded-lg bg-[#1F6F5B]/5 text-[#1F6F5B]">
+                                                <item.icon className="w-4 h-4" />
+                                            </div>
+                                            <div>
+                                                <div className="text-xs font-bold text-[#2B2B2B]">{item.label}</div>
+                                                <div className="text-[10px] text-[#2E8B75]">{item.desc}</div>
+                                            </div>
+                                        </Link>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {otherNavItems.map((item) => {
+                            const active = pathname.startsWith(item.href);
+                            return (
+                                <Link
+                                    key={item.href}
+                                    href={item.href}
+                                    className={cn(
+                                        "group flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full transition-all duration-300",
+                                        active ? "text-[#1F6F5B] bg-[#E5E7EB]" : "text-[#2E8B75] hover:text-[#1F6F5B] hover:bg-black/5"
+                                    )}
+                                >
+                                    <item.icon className="w-3.5 h-3.5" />
                                     <span>{item.label}</span>
                                 </Link>
                             );
@@ -406,6 +478,13 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                                 <div className="flex items-center gap-4">
                                     <UserCreditsIndicator />
                                     <UserNotificationBell />
+                                    <Link 
+                                        href={`/${locale}/profile`}
+                                        className="h-9 w-9 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-white/40 hover:text-emerald-500 hover:border-emerald-500/50 transition-all group"
+                                        title="User Profile & Settings"
+                                    >
+                                        <Settings size={18} className="transition-transform group-hover:rotate-45" />
+                                    </Link>
                                     <UserButton appearance={{ elements: { avatarBox: 'h-9 w-9' } }} />
                                 </div>
                             </Show>
@@ -438,12 +517,12 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                         role="navigation"
                         aria-label="Mobile navigation"
                     >
-                        <ul className="flex flex-col gap-2 p-2">
-                            {navItems.map((item) => (
+                        <ul className="flex flex-col gap-1 p-4">
+                            {mainNavItems.map((item) => (
                                 <li key={item.href}>
                                     <Link
                                         href={item.href}
-                                        className="flex items-center gap-3 px-4 py-3 text-base font-medium text-[#2B2B2B] hover:bg-[#F3F4F6] rounded-lg transition-colors"
+                                        className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-[#2B2B2B] hover:bg-[#F3F4F6] rounded-xl transition-colors"
                                         onClick={() => setIsMobileMenuOpen(false)}
                                     >
                                         <item.icon className="w-5 h-5 text-[#2E8B75]" />
@@ -451,14 +530,50 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                                     </Link>
                                 </li>
                             ))}
-                            {(isAdmin || isSuperAdmin) && (
-                                <li>
+                            
+                            <li className="px-4 py-2 mt-2">
+                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#BEA0A0] opacity-60">Resources</span>
+                            </li>
+                            {complianceItems.map((item) => (
+                                <li key={item.href}>
                                     <Link
-                                        href={`/${locale}/admin`}
-                                        className="flex items-center gap-2 px-4 py-3 text-base font-medium text-[#1F6F5B] hover:bg-[#1F6F5B]/10 rounded-lg transition-colors"
+                                        href={item.href}
+                                        className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-[#2B2B2B] hover:bg-[#F3F4F6] rounded-xl transition-colors"
                                         onClick={() => setIsMobileMenuOpen(false)}
                                     >
-                                        <Shield className="w-4 h-4" />
+                                        <item.icon className="w-5 h-5 text-[#2E8B75]" />
+                                        <div className="flex flex-col">
+                                            <span>{item.label}</span>
+                                            <span className="text-[10px] font-medium text-[#2E8B75]/70 italic">{item.desc}</span>
+                                        </div>
+                                    </Link>
+                                </li>
+                            ))}
+
+                            <li className="px-4 py-2 mt-2">
+                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#BEA0A0] opacity-60">System</span>
+                            </li>
+                            {otherNavItems.map((item) => (
+                                <li key={item.href}>
+                                    <Link
+                                        href={item.href}
+                                        className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-[#2B2B2B] hover:bg-[#F3F4F6] rounded-xl transition-colors"
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                    >
+                                        <item.icon className="w-5 h-5 text-[#2E8B75]" />
+                                        <span>{item.label}</span>
+                                    </Link>
+                                </li>
+                            ))}
+
+                            {(isAdmin || isSuperAdmin) && (
+                                <li className="mt-4 pt-4 border-t border-[#D1D5DB]">
+                                    <Link
+                                        href={`/${locale}/admin`}
+                                        className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-[#1F6F5B] hover:bg-[#1F6F5B]/10 rounded-xl transition-colors"
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                    >
+                                        <Shield className="w-5 h-5" />
                                         Admin Dashboard
                                     </Link>
                                 </li>

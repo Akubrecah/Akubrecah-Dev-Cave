@@ -69,6 +69,8 @@ export const metadata = {
   },
 };
 
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -94,9 +96,11 @@ export default function RootLayout({
             }}
           />
         </head>
-        <body className={`${plusJakartaSans.variable} ${geistMono.variable} font-sans antialiased text-[hsl(var(--color-foreground))] bg-[hsl(var(--color-background))]`}>
+        <body className={`${plusJakartaSans.variable} ${geistMono.variable} font-sans antialiased text-[hsl(var(--color-foreground))] bg-[hsl(var(--color-background))] transition-colors duration-300`}>
           <NextTopLoader color="#FF0000" showSpinner={false} />
-          {children}
+          <ThemeProvider>
+            {children}
+          </ThemeProvider>
           <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID || ""} />
         </body>
       </html>

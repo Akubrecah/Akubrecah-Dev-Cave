@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ShieldCheck, FileStack, LayoutGrid, ArrowRight, Zap, Activity, Clock } from 'lucide-react';
+import { ShieldCheck, FileStack, LayoutGrid, ArrowRight, Zap, Activity, Clock, Settings } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 
@@ -87,7 +87,16 @@ export default function UserDashboard() {
               <LayoutGrid size={14} className="text-emerald-500" />
               <span className="text-[10px] font-black uppercase tracking-widest italic">Personal Command Center</span>
             </div>
-            <h1 className="text-6xl md:text-8xl font-black italic tracking-tighter uppercase leading-none">DASHBOARD.</h1>
+            <div className="flex items-center gap-6">
+               <h1 className="text-6xl md:text-8xl font-black italic tracking-tighter uppercase leading-none">DASHBOARD.</h1>
+               <Link 
+                 href={`/${locale}/profile`}
+                 className="p-4 rounded-3xl bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-emerald-500 hover:border-emerald-500 transition-all group"
+                 title="Preferences & Theme"
+               >
+                 <Settings size={24} className="group-hover:rotate-90 transition-transform duration-500" />
+               </Link>
+            </div>
             <p className="text-[#BEA0A0] text-xl font-bold uppercase tracking-wide">Secure Access Terminal</p>
           </div>
 
