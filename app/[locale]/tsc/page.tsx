@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   GraduationCap, Download, Search, FileText, 
   ExternalLink, Clock, HardDrive, ShieldCheck,
-  ArrowRight, Sparkles, AlertCircle, RefreshCw
+  ArrowRight, Sparkles, AlertCircle, RefreshCw, X
 } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
@@ -18,6 +18,7 @@ interface TscResource {
   fileType: string;
   size: number | null;
   fileUrl: string | null;
+  fileContent?: string | null;
   createdAt: string;
 }
 
