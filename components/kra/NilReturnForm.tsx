@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
-import { Input, Select } from '@/components/ui/FormField';
-import { CheckCircle2, AlertCircle, Download, ClipboardList, ChevronRight, ShieldCheck, User, Database, Globe, Clock } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Download, ClipboardList, Info, FileText, Calendar, Search } from 'lucide-react';
 import { useUser } from '@clerk/nextjs';
 import { generateReceiptPdf, ReceiptPdfData } from '@/lib/pdf/generate-receipt-pdf';
 
@@ -43,19 +42,8 @@ export function NilReturnForm() {
     const [idType, setIdType] = useState("KE");
     const [verifying, setVerifying] = useState(false);
     const [subscription, setSubscription] = useState<any>(null);
-    const [timeLeft, setTimeLeft] = useState<{ h: number; m: number; s: number; expired: boolean } | null>(null);
-    const [activityLogs, setActivityLogs] = useState<{ id: string; msg: string; type: 'info' | 'success' | 'error' | 'cmd' }[]>([]);
     const [isAdmin, setIsAdmin] = useState(false);
     const { user, isLoaded } = useUser();
-    const logEndRef = useRef<HTMLDivElement>(null);
-
-    const addLog = (msg: string, type: 'info' | 'success' | 'error' | 'cmd' = 'info') => {
-        setActivityLogs(prev => [...prev.slice(-15), { id: Math.random().toString(36), msg, type }]);
-    };
-
-    useEffect(() => {
-        logEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [activityLogs]);
 
     useEffect(() => {
         if (!isLoaded || !user) return;
@@ -74,44 +62,14 @@ export function NilReturnForm() {
         checkStatus();
     }, [user, isLoaded]);
 
-    useEffect(() => {
-        if (!subscription?.subscriptionEnd) return;
-        const target = new Date(subscription.subscriptionEnd).getTime();
-        
-        const tick = () => {
-            const now = Date.now();
-            const diff = target - now;
-            if (diff <= 0) {
-                setTimeLeft({ h: 0, m: 0, s: 0, expired: true });
-                return;
-            }
-            setTimeLeft({
-                h: Math.floor((diff / (1000 * 60 * 60)) % 24),
-                m: Math.floor((diff / (1000 * 60)) % 60),
-                s: Math.floor((diff / 1000) % 60),
-                expired: false
-            });
-        };
-        tick();
-        const id = setInterval(tick, 1000);
-        return () => clearInterval(id);
-    }, [subscription]);
-
-    useEffect(() => {
-        addLog("Ready to assist with your KRA filing.", "success");
-        addLog("Your connection is secure.", "info");
-    }, []);
-
     async function handleVerifyId() {
         if (!idNumber) {
-            setError("Please enter your ID number.");
-            addLog("Error: Missing ID number.", "error");
+            setError("Oops! Please enter your ID number.");
             return;
         }
 
         setVerifying(true);
         setError(null);
-        addLog(`Searching for KRA PIN matching ID: ${idNumber}...`, "cmd");
         
         try {
             const res = await fetch('/api/kra/check-pin', {
@@ -121,20 +79,17 @@ export function NilReturnForm() {
             });
 
             const data = await res.json();
-            if (!res.ok) throw new Error(data.errorMessage || 'Verification failed');
+            if (!res.ok) throw new Error(data.errorMessage || 'We couldn’t find your details.');
 
             if (data.TaxpayerPIN || data.PIN) {
                 const pin = data.TaxpayerPIN || data.PIN;
                 setFormPin(pin);
                 setVerifyMode('pin');
-                addLog(`PIN Found: ${pin} (${data.TaxpayerName || 'Verified'}).`, "success");
-                addLog("Updating form with your details...", "info");
             } else {
-                throw new Error("No record found.");
+                throw new Error("We couldn't find a KRA PIN for this ID.");
             }
         } catch (err: unknown) {
             setError((err as Error).message);
-            addLog(`Failed: ${(err as Error).message}`, "error");
         } finally {
             setVerifying(false);
         }
@@ -145,7 +100,6 @@ export function NilReturnForm() {
         setLoading(true);
         setResult(null);
         setError(null);
-        addLog("Starting the filing process...", "cmd");
 
         const formData = new FormData(e.currentTarget);
         const data = {
@@ -155,8 +109,6 @@ export function NilReturnForm() {
             Year: formData.get('year')?.toString() || '',
         };
         
-        addLog(`Target: ${data.TaxpayerPIN} | Period: ${data.Month}/${data.Year}`, "info");
-
         try {
             const res = await fetch('/api/kra/nil-return', {
                 method: 'POST',
@@ -165,13 +117,11 @@ export function NilReturnForm() {
             });
 
             const json = await res.json();
-            if (!res.ok) throw new Error(json.errorMessage || 'Filing execution failed.');
+            if (!res.ok) throw new Error(json.errorMessage || 'There was a problem submitting your return.');
 
             setResult(json.RESPONSE as NilReturnResult);
-            addLog("Filing successful! Confirmation received.", "success");
         } catch (err: unknown) {
             setError((err as Error).message);
-            addLog(`Critical: ${(err as Error).message}`, "error");
         } finally {
             setLoading(false);
         }
@@ -180,11 +130,10 @@ export function NilReturnForm() {
     async function handleDownload() {
         if (!result) return;
         setDownloading(true);
-        addLog("Preparing your receipt...", "cmd");
         try {
             const pdfData: ReceiptPdfData = {
                 kraPin: formPin,
-                taxpayerName: "KRA Authorized Entity",
+                taxpayerName: "Taxpayer", // Generic fallback for privacy
                 acknowledgmentNumber: result.AckNumber,
                 date: new Date().toLocaleDateString('en-GB'),
             };
@@ -194,303 +143,248 @@ export function NilReturnForm() {
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `KRA_ACK_${result.AckNumber}.pdf`;
+            a.download = `Receipt_${result.AckNumber}.pdf`;
             a.click();
             URL.revokeObjectURL(url);
-            addLog("Receipt downloaded successfully.", "success");
         } catch (_err) {
-            addLog("Error generating binary export.", "error");
-            setError('Receipt generation failed.');
+            setError('We encountered a problem while creating your receipt.');
         } finally {
             setDownloading(false);
         }
     }
 
+    const inputClasses = "w-full h-14 bg-white/5 border border-white/10 rounded-2xl px-5 text-sm text-white focus:border-[var(--color-brand-yellow)] focus:ring-4 focus:ring-[var(--color-brand-yellow)]/10 outline-none transition-all";
+    const labelClasses = "block text-sm font-medium text-white/70 mb-2 ml-1";
+
     return (
-        <div className="w-full max-w-6xl mx-auto flex flex-col lg:flex-row gap-0 border border-white/10 bg-white/5 backdrop-blur-3xl shadow-2xl rounded-[3rem] overflow-hidden">
-            {/* Activity Log - Admin Only */}
-            {isAdmin && (
-                <div className="w-full lg:w-80 bg-black/40 border-b lg:border-b-0 lg:border-r border-white/10 p-4 font-mono text-[10px] flex flex-col h-[300px] lg:h-auto">
-                <div className="flex items-center gap-2 mb-4 text-[#F59E0B] border-b border-[#F59E0B]/10 pb-2">
-                    <ClipboardList size={14} />
-                    <span className="font-bold tracking-widest uppercase text-white/60">Activity Log</span>
+        <div className="w-full max-w-4xl mx-auto flex flex-col gap-6 font-sans">
+            <div className="text-center space-y-4 mb-8">
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-yellow-500/10 text-yellow-500 text-sm font-medium">
+                    <CheckCircle2 size={16} /> Fast, safe, and secure
                 </div>
-                <div className="flex-1 overflow-y-auto space-y-2 scrollbar-hide">
-                    <AnimatePresence initial={false}>
-                        {activityLogs.map((log) => (
-                            <motion.div
-                                key={log.id}
-                                initial={{ opacity: 0, x: -10 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                className={`flex gap-2 leading-relaxed ${
-                                    log.type === 'error' ? 'text-red-400' : 
-                                    log.type === 'success' ? 'text-emerald-400' : 
-                                    log.type === 'cmd' ? 'text-amber-400' : 'text-slate-400'
-                                }`}
-                            >
-                                <span className="opacity-30 flex-shrink-0">[{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}]</span>
-                                <span className="flex-shrink-0">{log.type === 'cmd' ? '>' : '$'}</span>
-                                <span className="break-all">{log.msg}</span>
-                            </motion.div>
-                        ))}
-                    </AnimatePresence>
-                    <div ref={logEndRef} />
-                </div>
-                <div className="mt-4 pt-4 border-t border-white/5 space-y-3">
-                    <div className="flex items-center gap-2 text-emerald-500/60">
-                        <ShieldCheck size={12} />
-                        <span className="uppercase tracking-tighter">Connection Secure</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-slate-500">
-                        <User size={12} />
-                        <span className="uppercase tracking-tighter">Identity Verified</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-slate-500">
-                        <Globe size={12} />
-                        <span className="uppercase tracking-tighter">Global KRA Network</span>
-                    </div>
-                </div>
+                <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-white">
+                    File your <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-amber-300">Nil Return</span>
+                </h2>
+                <p className="text-lg text-white/50 max-w-lg mx-auto">
+                    Quickly file your return in just a few clicks. Your security and privacy are our top priorities.
+                </p>
             </div>
-            )}
 
-            {/* Main Action Area */}
-            <div className="flex-1 p-6 lg:p-10 relative overflow-hidden flex flex-col">
-                <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
-                    <Database size={240} className="text-white" />
-                </div>
-
-                <div className="relative z-10 mb-10">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="space-y-4"
-                    >
-                        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-                            <h2 className="text-3xl lg:text-5xl font-extrabold uppercase tracking-tighter text-white leading-none">
-                                Easy KRA <span className="text-primary italic">Filing</span>
-                            </h2>
-                            
-                            {timeLeft && !timeLeft.expired && (
-                                <div className="flex items-center gap-3 px-6 py-3 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl backdrop-blur-xl">
-                                    <Clock size={16} className="text-emerald-500 animate-pulse" />
-                                    <div className="flex items-center gap-1 font-mono text-lg font-black text-emerald-500">
-                                        <span>{timeLeft.h.toString().padStart(2, '0')}</span>:
-                                        <span>{timeLeft.m.toString().padStart(2, '0')}</span>:
-                                        <span>{timeLeft.s.toString().padStart(2, '0')}</span>
-                                    </div>
-                                    <span className="text-[9px] font-black uppercase tracking-widest text-emerald-500/50">Remain</span>
-                                </div>
-                            )}
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <span className="h-[2px] w-12 bg-primary"></span>
-                            <p className="text-xs uppercase tracking-[0.2em] text-[#F59E0B] font-bold">Type: Nil Return</p>
-                        </div>
-                    </motion.div>
-                </div>
-
-                <div className="flex-1 relative z-10">
-                    {/* Detailed PIN Banner */}
-                    {formPin && verifyMode === 'pin' && (
-                        <motion.div 
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            className="mb-8 p-6 rounded-[2rem] bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-6"
-                        >
-                            <div className="w-14 h-14 bg-emerald-500 rounded-2xl flex items-center justify-center text-white shadow-lg">
-                                <ShieldCheck size={28} />
-                            </div>
-                            <div>
-                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-500 mb-1">PIN Successfully Found</p>
-                                <h4 className="text-2xl font-mono font-black text-white tracking-widest">{formPin}</h4>
-                            </div>
-                        </motion.div>
-                    )}
-
+            <div className="relative z-10 w-full bg-[#161616] border border-white/10 rounded-[2.5rem] shadow-2xl overflow-hidden">
+                <div className="p-8 md:p-12 relative flex flex-col h-full">
+                    
                     {!result ? (
-                        <form onSubmit={handleSubmit} className="space-y-8">
-                            {/* Mode Control - Staggered Reveal */}
-                            <motion.div 
-                                initial={{ opacity: 0, x: 20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: 0.1 }}
-                                className="flex border border-white/10 p-1.5 bg-white/5 rounded-2xl w-max backdrop-blur-md"
-                            >
+                        <>
+                            <div className="flex p-1 border border-white/10 bg-white/5 rounded-3xl w-max mx-auto mb-10 shadow-lg">
                                 <button 
                                     type="button"
                                     onClick={() => setVerifyMode('pin')}
-                                    className={`px-8 py-3 text-[10px] font-black uppercase tracking-widest transition-all rounded-xl ${verifyMode === 'pin' ? 'bg-white text-black shadow-lg' : 'text-white/40 hover:text-white'}`}
+                                    className={`px-8 py-2.5 text-sm font-medium rounded-3xl transition-all ${verifyMode === 'pin' ? 'bg-white text-black shadow-md' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
                                 >
-                                    Enter PIN
+                                    I have my PIN
                                 </button>
                                 <button 
                                     type="button"
                                     onClick={() => setVerifyMode('id')}
-                                    className={`px-8 py-3 text-[10px] font-black uppercase tracking-widest transition-all rounded-xl ${verifyMode === 'id' ? 'bg-white text-black shadow-lg' : 'text-white/40 hover:text-white'}`}
+                                    className={`px-8 py-2.5 text-sm font-medium rounded-3xl transition-all ${verifyMode === 'id' ? 'bg-white text-black shadow-md' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
                                 >
-                                    Find PIN
+                                    I have an ID
                                 </button>
-                            </motion.div>
-
-                            <AnimatePresence mode="wait">
-                                {verifyMode === 'id' ? (
-                                    <motion.div 
-                                        key="id"
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, y: -10 }}
-                                        className="space-y-4 max-w-md"
-                                    >
-                                        <div className="flex flex-col sm:flex-row gap-4">
-                                            <Select 
-                                                value={idType} 
-                                                onChange={e => setIdType(e.target.value)}
-                                                className="w-full sm:w-[140px] h-14 rounded-2xl border-white/10 bg-white/5 text-[10px] font-black uppercase tracking-widest"
-                                            >
-                                                <option value="KE">Kenyan</option>
-                                                <option value="NKE">Alien</option>
-                                            </Select>
-                                            <Input 
-                                                placeholder="ID NUMBER" 
-                                                value={idNumber}
-                                                onChange={e => setIdNumber(e.target.value)}
-                                                className="flex-1 h-14 rounded-2xl border-white/10 bg-white/5 text-xl font-mono placeholder:opacity-20 uppercase px-6"
-                                            />
-                                        </div>
-                                        <Button 
-                                            type="button"
-                                            onClick={handleVerifyId}
-                                            loading={verifying}
-                                            className="w-full bg-white rounded-2xl text-black h-14 font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-3 hover:bg-[var(--color-brand-red)] hover:text-white transition-all italic"
-                                        >
-                                            Find My PIN <ChevronRight size={16} />
-                                        </Button>
-                                    </motion.div>
-                                ) : (
-                                    <motion.div 
-                                        key="pin"
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, y: -10 }}
-                                        className="space-y-4 max-w-md"
-                                    >
-                                        <div className="space-y-4">
-                                            <label className="text-[10px] font-black uppercase tracking-[0.3em] text-white/30 ml-4 italic">Your KRA PIN</label>
-                                            <Input 
-                                                name="pin" 
-                                                placeholder="AXXXXXXXXX" 
-                                                required 
-                                                className="h-20 rounded-[2rem] border-white/10 bg-white/5 text-4xl font-mono uppercase tracking-[0.2em] text-white focus:border-[var(--color-brand-red)] transition-all px-10 shadow-inner"
-                                                value={formPin}
-                                                onChange={e => setFormPin(e.target.value.toUpperCase())}
-                                            />
-                                        </div>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
-
-                            <motion.div 
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                transition={{ delay: 0.3 }}
-                                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-                            >
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-4">Obligation</label>
-                                    <Select name="obligation" required defaultValue="1" className="h-14 rounded-2xl border-white/10 bg-white/5 text-[10px] font-black uppercase tracking-widest px-6">
-                                        {OBLIGATIONS.map(opt => (
-                                            <option key={opt.value} value={opt.value}>{opt.label}</option>
-                                        ))}
-                                    </Select>
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-4">Period Month</label>
-                                    <Select name="month" required className="h-14 rounded-2xl border-white/10 bg-white/5 text-[10px] font-black uppercase tracking-widest px-6">
-                                        <option value="">-- SELECT --</option>
-                                        {MONTHS.map(opt => (
-                                            <option key={opt.value} value={opt.value}>{opt.label}</option>
-                                        ))}
-                                    </Select>
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-4">Period Year</label>
-                                    <Input name="year" type="number" placeholder="2025" defaultValue={new Date().getFullYear()} required className="h-14 rounded-2xl border-white/10 bg-white/5 font-mono text-center text-lg" />
-                                </div>
-                            </motion.div>
-
-                            <div className="pt-6">
-                                <Button 
-                                    type="submit" 
-                                    loading={loading} 
-                                    className="w-full lg:w-auto px-16 h-18 bg-[var(--color-brand-red)] hover:bg-white hover:text-black text-white rounded-3xl font-black uppercase italic tracking-tighter text-xl shadow-[0_10px_30px_rgba(227,6,19,0.4)] transition-all hover:translate-y-[-2px]"
-                                >
-                                    Submit My Return
-                                </Button>
                             </div>
-                        </form>
+
+                            <form onSubmit={handleSubmit} className="space-y-10">
+                                <AnimatePresence mode="wait">
+                                    {verifyMode === 'id' ? (
+                                        <motion.div 
+                                            key="id"
+                                            initial={{ opacity: 0, scale: 0.95 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            exit={{ opacity: 0, scale: 0.95 }}
+                                            className="space-y-4 max-w-sm mx-auto"
+                                        >
+                                            <div className="space-y-1">
+                                                <label className={labelClasses}>Find your PIN via ID Number</label>
+                                                <div className="relative flex gap-3">
+                                                    <div className="relative">
+                                                        <select 
+                                                            value={idType} 
+                                                            onChange={e => setIdType(e.target.value)}
+                                                            className={`${inputClasses} w-[110px] sm:w-[130px] flex-shrink-0 cursor-pointer appearance-none px-4 bg-[length:14px]`}
+                                                        >
+                                                            <option value="KE">Kenyan ID</option>
+                                                            <option value="NKE">Alien ID</option>
+                                                        </select>
+                                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-white/50">
+                                                            <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M5.2 7.2L10 12l4.8-4.8 1.4 1.4L10 14.8 3.8 8.6z"/></svg>
+                                                        </div>
+                                                    </div>
+                                                    <div className="relative flex-1">
+                                                        <input 
+                                                            placeholder="e.g., 12345678" 
+                                                            value={idNumber}
+                                                            onChange={e => setIdNumber(e.target.value)}
+                                                            onKeyDown={(e) => {
+                                                                if (e.key === 'Enter') {
+                                                                    e.preventDefault();
+                                                                    handleVerifyId();
+                                                                }
+                                                            }}
+                                                            className={`${inputClasses} pr-[100px] sm:pr-[120px]`}
+                                                        />
+                                                        <button 
+                                                            type="button"
+                                                            onClick={handleVerifyId}
+                                                            disabled={verifying}
+                                                            className="absolute right-1.5 top-1.5 bottom-1.5 px-4 sm:px-6 rounded-xl bg-[var(--color-brand-yellow)] text-black font-bold flex items-center justify-center gap-2 transition-all hover:bg-white disabled:opacity-50 shadow-md"
+                                                        >
+                                                            {verifying ? <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" /> : <Search size={18} />}
+                                                            <span className="hidden sm:inline">Find</span>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    ) : (
+                                        <motion.div 
+                                            key="pin"
+                                            initial={{ opacity: 0, scale: 0.95 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            exit={{ opacity: 0, scale: 0.95 }}
+                                            className="space-y-4 max-w-sm mx-auto text-center"
+                                        >
+                                            <div className="space-y-1">
+                                                <label className={labelClasses}>Enter your KRA PIN</label>
+                                                <input 
+                                                    name="pin" 
+                                                    placeholder="AXXXXXXXXX" 
+                                                    required 
+                                                    className="w-full h-16 border border-white/10 bg-white/5 rounded-[2rem] text-center text-xl font-mono uppercase tracking-widest text-white focus:border-[var(--color-brand-yellow)] focus:ring-4 focus:ring-[var(--color-brand-yellow)]/10 transition-all outline-none"
+                                                    value={formPin}
+                                                    onChange={e => setFormPin(e.target.value.toUpperCase())}
+                                                />
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+
+                                <div className="bg-white/5 border border-white/10 rounded-3xl p-8 max-w-2xl mx-auto space-y-6 shadow-inner">
+                                    <div className="flex items-center gap-3 text-white">
+                                        <Calendar className="text-yellow-500" size={24} />
+                                        <h3 className="font-semibold text-lg">Select Filing Period</h3>
+                                    </div>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                        <div className="space-y-1">
+                                            <label className={labelClasses}>Month</label>
+                                            <select name="month" required className={`${inputClasses} cursor-pointer`}>
+                                                <option value="">Select Month...</option>
+                                                {MONTHS.map(opt => (
+                                                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <label className={labelClasses}>Year</label>
+                                            <input name="year" type="number" placeholder="2025" defaultValue={new Date().getFullYear()} required className={inputClasses} />
+                                        </div>
+                                    </div>
+                                    <div className="hidden">
+                                        <select name="obligation" defaultValue="1">
+                                            {OBLIGATIONS.map(opt => (
+                                                <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div className="pt-4 max-w-xs mx-auto">
+                                    <Button 
+                                        type="submit" 
+                                        loading={loading} 
+                                        className="w-full h-16 bg-[var(--color-brand-yellow)] hover:bg-white text-black font-semibold rounded-full text-lg shadow-xl shadow-yellow-500/20 hover:scale-[1.02] transition-all"
+                                    >
+                                        File My Return Now
+                                    </Button>
+                                    <p className="text-center text-xs text-white/40 mt-4 flex items-center justify-center gap-2">
+                                        <Info size={14}/> Double-check your details before submitting
+                                    </p>
+                                </div>
+                            </form>
+                        </>
                     ) : (
                         <motion.div 
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            className="space-y-8 bg-black/20 border border-emerald-500/20 p-8 relative overflow-hidden"
+                            className="flex flex-col items-center justify-center py-8 text-center space-y-8"
                         >
-                            <div className="absolute top-0 right-0 p-4 opacity-10">
-                                <CheckCircle2 size={120} className="text-emerald-500" />
+                            <div className="w-24 h-24 bg-emerald-500/10 rounded-[2.5rem] flex items-center justify-center border border-emerald-500/30">
+                                <CheckCircle2 size={56} className="text-emerald-500" />
                             </div>
                             
                             <div className="space-y-2">
-                                <h3 className="text-3xl font-black uppercase tracking-tighter text-emerald-500 leading-none">Success!</h3>
-                                <p className="text-[10px] uppercase tracking-[0.3em] text-emerald-500/60 font-medium">Your return has been filed successfully.</p>
+                                <h3 className="text-3xl font-bold text-white">Success!</h3>
+                                <p className="text-white/60">Your Nil Return has been processed successfully.</p>
                             </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-4 max-w-2xl">
-                                <div className="space-y-1">
-                                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Reference ID</p>
-                                    <p className="text-xl font-mono text-white tracking-widest">{result.AckNumber}</p>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-lg">
+                                <div className="bg-white/5 border border-white/10 p-6 rounded-3xl rounded-tr-xl flex flex-col items-center justify-center">
+                                    <p className="text-xs text-white/50 mb-2 uppercase font-medium">Reference Number</p>
+                                    <p className="font-mono text-xl text-white break-all">{result.AckNumber}</p>
                                 </div>
-                                <div className="space-y-1">
-                                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Response Code</p>
-                                    <p className="text-xl font-mono text-white tracking-widest">{result.ResponseCode}</p>
+                                <div className="bg-white/5 border border-white/10 p-6 rounded-3xl rounded-tl-xl flex flex-col items-center justify-center">
+                                    <p className="text-xs text-white/50 mb-2 uppercase font-medium">Status</p>
+                                    <p className="font-semibold text-emerald-400 capitalize">{result.ResponseCode}</p>
                                 </div>
                             </div>
+                            
+                            {result.Message && (
+                                <div className="max-w-lg w-full bg-emerald-500/10 text-emerald-400 p-4 rounded-2xl text-sm border border-emerald-500/20">
+                                    {result.Message}
+                                </div>
+                            )}
 
-                            <div className="bg-emerald-500/5 p-4 border-l-4 border-emerald-500 italic text-emerald-100/70 text-sm">
-                                &quot;{result.Message}&quot;
-                            </div>
-
-                             <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                             <div className="flex flex-col sm:flex-row gap-4 pt-6 max-w-md w-full mx-auto">
                                 <Button 
                                     onClick={handleDownload}
                                     loading={downloading}
-                                    className="px-8 h-14 bg-white text-black hover:bg-[var(--color-brand-red)] hover:text-white rounded-2xl font-black uppercase tracking-widest text-[10px] flex items-center gap-3 transition-all"
+                                    className="h-14 bg-white text-black hover:bg-[var(--color-brand-yellow)] rounded-full font-semibold transition-all flex-1 shadow-md shadow-white/5 flex items-center justify-center gap-2"
                                 >
-                                    <Download size={16} /> Export Receipt.PDF
+                                    <Download size={18} /> Download Receipt
                                 </Button>
                                 <Button 
                                     onClick={() => setResult(null)} 
-                                    className="px-8 h-14 border border-white/10 hover:bg-white/10 rounded-2xl font-black uppercase tracking-widest text-[10px] text-white/50 hover:text-white transition-all"
+                                    className="h-14 bg-white/5 border border-white/10 hover:bg-white/10 text-white rounded-full font-medium transition-all flex-1"
                                 >
-                                    File Another Return
+                                    File Another
                                 </Button>
                             </div>
                         </motion.div>
                     )}
-                </div>
 
-                {error && (
-                    <motion.div 
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="mt-8 p-4 bg-emerald-500/10 border-l-4 border-emerald-500 flex items-center gap-4 text-emerald-500"
-                    >
-                        <AlertCircle size={20} />
-                        <div>
-                            <p className="text-[10px] font-black uppercase tracking-widest opacity-60">Filing Issue Detected</p>
-                            <p className="text-sm font-bold">{error}</p>
-                        </div>
-                    </motion.div>
-                )}
+                    <AnimatePresence>
+                        {error && (
+                            <motion.div 
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                                className="absolute bottom-6 left-6 right-6"
+                            >
+                                <div className="p-4 bg-red-500/90 backdrop-blur-md rounded-2xl shadow-2xl flex items-center gap-4 text-white">
+                                    <div className="bg-white/20 p-2 rounded-full">
+                                        <AlertCircle size={20} strokeWidth={2.5} />
+                                    </div>
+                                    <p className="text-sm font-medium flex-1">{error}</p>
+                                    <button onClick={() => setError(null)} className="text-white/60 hover:text-white p-2">✕</button>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
             </div>
+            
+            {/* Friendly helper text outside the main box */}
+            <p className="text-center text-sm text-white/30 hidden md:flex items-center justify-center gap-2 mt-4">
+                <FileText size={16} /> Made simple for you. We don't store your KRA PIN indefinitely.
+            </p>
         </div>
     );
 }

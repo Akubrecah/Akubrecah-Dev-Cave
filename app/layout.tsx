@@ -94,7 +94,7 @@ export default function RootLayout({
             }}
           />
         </head>
-        <body className={`${plusJakartaSans.variable} ${geistMono.variable} antialiased`}>
+        <body className={`${plusJakartaSans.variable} ${geistMono.variable} font-sans antialiased text-[hsl(var(--color-foreground))] bg-[hsl(var(--color-background))]`}>
           <NextTopLoader color="#FF0000" showSpinner={false} />
           {children}
           <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID || ""} />

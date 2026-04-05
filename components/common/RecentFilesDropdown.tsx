@@ -133,15 +133,14 @@ export const RecentFilesDropdown: React.FC<RecentFilesDropdownProps> = ({
         aria-label={translations.title}
         aria-expanded={isOpen}
         aria-haspopup="true"
-        className="flex items-center gap-1 text-[#2B2B2B] hover:text-[#1F6F5B] hover:bg-black/5"
+        className="relative group flex items-center gap-2 px-3 py-2 rounded-xl bg-[#1F6F5B]/5 border border-[#1F6F5B]/20 text-[#2B2B2B] hover:text-[#1F6F5B] hover:bg-[#1F6F5B]/10 transition-all font-bold"
       >
-        <Clock className="h-4 w-4" aria-hidden="true" />
+        <Clock className="h-5 w-5 md:h-4 md:w-4 transition-transform group-hover:scale-110 text-[#1F6F5B]" aria-hidden="true" />
         {recentFiles.length > 0 && (
-          <span className="text-xs bg-[#1F6F5B] text-white rounded-full px-1.5 py-0.5 min-w-[18px] text-center">
+          <span className="hidden lg:inline-block text-[10px] text-white uppercase tracking-widest bg-[#1F6F5B] rounded px-1.5 py-0.5 shadow-sm font-black">
             {recentFiles.length}
           </span>
         )}
-        <ChevronDown className={`h-3 w-3 transition-transform ${isOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
       </Button>
 
       {isOpen && (

@@ -359,6 +359,7 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                                         className="relative group flex items-center gap-2 px-3 py-2 rounded-xl bg-[#1F6F5B]/5 border border-[#1F6F5B]/20 text-[#2B2B2B] hover:text-[#1F6F5B] hover:bg-[#1F6F5B]/10 transition-all font-bold"
                                     >
                                         <Search className="h-5 w-5 md:h-4 md:w-4 transition-transform group-hover:scale-110 text-[#1F6F5B]" aria-hidden="true" />
+                                        <span className="hidden lg:inline-block text-[13px] text-[#2B2B2B] group-hover:text-[#1F6F5B] transition-colors pr-1">Search</span>
                                         <span className="hidden lg:inline-block text-[10px] text-[#1F6F5B] uppercase tracking-widest bg-white border border-[#1F6F5B]/30 rounded px-1.5 py-0.5 shadow-sm font-black italic">⌘K</span>
                                     </Button>
                                 )}

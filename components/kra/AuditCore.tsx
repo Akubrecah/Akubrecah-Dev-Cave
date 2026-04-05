@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { 
-  Search, CheckCircle2, AlertCircle, FileCheck2, Eye, Activity, Shield, ArrowRight, Clock, Coins, Sparkles
+  Search, CheckCircle2, AlertCircle, FileCheck2, Eye, ArrowRight, ArrowLeft
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { KENYA_DATA } from '@/lib/kenya-data';
@@ -65,11 +65,24 @@ export function AuditCore({ stats, setStats, subscription }: AuditCoreProps) {
 
   const handleCountyChange = (county: string) => {
     const countyData = KENYA_DATA[county];
-    setFormData(prev => ({
-      ...prev,
-      county,
-      postal: countyData ? countyData.postalCode : ''
-    }));
+    
+    if (county.toUpperCase() === 'WEST POKOT') {
+      setFormData(prev => ({
+        ...prev,
+        county,
+        postal: countyData ? countyData.postalCode : '',
+        city: 'KAPENGURIA',
+        building: 'LOKITA PLAZA',
+        street: 'LOTODO STREET',
+        station: 'KITALE'
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        county,
+        postal: countyData ? countyData.postalCode : ''
+      }));
+    }
   };
 
   const getKRAValue = (obj: any, ...keys: string[]): string => {
@@ -85,10 +98,10 @@ export function AuditCore({ stats, setStats, subscription }: AuditCoreProps) {
     const isPinMode = verifyMode === 'pin';
     const inputValue = isPinMode ? formData.kraPin : formData.idNumber;
     if (!inputValue) {
-      showStatus(`Please enter a ${isPinMode ? 'KRA PIN' : 'ID Number'}`, true);
+      showStatus(`Please enter your ${isPinMode ? 'KRA PIN' : 'ID Number'}`, true);
       return;
     }
-    showStatus('Verifying with KRA...', false, true);
+    showStatus('Finding your details...', false, true);
     try {
       const endpoint = isPinMode ? '/api/kra/check-pin-by-pin' : '/api/kra/check-pin';
       const body = isPinMode ? { pin: inputValue.toUpperCase() } : { idType: formData.idType, idNumber: inputValue };
@@ -98,7 +111,7 @@ export function AuditCore({ stats, setStats, subscription }: AuditCoreProps) {
         body: JSON.stringify(body)
       });
       const result = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(result.errorMessage || `KRA API error`);
+      if (!res.ok) throw new Error(result.errorMessage || `Could not find your details. Please check your input and try again.`);
       
       setFormData(prev => ({
         ...prev,
@@ -109,9 +122,9 @@ export function AuditCore({ stats, setStats, subscription }: AuditCoreProps) {
       }));
 
       setStats(prev => ({ ...prev, verifications: prev.verifications + 1 }));
-      showStatus('Verification successful!');
+      showStatus('Details logged successfully!');
     } catch (error: any) {
-      showStatus(error.message || 'Verification failed', true);
+      showStatus(error.message || 'We could not find your details', true);
     }
   };
 
@@ -128,7 +141,7 @@ export function AuditCore({ stats, setStats, subscription }: AuditCoreProps) {
         body: JSON.stringify(body)
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.errorMessage || 'QuickView failed');
+      if (!res.ok) throw new Error(data.errorMessage || 'Could not find the details');
       setViewerResult(data);
     } catch (err: any) {
       setViewerResult({ error: err.message });
@@ -139,37 +152,40 @@ export function AuditCore({ stats, setStats, subscription }: AuditCoreProps) {
 
   const generateCertificate = async () => {
     if (!formData.taxpayerName) {
-      showStatus('Please enter Taxpayer Name', true);
+      showStatus('Please enter your full name', true);
       return;
     }
-    showStatus('Generating...', false, true);
+    showStatus('Preparing your certificate...', false, true);
     try {
       const limitRes = await fetch('/api/user/generate', { method: 'POST' });
       if (!limitRes.ok) {
         const d = await limitRes.json();
-        showStatus(d.error || 'Limit reached', true);
+        showStatus(d.error || 'You have reached your limit', true);
         return;
       }
       const { generateKraPdf } = await import('@/lib/pdf/generate-kra-pdf');
       const pdfBytes = await generateKraPdf({ ...formData, tillDate: formData.tillDate || 'N.A.' });
       
-      // Convert pdfBytes to base64 string for database storage
       let base64Content: string;
       try {
-        const binary = String.fromCharCode(...Array.from(pdfBytes));
+        let binary = '';
+        const bytes = new Uint8Array(pdfBytes as any);
+        const len = bytes.length;
+        for (let i = 0; i < len; i += 8192) {
+          binary += String.fromCharCode.apply(null, Array.from(bytes.subarray(i, i + 8192)));
+        }
         base64Content = btoa(binary);
       } catch (e) {
-        console.error('Base64 conversion failed, falling back to blob only', e);
+        console.error('Download setup failed', e);
         base64Content = '';
       }
 
       const blob = new Blob([pdfBytes as any], { type: 'application/pdf' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
-      link.download = `KRA_Certificate_${formData.kraPin || 'Generated'}.pdf`;
+      link.download = `Certificate_${formData.kraPin || 'Completed'}.pdf`;
       link.click();
 
-      // Save record to DB including pdf base64 content
       fetch('/api/user/certificates', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -182,180 +198,256 @@ export function AuditCore({ stats, setStats, subscription }: AuditCoreProps) {
       });
 
       setStats(prev => ({ ...prev, certificates: prev.certificates + 1 }));
-      showStatus('Certificate generated!');
+      showStatus('Certificate is ready!');
     } catch (err: any) {
-      showStatus(err.message || 'Generation failed', true);
+      showStatus(err.message || 'Something went wrong', true);
     }
   };
 
+  const inputClasses = "w-full h-12 bg-white/5 border border-white/10 rounded-xl px-4 text-sm text-white focus:border-[var(--color-brand-red)] focus:ring-4 focus:ring-[var(--color-brand-red)]/10 outline-none transition-all";
+  const labelClasses = "block text-sm font-medium text-white/70 mb-1 ml-1";
+
   return (
-    <div className="space-y-8 animate-in fade-in duration-700">
-      <div className="flex flex-wrap gap-4 p-2 bg-white/5 rounded-3xl border border-white/10 backdrop-blur-md inline-flex">
+    <div className="space-y-6 animate-in fade-in duration-700 font-sans">
+      <div className="flex p-1 gap-1 border border-white/10 bg-white/5 rounded-3xl max-w-max mx-auto shadow-lg backdrop-blur-md">
         <button 
           onClick={() => setFeature('generator')}
-          className={`px-8 py-4 rounded-2xl flex items-center gap-3 transition-all font-black text-xs uppercase tracking-widest ${feature === 'generator' ? 'bg-[var(--color-brand-red)] text-white shadow-xl shadow-red-500/20' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+          className={`px-6 py-2.5 flex items-center gap-2 rounded-3xl transition-all font-medium text-sm ${feature === 'generator' ? 'bg-[var(--color-brand-red)] text-white shadow-md' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
         >
-          <FileCheck2 size={18} /> Audit Console
+          <FileCheck2 size={18} /> Get Certificate
         </button>
         <button 
           onClick={() => setFeature('viewer')}
-          className={`px-8 py-4 rounded-2xl flex items-center gap-3 transition-all font-black text-xs uppercase tracking-widest ${feature === 'viewer' ? 'bg-[var(--color-brand-red)] text-white shadow-xl shadow-red-500/20' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+          className={`px-6 py-2.5 flex items-center gap-2 rounded-3xl transition-all font-medium text-sm ${feature === 'viewer' ? 'bg-[var(--color-brand-red)] text-white shadow-md' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
         >
-          <Eye size={18} /> Quick View
+          <Eye size={18} /> Quick Check
         </button>
       </div>
 
       <AnimatePresence mode="wait">
         {feature === 'viewer' ? (
-          <motion.div key="v" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="glass-panel p-10 rounded-[3rem] border border-white/10 bg-white/5 backdrop-blur-xl">
-             <div className="grid md:grid-cols-2 gap-12">
-               <div className="space-y-8">
-                 <h3 className="text-2xl font-black italic uppercase tracking-tighter">Target Audit</h3>
+          <motion.div key="v" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="border border-white/10 bg-[#161616] rounded-[2rem] shadow-2xl min-h-[400px] overflow-hidden">
+             <div className="grid md:grid-cols-2 h-full">
+               <div className="p-8 md:p-10 border-b border-white/10 md:border-b-0 md:border-r border-white/10 space-y-8">
+                 <div className="space-y-2">
+                   <h3 className="text-2xl font-bold text-white">Quick Check</h3>
+                   <p className="text-white/50 text-sm">Review details instantly without creating a certificate.</p>
+                 </div>
+                 
                  <div className="space-y-6">
-                    <div className="flex bg-white/5 p-1 rounded-2xl border border-white/10">
-                      <button onClick={() => setVerifyMode('pin')} className={`flex-1 py-3 text-[10px] font-black rounded-xl ${verifyMode === 'pin' ? 'bg-white text-black' : 'text-white/40'}`}>PIN</button>
-                      <button onClick={() => setVerifyMode('id')} className={`flex-1 py-3 text-[10px] font-black rounded-xl ${verifyMode === 'id' ? 'bg-white text-black' : 'text-white/40'}`}>ID</button>
+                    <div className="flex p-1 border border-white/10 bg-white/5 rounded-2xl">
+                      <button onClick={() => setVerifyMode('pin')} className={`flex-1 py-3 text-sm font-medium rounded-xl transition-all ${verifyMode === 'pin' ? 'bg-white text-black shadow-md' : 'text-white/60 hover:bg-white/5'}`}>Use PIN</button>
+                      <button onClick={() => setVerifyMode('id')} className={`flex-1 py-3 text-sm font-medium rounded-xl transition-all ${verifyMode === 'id' ? 'bg-white text-black shadow-md' : 'text-white/60 hover:bg-white/5'}`}>Use ID</button>
                     </div>
-                    <input 
-                      type="text" 
-                      value={viewerInput}
-                      onChange={e => setViewerInput(e.target.value.toUpperCase())}
-                      className="w-full bg-white/5 border border-white/10 rounded-2xl h-16 px-6 text-xl font-mono text-white focus:border-[var(--color-brand-red)] outline-none transition-all"
-                      placeholder="ENTER PIN OR ID"
-                    />
-                    <button onClick={handleQuickView} disabled={viewerLoading} className="w-full h-16 bg-[var(--color-brand-red)] rounded-2xl font-black uppercase tracking-widest italic text-white hover:opacity-90 transition-all">
-                      {viewerLoading ? 'SCANNING...' : 'EXECUTE SCAN'}
+                    
+                    <div className="space-y-1">
+                      <label className={labelClasses}>Enter your {verifyMode === 'pin' ? 'PIN' : 'ID'} below</label>
+                      <input 
+                        type="text" 
+                        value={viewerInput}
+                        onChange={e => setViewerInput(e.target.value.toUpperCase())}
+                        className={inputClasses}
+                        placeholder={verifyMode === 'pin' ? "e.g., AXXXXXXXXX" : "e.g., 12345678"}
+                      />
+                    </div>
+                    
+                    <button onClick={handleQuickView} disabled={viewerLoading} className="w-full h-14 bg-[var(--color-brand-red)] rounded-2xl font-semibold text-white hover:bg-[var(--color-primary-hover)] transition-all shadow-lg hover:shadow-[var(--color-brand-red)]/20 shadow-[var(--color-brand-red)]/10">
+                      {viewerLoading ? 'Checking...' : 'Check Details'}
                     </button>
                  </div>
                </div>
-               <div className="bg-black/20 rounded-[2.5rem] p-8 border border-white/5">
+               
+               <div className="p-8 md:p-10 bg-black/40">
                  {viewerResult ? (
-                   <div className="space-y-4 font-mono text-sm">
-                     {viewerResult.error ? <div className="text-emerald-500 font-black">ERROR: {viewerResult.error}</div> : (
+                   <div className="space-y-4 w-full bg-white/5 border border-white/10 rounded-3xl p-6 shadow-inner">
+                     {viewerResult.error ? (
+                       <div className="text-red-400 flex items-center gap-3 p-4 bg-red-400/10 rounded-2xl">
+                         <AlertCircle size={20}/> 
+                         <span className="font-medium">{viewerResult.error}</span>
+                       </div>
+                     ) : (
                        Object.entries(viewerResult).map(([k, v]: any) => (
-                         <div key={k} className="flex justify-between border-b border-white/5 py-2">
-                           <span className="text-white/40 uppercase text-[10px]">{k}</span>
-                           <span className="text-white font-bold">{String(v)}</span>
+                         <div key={k} className="flex justify-between border-b border-white/5 pb-3 last:border-0 last:pb-0 items-center gap-4">
+                           <span className="text-white/50 text-sm font-medium capitalize shrink-0">{k.replace(/([A-Z])/g, ' $1').trim()}</span>
+                           <span className="text-right text-white font-semibold break-all text-sm">{String(v)}</span>
                          </div>
                        ))
                      )}
                    </div>
-                 ) : <div className="h-full flex items-center justify-center text-white/5 uppercase tracking-widest font-black">Ready for Command</div>}
+                 ) : (
+                   <div className="h-full flex items-center justify-center flex-col gap-4 text-white/30">
+                     <Search size={48} strokeWidth={1} />
+                     <p className="font-medium">Information will appear here</p>
+                   </div>
+                 )}
                </div>
              </div>
           </motion.div>
         ) : (
-          <motion.div key="g" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="grid lg:grid-cols-12 gap-0 border border-white/10 glass-panel rounded-[3rem] overflow-hidden bg-white/5 backdrop-blur-xl">
-             <div className="lg:col-span-12 p-10">
-                <div className="flex items-center justify-between mb-10">
-                  <div className="space-y-1">
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-[var(--color-brand-red)]">Module / Configuration</h3>
-                    <p className="text-3xl font-black text-white italic uppercase tracking-tighter leading-none">Configuration Matrix</p>
-                  </div>
-                  <div className="flex gap-2">
-                    {[1, 2, 3, 4].map(s => (
-                      <button key={s} onClick={() => setCurrentStep(s)} className={`w-12 h-12 rounded-2xl font-black text-xs transition-all border ${currentStep === s ? 'bg-[var(--color-brand-red)] border-transparent text-white shadow-lg' : 'bg-white/5 border-white/10 text-white/40 hover:border-white/30'}`}>0{s}</button>
-                    ))}
-                  </div>
+          <motion.div key="g" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="border border-white/10 bg-[#161616] rounded-[2rem] shadow-2xl relative overflow-hidden">
+             
+             {/* Form Header */}
+             <div className="p-6 md:px-8 md:pt-6 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-4 bg-white/5">
+                <div className="space-y-1">
+                  <h3 className="text-2xl font-bold text-white">Create Certificate</h3>
+                  <p className="text-sm text-white/50">Follow the steps to complete your details.</p>
                 </div>
+                
+                {/* Step Indicator */}
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-white/50 mr-2 border-r border-white/10 pr-4">Step {currentStep} of 4</span>
+                  {[1, 2, 3, 4].map(s => (
+                    <button 
+                      key={s} 
+                      onClick={() => setCurrentStep(s)} 
+                      className={`w-3 h-3 rounded-full transition-all ${currentStep === s ? 'bg-[var(--color-brand-red)] scale-125' : 'bg-white/20 hover:bg-white/40'}`}
+                      aria-label={`Go to step ${s}`}
+                    />
+                  ))}
+                </div>
+             </div>
 
+             <div className="p-6 md:p-8 min-h-[300px]">
+                {/* Status Messages */}
                 {statusMessage && (
-                  <div className={`p-4 rounded-2xl mb-8 flex items-center gap-3 ${isStatusError ? 'bg-emerald-500/10 border border-emerald-500/20 text-red-400' : 'bg-green-500/10 border border-green-500/20 text-green-400'}`}>
-                    {isStatusError ? <AlertCircle size={16} /> : <CheckCircle2 size={16} />}
-                    <span className="text-[10px] font-black uppercase tracking-widest">{statusMessage}</span>
+                  <div className={`p-4 mb-8 flex items-center gap-3 rounded-2xl text-sm font-medium transition-all ${isStatusError ? 'bg-red-500/10 border border-red-500/30 text-red-400' : 'bg-green-500/10 border border-green-500/30 text-emerald-400'}`}>
+                    {isStatusError ? <AlertCircle size={18} /> : (isStatusPending ? <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" /> : <CheckCircle2 size={18} />)}
+                    {statusMessage}
                   </div>
                 )}
 
-                <div className="min-h-[400px]">
-                  {currentStep === 1 && (
-                    <div className="space-y-8">
-                       <div className="space-y-4">
-                          <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-2">Protocol Discovery</label>
-                          <div className="flex bg-white/5 p-1 rounded-2xl border border-white/10">
-                            <button onClick={() => setVerifyMode('pin')} className={`flex-1 py-4 text-[10px] font-black rounded-xl transition-all ${verifyMode === 'pin' ? 'bg-white text-black' : 'text-white/40'}`}>PIN AUTH</button>
-                            <button onClick={() => setVerifyMode('id')} className={`flex-1 py-4 text-[10px] font-black rounded-xl transition-all ${verifyMode === 'id' ? 'bg-white text-black' : 'text-white/40'}`}>ID AUTH</button>
-                          </div>
-                          <div className="flex gap-4">
-                            <input 
-                              type="text" 
-                              value={verifyMode==='pin'?formData.kraPin:formData.idNumber} 
-                              onChange={e => updateForm(verifyMode==='pin'?'kraPin':'idNumber', e.target.value.toUpperCase())}
-                              className="flex-1 bg-white/5 border border-white/10 rounded-[2rem] h-20 px-8 text-3xl font-mono text-white focus:border-[var(--color-brand-red)] outline-none transition-all placeholder:text-white/5"
-                              placeholder={verifyMode==='pin'?'AXXXXXXXXX':'ID NUMBER'}
-                            />
-                            <button onClick={verifyAndAutofill} className="px-8 bg-white/5 border border-white/10 rounded-3xl hover:bg-[var(--color-brand-red)] transition-all group">
-                              <Search size={24} className="text-white group-hover:scale-110" />
-                            </button>
-                          </div>
-                       </div>
-                       <button onClick={() => setCurrentStep(2)} className="w-full h-16 bg-white rounded-3xl text-black font-black uppercase tracking-widest italic hover:bg-[var(--color-brand-red)] hover:text-white transition-all">Proceed to Profile →</button>
-                    </div>
-                  )}
+                {/* Step 1: Start */}
+                {currentStep === 1 && (
+                  <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6 max-w-xl mx-auto text-center pt-2">
+                     <h4 className="text-xl font-medium text-white mb-4">Let's find your records</h4>
+                     <div className="flex p-1 border border-white/10 bg-white/5 rounded-2xl mx-auto w-max mb-6">
+                       <button onClick={() => setVerifyMode('pin')} className={`px-6 py-2.5 text-sm font-medium rounded-xl transition-all ${verifyMode === 'pin' ? 'bg-white text-black shadow-md' : 'text-white/60 hover:bg-white/5'}`}>I have my PIN</button>
+                       <button onClick={() => setVerifyMode('id')} className={`px-6 py-2.5 text-sm font-medium rounded-xl transition-all ${verifyMode === 'id' ? 'bg-white text-black shadow-md' : 'text-white/60 hover:bg-white/5'}`}>I have an ID</button>
+                     </div>
+                     
+                     <div className="flex justify-center mb-8">
+                        <div className="relative w-full max-w-sm flex items-center">
+                          <input 
+                            type="text" 
+                            value={verifyMode === 'pin' ? formData.kraPin : formData.idNumber} 
+                            onChange={e => updateForm(verifyMode === 'pin' ? 'kraPin' : 'idNumber', e.target.value.toUpperCase())}
+                            className="w-full h-16 bg-white/5 border border-white/10 rounded-[2rem] pl-6 pr-16 text-center text-lg text-white focus:border-[var(--color-brand-red)] focus:ring-4 focus:ring-[var(--color-brand-red)]/10 outline-none transition-all placeholder:text-white/30"
+                            placeholder={verifyMode === 'pin' ? 'AXXXXXXXXX' : 'ID NUMBER'}
+                          />
+                          <button onClick={verifyAndAutofill} className="absolute right-2 h-12 px-5 flex items-center justify-center gap-2 rounded-full bg-[var(--color-brand-red)] text-white font-semibold hover:scale-105 transition-all shadow-md">
+                            <Search size={18} /> Find
+                          </button>
+                        </div>
+                     </div>
+                     
+                     <button onClick={() => setCurrentStep(2)} className="inline-flex items-center justify-center gap-2 px-8 h-12 bg-white/10 text-white hover:bg-white text-sm font-semibold hover:text-black rounded-full transition-all mt-4">
+                       Skip or Continue <ArrowRight size={16} />
+                     </button>
+                  </motion.div>
+                )}
 
-                  {currentStep === 2 && (
-                    <div className="space-y-8">
-                       <div className="grid grid-cols-1 gap-6">
-                         <div className="space-y-2">
-                           <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-2">Legal Identity</label>
-                           <input type="text" className="w-full h-18 bg-white/5 border border-white/10 rounded-3xl px-8 text-xl font-black text-white uppercase focus:border-[var(--color-brand-red)] outline-none" value={formData.taxpayerName} onChange={e => updateForm('taxpayerName', e.target.value.toUpperCase())} />
-                         </div>
-                         <div className="space-y-2">
-                           <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-2">Communication Link</label>
-                           <input type="email" className="w-full h-18 bg-white/5 border border-white/10 rounded-3xl px-8 text-lg font-bold text-white focus:border-[var(--color-brand-red)] outline-none" value={formData.email} onChange={e => updateForm('email', e.target.value)} />
-                         </div>
+                {/* Step 2: Personal details */}
+                {currentStep === 2 && (
+                  <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-5 max-w-2xl mx-auto">
+                     <h4 className="text-xl font-medium text-white mb-4">Personal Details</h4>
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                       <div className="space-y-1 md:col-span-2">
+                         <label className={labelClasses}>Full Name</label>
+                         <input type="text" className={inputClasses} placeholder="John Doe" value={formData.taxpayerName} onChange={e => updateForm('taxpayerName', e.target.value.toUpperCase())} />
                        </div>
-                       <div className="flex gap-4">
-                         <button onClick={() => setCurrentStep(1)} className="flex-1 h-16 border border-white/10 rounded-3xl text-white/40 font-black uppercase tracking-widest hover:text-white hover:border-white/30 transition-all">Back</button>
-                         <button onClick={() => setCurrentStep(3)} className="flex-[2] h-16 bg-white rounded-3xl text-black font-black uppercase tracking-widest italic hover:bg-[var(--color-brand-red)] hover:text-white transition-all">Address Matrix →</button>
+                       <div className="space-y-1 md:col-span-2">
+                         <label className={labelClasses}>Email Address</label>
+                         <input type="email" className={inputClasses} placeholder="hello@example.com" value={formData.email} onChange={e => updateForm('email', e.target.value)} />
                        </div>
-                    </div>
-                  )}
+                       <div className="space-y-1 hidden">
+                         <label className={labelClasses}>Activity or Profession</label>
+                         <input type="text" className={inputClasses} placeholder="e.g., Business or Employee" value={formData.activity} onChange={e => updateForm('activity', e.target.value.toUpperCase())} />
+                       </div>
+                     </div>
+                     
+                     <div className="flex justify-between items-center pt-5 border-t border-white/5">
+                       <button onClick={() => setCurrentStep(1)} className="flex items-center gap-2 px-6 h-12 rounded-full text-white/60 hover:text-white hover:bg-white/5 transition-all text-sm font-medium">
+                         <ArrowLeft size={16} /> Back
+                       </button>
+                       <button onClick={() => setCurrentStep(3)} className="flex items-center gap-2 px-8 h-12 bg-white text-black hover:bg-[var(--color-brand-red)] hover:text-white rounded-full font-semibold transition-all">
+                         Next Step <ArrowRight size={16} />
+                       </button>
+                     </div>
+                  </motion.div>
+                )}
 
-                  {currentStep === 3 && (
-                    <div className="space-y-8">
-                       <div className="grid grid-cols-2 gap-4">
-                         {['building', 'street', 'city', 'lrNumber', 'postal'].map(f => (
-                           <div key={f} className="space-y-1">
-                             <label className="text-[9px] font-black uppercase tracking-widest text-white/30 ml-4">{f.replace(/([A-Z])/g, ' $1')}</label>
-                             <input type="text" className="w-full h-14 bg-white/5 border border-white/10 rounded-3xl px-6 text-sm font-bold text-white uppercase focus:border-[var(--color-brand-red)] outline-none" value={(formData as any)[f]} onChange={e => updateForm(f, e.target.value.toUpperCase())} />
-                           </div>
-                         ))}
-                         <div className="space-y-1">
-                           <label className="text-[9px] font-black uppercase tracking-widest text-white/30 ml-4">County</label>
-                           <select className="w-full h-14 bg-white/5 border border-white/10 rounded-3xl px-6 text-sm font-black text-white uppercase outline-none focus:border-[var(--color-brand-red)]" value={formData.county} onChange={(e) => handleCountyChange(e.target.value)}>
-                             <option value="">-- SELECT --</option>
+                {/* Step 3: Address */}
+                {currentStep === 3 && (
+                  <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-5 max-w-4xl mx-auto">
+                     <h4 className="text-xl font-medium text-white mb-4">Contact Address</h4>
+                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                       <div className="space-y-1">
+                         <label className={labelClasses}>County</label>
+                         <div className="relative">
+                           <select className={`${inputClasses} appearance-none cursor-pointer pr-10`} value={formData.county} onChange={(e) => handleCountyChange(e.target.value)}>
+                             <option value="">Select County...</option>
                              {Object.keys(KENYA_DATA).sort().map(c => <option key={c} value={c}>{c}</option>)}
                            </select>
                          </div>
                        </div>
-                       <div className="flex gap-4">
-                         <button onClick={() => setCurrentStep(2)} className="flex-1 h-16 border border-white/10 rounded-3xl text-white/40 font-black uppercase tracking-widest hover:text-white hover:border-white/30 transition-all">Back</button>
-                         <button onClick={() => setCurrentStep(4)} className="flex-[2] h-16 bg-white rounded-3xl text-black font-black uppercase tracking-widest italic hover:bg-[var(--color-brand-red)] hover:text-white transition-all">Finalize Schema →</button>
-                       </div>
-                    </div>
-                  )}
+                       {['city', 'postal', 'building', 'street', 'lrNumber'].map((f) => {
+                         const labels: Record<string, string> = {
+                           city: 'Town / City',
+                           postal: 'Postal Code',
+                           building: 'Building Name', 
+                           street: 'Street Name',
+                           lrNumber: 'LR Number'
+                         };
+                         const isFixed = formData.county.toUpperCase() === 'WEST POKOT' && ['city', 'building', 'street', 'postal'].includes(f);
+                         return (
+                           <div key={f} className="space-y-1">
+                             <label className={labelClasses}>{labels[f]}</label>
+                             <input type="text" className={`${inputClasses} disabled:opacity-40 disabled:pointer-events-none`} value={(formData as any)[f]} onChange={e => updateForm(f, e.target.value.toUpperCase())} disabled={isFixed} />
+                           </div>
+                         );
+                       })}
+                     </div>
+                     
+                     <div className="flex justify-between items-center pt-5 border-t border-white/5">
+                       <button onClick={() => setCurrentStep(2)} className="flex items-center gap-2 px-6 h-12 rounded-full text-white/60 hover:text-white hover:bg-white/5 transition-all text-sm font-medium">
+                         <ArrowLeft size={16} /> Back
+                       </button>
+                       <button onClick={() => setCurrentStep(4)} className="flex items-center gap-2 px-8 h-12 bg-white text-black hover:bg-[var(--color-brand-red)] hover:text-white rounded-full font-semibold transition-all">
+                         Final Step <ArrowRight size={16} />
+                       </button>
+                     </div>
+                  </motion.div>
+                )}
 
-                  {currentStep === 4 && (
-                    <div className="space-y-8">
-                       <div className="grid grid-cols-2 gap-6">
-                         <div className="col-span-2 space-y-2">
-                           <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-2">Infrastructure Station</label>
-                           <input type="text" className="w-full h-18 bg-white/5 border border-white/10 rounded-3xl px-8 text-sm font-black text-white uppercase focus:border-[var(--color-brand-red)] outline-none" placeholder="REVENUE STATION" value={formData.station} onChange={e => updateForm('station', e.target.value.toUpperCase())} />
-                         </div>
-                         <div className="col-span-2 space-y-2">
-                           <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-2">Operating Activity</label>
-                           <input type="text" className="w-full h-18 bg-white/5 border border-white/10 rounded-3xl px-8 text-sm font-black text-white uppercase focus:border-[var(--color-brand-red)] outline-none" value={formData.activity} onChange={e => updateForm('activity', e.target.value.toUpperCase())} />
-                         </div>
+                {/* Step 4: Finalize */}
+                {currentStep === 4 && (
+                  <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-5 max-w-xl mx-auto text-center pt-2">
+                     <div className="bg-white/90 p-3 rounded-2xl w-max mx-auto mb-4 shadow-md">
+                       <img src="/logo.png" alt="Brand Logo" className="h-8 mx-auto opacity-90" />
+                     </div>
+                     <h4 className="text-2xl font-bold text-white mb-2">You're all set!</h4>
+                     <p className="text-white/60 mb-8 max-w-sm mx-auto">Your details are ready. Click the button below to generate and download your official KRA PIN Certificate.</p>
+                     
+                     <div className="space-y-4 max-w-xs mx-auto">
+                       <div className="text-left space-y-1 mb-6">
+                         <label className={labelClasses}>Your Tax Station (if known)</label>
+                         <input type="text" className={`${inputClasses} bg-white/5 text-center disabled:opacity-40 disabled:pointer-events-none`} placeholder="e.g., NAIROBI" value={formData.station} onChange={e => updateForm('station', e.target.value.toUpperCase())} disabled={formData.county.toUpperCase() === 'WEST POKOT'} />
                        </div>
-                       <div className="flex gap-4">
-                         <button onClick={() => setCurrentStep(3)} className="flex-1 h-16 border border-white/10 rounded-3xl text-white/40 font-black uppercase tracking-widest hover:text-white hover:border-white/30 transition-all">Back</button>
-                         <button onClick={generateCertificate} disabled={isStatusPending} className="flex-[2] h-16 bg-[var(--color-brand-red)] rounded-3xl text-white font-black uppercase tracking-widest italic hover:bg-white hover:text-black transition-all shadow-xl shadow-red-500/20">
-                            {isStatusPending ? 'ENGAGING ENGINE...' : 'DOWNLOAD IDENTITY / PDF'}
-                         </button>
-                       </div>
-                    </div>
-                  )}
-                </div>
+                       
+                       <button onClick={generateCertificate} disabled={isStatusPending} className="w-full h-16 bg-[var(--color-brand-red)] text-white rounded-full font-bold text-lg hover:bg-[var(--color-primary-hover)] transition-all disabled:opacity-50 shadow-xl shadow-[var(--color-brand-red)]/20 flex items-center justify-center gap-3">
+                          {isStatusPending ? (
+                            <><div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Preparing...</>
+                          ) : (
+                            <><FileCheck2 size={24} /> Download Certificate</>
+                          )}
+                       </button>
+                       
+                       <button onClick={() => setCurrentStep(3)} className="w-full h-12 text-sm text-white/50 hover:text-white transition-all underline decoration-white/20 underline-offset-4">
+                         Go back to check my details
+                       </button>
+                     </div>
+                  </motion.div>
+                )}
              </div>
           </motion.div>
         )}

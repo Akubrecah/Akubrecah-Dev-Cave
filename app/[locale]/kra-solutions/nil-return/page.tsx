@@ -30,14 +30,14 @@ export default function NilReturnPage() {
             <div className="space-y-4">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 shadow-sm text-white/90">
                 <Sparkles className="h-4 w-4 text-yellow-500" />
-                <span className="text-[10px] font-black uppercase tracking-widest italic">KRA Filing Node 02</span>
+                <span className="text-[10px] font-black uppercase tracking-widest italic opacity-50">KRA Filing Service</span>
               </div>
-              <h1 className="text-5xl md:text-7xl font-black text-white leading-tight flex items-center gap-6 italic tracking-tighter uppercase">
-                <div className="p-4 rounded-[1.5rem] bg-white/5 border border-white/10 shadow-2xl shadow-blue-500/10">
-                  <Activity className="text-yellow-500" size={40} />
-                </div>
-                Filing Node.
+              <h1 className="text-4xl sm:text-5xl lg:text-7xl font-black text-white tracking-widest uppercase mt-4 mb-6 relative">
+                 <span className="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-amber-300">Nil Return</span>
               </h1>
+              <p className="text-lg md:text-xl text-white/50 max-w-xl font-medium tracking-wide">
+                Quickly and securely file your Nil Return using our streamlined Filing Service.
+              </p>
             </div>
 
             <div className="bg-white/5 p-8 rounded-[2rem] border border-white/10 backdrop-blur-md max-w-md">

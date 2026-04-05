@@ -24,11 +24,11 @@ export const Footer: React.FC<FooterProps> = ({ locale }) => {
 
   return (
     <footer
-      className="w-full border-t border-[#D1D5DB] bg-[#F2F2F2] pt-10 sm:pt-16 pb-8"
+      className="w-full border-t border-[#D1D5DB] bg-[#F2F2F2] pt-8 sm:pt-10 pb-6"
       role="contentinfo"
     >
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-12 mb-8 md:mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 md:gap-8 mb-6 md:mb-8">
           {/* Brand Column */}
         <div className="col-span-1 md:col-span-1 flex flex-col gap-6">
             <Link
@@ -39,8 +39,8 @@ export const Footer: React.FC<FooterProps> = ({ locale }) => {
                 <NextImage
                   src="/logo.png"
                   alt="Akubrecah Entertainment Logo"
-                  width={200}
-                  height={60}
+                  width={150}
+                  height={45}
                   className="object-contain"
                 />
             </Link>
@@ -128,7 +128,7 @@ export const Footer: React.FC<FooterProps> = ({ locale }) => {
         </div>
 
         {/* Copyright */}
-        <div className="pt-8 border-t border-[#D1D5DB] flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="pt-6 border-t border-[#D1D5DB] flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-[#2E8B75] text-center md:text-left">
             &copy; {currentYear} {t('brand')}. All rights reserved.
           </p>

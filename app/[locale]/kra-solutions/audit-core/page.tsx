@@ -39,11 +39,11 @@ export default function AuditCorePage() {
               <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> 
               Back to Solutions
             </button>
-            <h2 className="text-3xl sm:text-5xl md:text-6xl font-black text-white leading-tight flex items-center gap-4 sm:gap-6 italic tracking-tighter uppercase">
+            <h2 className="text-3xl sm:text-5xl md:text-6xl font-black text-white leading-tight flex items-center gap-4 sm:gap-6 uppercase">
               <div className="p-4 rounded-[1.5rem] bg-white/5 border border-white/10 shadow-2xl shadow-red-500/10">
                 <ShieldCheck className="text-[var(--color-brand-red)]" size={40} />
               </div>
-              Audit Core
+              Get Certificate
             </h2>
           </div>
 
@@ -52,7 +52,7 @@ export default function AuditCorePage() {
               <div className="bg-green-500/20 p-2 rounded-xl text-green-500"><CheckCircle2 size={18} /></div>
               <div>
                 <div className="text-sm font-black text-white leading-none mb-1">{stats.verifications}</div>
-                <div className="text-[10px] text-[#BEA0A0]/70 uppercase tracking-widest font-black">Audit Count</div>
+                <div className="text-[10px] text-[#BEA0A0]/70 uppercase tracking-widest font-black">Checks</div>
               </div>
             </div>
             <div className="hidden sm:block w-px h-10 bg-white/10" />

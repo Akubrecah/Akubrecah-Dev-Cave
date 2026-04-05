@@ -53,7 +53,7 @@ export default function UserDashboard() {
   const modules = [
     {
       title: 'KRA Solutions',
-      description: 'Audit Core & Nil Return Node.',
+      description: 'KRA PIN & Nil Return Services.',
       icon: ShieldCheck,
       href: `/${locale}/kra-solutions`,
       color: 'text-emerald-500',
