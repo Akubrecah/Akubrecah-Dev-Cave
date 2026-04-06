@@ -16,7 +16,8 @@ import {
   Settings,
   LogOut,
   GraduationCap,
-  ChevronRight
+  ChevronRight,
+  Navigation
 } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -33,6 +34,7 @@ const coreNavItems = [
   { id: 'verifications', label: 'Verifications', icon: FileCheck2, href: '/admin?tab=verifications' },
   { id: 'safaricom', label: 'Safaricom', icon: Shield, href: '/admin?tab=safaricom' },
   { id: 'notifications', label: 'Notifications', icon: Bell, href: '/admin?tab=notifications' },
+  { id: 'navigation', label: 'Navigation', icon: Navigation, href: '/admin?tab=navigation' },
   { id: 'tsc', label: 'TSC Resources', icon: GraduationCap, href: '/admin/tsc' },
 ];
 

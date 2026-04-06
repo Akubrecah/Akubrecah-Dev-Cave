@@ -27,7 +27,8 @@ import { TransactionsTab } from './_components/tabs/TransactionsTab';
 import { VerificationsTab } from './_components/tabs/VerificationsTab';
 import { SafaricomTab } from './_components/tabs/SafaricomTab';
 import { NotificationsTab } from './_components/tabs/NotificationsTab';
-type Tab = 'overview' | 'users' | 'transactions' | 'verifications' | 'safaricom' | 'notifications';
+import { NavigationTab } from './_components/tabs/NavigationTab';
+type Tab = 'overview' | 'users' | 'transactions' | 'verifications' | 'safaricom' | 'notifications' | 'navigation';
 
 interface Stats {
   totalUsers: number;
@@ -522,6 +523,9 @@ export default function AdminDashboard() {
                     setNotificationForm={setNotificationForm}
                     handleNotificationDelete={handleNotificationDelete}
                   />
+                )}
+                {activeTab === 'navigation' && (
+                  <NavigationTab />
                 )}
              </motion.div>
           )}

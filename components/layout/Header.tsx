@@ -57,6 +57,7 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
     const pathname = usePathname();
     const [scrolled, setScrolled] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
+    const [navSettings, setNavSettings] = useState<any[]>([]);
     const { user, isLoaded } = useUser();
     
     const isSuperAdmin = useMemo(() => {
@@ -109,6 +110,22 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
         
         checkAdmin();
     }, [user, isLoaded]);
+
+    // Fetch navigation settings
+    useEffect(() => {
+        const fetchNavSettings = async () => {
+            try {
+                const res = await fetch('/api/admin/navigation');
+                if (res.ok) {
+                    const data = await res.json();
+                    setNavSettings(data);
+                }
+            } catch (err) {
+                console.error('[HEADER] Nav Settings Error:', err);
+            }
+        };
+        fetchNavSettings();
+    }, []);
 
     // Memoize localized tools to avoid cascading renders in effects
     const localizedTools = useMemo(() => {
@@ -225,21 +242,27 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
         return icons[category] || '📄';
     };
 
+    const getNavStatus = (href: string) => {
+        const normalizedHref = href.replace(`/${locale}`, '') || '/';
+        const setting = navSettings.find(s => s.href === normalizedHref);
+        return setting || { isHidden: false, isDisabled: false };
+    };
+
     const mainNavItems = [
         { href: `/${locale}`, label: 'Home', icon: LayoutGrid },
         { href: `/${locale}/kra-solutions`, label: 'KRA Solutions', icon: ShieldCheck },
         ...(user ? [{ href: `/${locale}/dashboard`, label: 'Dashboard', icon: LayoutGrid }] : []),
-    ];
+    ].filter(item => !getNavStatus(item.href).isHidden);
 
     const complianceItems = [
         { href: `/${locale}/tsc`, label: 'TSC Resources', icon: GraduationCap, desc: 'Teacher Management' },
-    ];
+    ].filter(item => !getNavStatus(item.href).isHidden);
 
     const otherNavItems = [
         { href: `/${locale}/pdf-tools`, label: 'PDF Suite', icon: FileStack },
         { href: `/${locale}/pricing`, label: 'Pricing', icon: PieChart },
         { href: `/${locale}/contact`, label: 'Contact', icon: Mail },
-    ];
+    ].filter(item => !getNavStatus(item.href).isHidden);
 
     return (
         <header
@@ -279,13 +302,16 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                     >
                         {mainNavItems.map((item) => {
                             const active = pathname === item.href;
+                            const { isDisabled } = getNavStatus(item.href);
                             return (
                                 <Link
                                     key={item.href}
-                                    href={item.href}
+                                    href={isDisabled ? '#' : item.href}
+                                    onClick={(e) => isDisabled && e.preventDefault()}
                                     className={cn(
                                         "group flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full transition-all duration-300",
-                                        active ? "text-[#1F6F5B] bg-[#E5E7EB]" : "text-[#2E8B75] hover:text-[#1F6F5B] hover:bg-black/5"
+                                        active ? "text-[#1F6F5B] bg-[#E5E7EB]" : "text-[#2E8B75] hover:text-[#1F6F5B] hover:bg-black/5",
+                                        isDisabled && "opacity-40 grayscale cursor-not-allowed pointer-events-none"
                                     )}
                                 >
                                     <item.icon className="w-3.5 h-3.5" />
@@ -310,35 +336,47 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
 
                             {isResourcesOpen && (
                                 <div className="absolute top-full left-0 mt-3 w-64 bg-white border border-[#D1D5DB] rounded-2xl shadow-xl p-2 animate-in fade-in zoom-in-95 duration-200 z-[100]">
-                                    {complianceItems.map((item) => (
-                                        <Link
-                                            key={item.href}
-                                            href={item.href}
-                                            onClick={() => setIsResourcesOpen(false)}
-                                            className="flex items-center gap-3 p-3 rounded-xl hover:bg-[#F3F4F6] transition-colors group"
-                                        >
-                                            <div className="p-2 rounded-lg bg-[#1F6F5B]/5 text-[#1F6F5B]">
-                                                <item.icon className="w-4 h-4" />
-                                            </div>
-                                            <div>
-                                                <div className="text-xs font-bold text-[#2B2B2B]">{item.label}</div>
-                                                <div className="text-[10px] text-[#2E8B75]">{item.desc}</div>
-                                            </div>
-                                        </Link>
-                                    ))}
+                                    {complianceItems.map((item) => {
+                                        const { isDisabled } = getNavStatus(item.href);
+                                        return (
+                                            <Link
+                                                key={item.href}
+                                                href={isDisabled ? '#' : item.href}
+                                                onClick={(e) => {
+                                                    if (isDisabled) e.preventDefault();
+                                                    else setIsResourcesOpen(false);
+                                                }}
+                                                className={cn(
+                                                    "flex items-center gap-3 p-3 rounded-xl hover:bg-[#F3F4F6] transition-all group",
+                                                    isDisabled && "opacity-40 grayscale cursor-not-allowed pointer-events-none"
+                                                )}
+                                            >
+                                                <div className="p-2 rounded-lg bg-[#1F6F5B]/5 text-[#1F6F5B]">
+                                                    <item.icon className="w-4 h-4" />
+                                                </div>
+                                                <div>
+                                                    <div className="text-xs font-bold text-[#2B2B2B]">{item.label}</div>
+                                                    <div className="text-[10px] text-[#2E8B75]">{item.desc}</div>
+                                                </div>
+                                            </Link>
+                                        );
+                                    })}
                                 </div>
                             )}
                         </div>
 
                         {otherNavItems.map((item) => {
                             const active = pathname.startsWith(item.href);
+                            const { isDisabled } = getNavStatus(item.href);
                             return (
                                 <Link
                                     key={item.href}
-                                    href={item.href}
+                                    href={isDisabled ? '#' : item.href}
+                                    onClick={(e) => isDisabled && e.preventDefault()}
                                     className={cn(
                                         "group flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full transition-all duration-300",
-                                        active ? "text-[#1F6F5B] bg-[#E5E7EB]" : "text-[#2E8B75] hover:text-[#1F6F5B] hover:bg-black/5"
+                                        active ? "text-[#1F6F5B] bg-[#E5E7EB]" : "text-[#2E8B75] hover:text-[#1F6F5B] hover:bg-black/5",
+                                        isDisabled && "opacity-40 grayscale cursor-not-allowed pointer-events-none"
                                     )}
                                 >
                                     <item.icon className="w-3.5 h-3.5" />
@@ -518,53 +556,80 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                         aria-label="Mobile navigation"
                     >
                         <ul className="flex flex-col gap-1 p-4">
-                            {mainNavItems.map((item) => (
-                                <li key={item.href}>
-                                    <Link
-                                        href={item.href}
-                                        className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-[#2B2B2B] hover:bg-[#F3F4F6] rounded-xl transition-colors"
-                                        onClick={() => setIsMobileMenuOpen(false)}
-                                    >
-                                        <item.icon className="w-5 h-5 text-[#2E8B75]" />
-                                        <span>{item.label}</span>
-                                    </Link>
-                                </li>
-                            ))}
+                            {mainNavItems.map((item) => {
+                                const { isDisabled } = getNavStatus(item.href);
+                                return (
+                                    <li key={item.href}>
+                                        <Link
+                                            href={isDisabled ? '#' : item.href}
+                                            className={cn(
+                                                "flex items-center gap-3 px-4 py-3 text-sm font-bold text-[#2B2B2B] hover:bg-[#F3F4F6] rounded-xl transition-colors",
+                                                isDisabled && "opacity-30 grayscale cursor-not-allowed pointer-events-none"
+                                            )}
+                                            onClick={(e) => {
+                                                if (isDisabled) e.preventDefault();
+                                                else setIsMobileMenuOpen(false);
+                                            }}
+                                        >
+                                            <item.icon className="w-5 h-5 text-[#2E8B75]" />
+                                            <span>{item.label}</span>
+                                        </Link>
+                                    </li>
+                                );
+                            })}
                             
                             <li className="px-4 py-2 mt-2">
                                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#BEA0A0] opacity-60">Resources</span>
                             </li>
-                            {complianceItems.map((item) => (
-                                <li key={item.href}>
-                                    <Link
-                                        href={item.href}
-                                        className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-[#2B2B2B] hover:bg-[#F3F4F6] rounded-xl transition-colors"
-                                        onClick={() => setIsMobileMenuOpen(false)}
-                                    >
-                                        <item.icon className="w-5 h-5 text-[#2E8B75]" />
-                                        <div className="flex flex-col">
-                                            <span>{item.label}</span>
-                                            <span className="text-[10px] font-medium text-[#2E8B75]/70 italic">{item.desc}</span>
-                                        </div>
-                                    </Link>
-                                </li>
-                            ))}
+                            {complianceItems.map((item) => {
+                                const { isDisabled } = getNavStatus(item.href);
+                                return (
+                                    <li key={item.href}>
+                                        <Link
+                                            href={isDisabled ? '#' : item.href}
+                                            className={cn(
+                                                "flex items-center gap-3 px-4 py-3 text-sm font-bold text-[#2B2B2B] hover:bg-[#F3F4F6] rounded-xl transition-colors",
+                                                isDisabled && "opacity-30 grayscale cursor-not-allowed pointer-events-none"
+                                            )}
+                                            onClick={(e) => {
+                                                if (isDisabled) e.preventDefault();
+                                                else setIsMobileMenuOpen(false);
+                                            }}
+                                        >
+                                            <item.icon className="w-5 h-5 text-[#2E8B75]" />
+                                            <div className="flex flex-col">
+                                                <span>{item.label}</span>
+                                                <span className="text-[10px] font-medium text-[#2E8B75]/70 italic">{item.desc}</span>
+                                            </div>
+                                        </Link>
+                                    </li>
+                                );
+                            })}
 
                             <li className="px-4 py-2 mt-2">
                                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#BEA0A0] opacity-60">System</span>
                             </li>
-                            {otherNavItems.map((item) => (
-                                <li key={item.href}>
-                                    <Link
-                                        href={item.href}
-                                        className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-[#2B2B2B] hover:bg-[#F3F4F6] rounded-xl transition-colors"
-                                        onClick={() => setIsMobileMenuOpen(false)}
-                                    >
-                                        <item.icon className="w-5 h-5 text-[#2E8B75]" />
-                                        <span>{item.label}</span>
-                                    </Link>
-                                </li>
-                            ))}
+                            {otherNavItems.map((item) => {
+                                const { isDisabled } = getNavStatus(item.href);
+                                return (
+                                    <li key={item.href}>
+                                        <Link
+                                            href={isDisabled ? '#' : item.href}
+                                            className={cn(
+                                                "flex items-center gap-3 px-4 py-3 text-sm font-bold text-[#2B2B2B] hover:bg-[#F3F4F6] rounded-xl transition-colors",
+                                                isDisabled && "opacity-30 grayscale cursor-not-allowed pointer-events-none"
+                                            )}
+                                            onClick={(e) => {
+                                                if (isDisabled) e.preventDefault();
+                                                else setIsMobileMenuOpen(false);
+                                            }}
+                                        >
+                                            <item.icon className="w-5 h-5 text-[#2E8B75]" />
+                                            <span>{item.label}</span>
+                                        </Link>
+                                    </li>
+                                );
+                            })}
 
                             {(isAdmin || isSuperAdmin) && (
                                 <li className="mt-4 pt-4 border-t border-[#D1D5DB]">
