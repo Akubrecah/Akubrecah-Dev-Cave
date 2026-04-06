@@ -1,13 +1,10 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { motion } from 'react-all-motion'; // Using framer-motion via standard import if possible, but let's check imports in other tabs
+import { motion } from 'framer-motion';
 import { Shield, Eye, EyeOff, XCircle, CheckCircle2, RefreshCw, Navigation } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-
-// Wait, I should use the same motion import as others: import { motion } from 'framer-motion';
-import { motion as fm } from 'framer-motion';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -90,7 +87,7 @@ export function NavigationTab() {
         )}
         
         {settings.map((s, i) => (
-          <fm.div
+          <motion.div
             key={s.id}
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -161,7 +158,7 @@ export function NavigationTab() {
                 {s.isDisabled ? 'Disabled' : 'Enabled'}
               </button>
             </div>
-          </fm.div>
+          </motion.div>
         ))}
       </div>
     </div>
