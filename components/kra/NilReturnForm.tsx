@@ -10,17 +10,17 @@ const OBLIGATIONS = [
 ];
 
 const MONTHS = [
-    { value: "01", label: "January" },
-    { value: "02", label: "February" },
-    { value: "03", label: "March" },
-    { value: "04", label: "April" },
-    { value: "05", label: "May" },
-    { value: "06", label: "June" },
-    { value: "07", label: "July" },
-    { value: "08", label: "August" },
-    { value: "09", label: "September" },
-    { value: "10", label: "October" },
-    { value: "11", label: "November" },
+    // { value: "01", label: "January" },
+    // { value: "02", label: "February" },
+    // { value: "03", label: "March" },
+    // { value: "04", label: "April" },
+    // { value: "05", label: "May" },
+    // { value: "06", label: "June" },
+    // { value: "07", label: "July" },
+    // { value: "08", label: "August" },
+    // { value: "09", label: "September" },
+    // { value: "10", label: "October" },
+    // { value: "11", label: "November" },
     { value: "12", label: "December" },
 ];
 
@@ -383,7 +383,7 @@ export function NilReturnForm() {
             
             {/* Friendly helper text outside the main box */}
             <p className="text-center text-sm text-white/30 hidden md:flex items-center justify-center gap-2 mt-4">
-                <FileText size={16} /> Made simple for you. We don't store your KRA PIN indefinitely.
+                <FileText size={16} /> Made simple for you. We don&apos;t store your KRA PIN indefinitely.
             </p>
         </div>
     );

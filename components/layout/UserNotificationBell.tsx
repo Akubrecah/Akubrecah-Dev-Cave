@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Bell, CheckCircle2, Clock, Trash2, X, MessageSquare, ExternalLink } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -18,7 +18,7 @@ export const UserNotificationBell = () => {
 
     const unreadCount = notifications.filter(n => !n.isRead).length;
 
-    const fetchNotifications = async () => {
+    const fetchNotifications = useCallback(async () => {
         try {
             const res = await fetch('/api/user/notifications');
             if (res.ok) {
@@ -27,14 +27,21 @@ export const UserNotificationBell = () => {
         } catch (e) {
             console.error('Failed to fetch notifications:', e);
         }
-    };
+    }, []);
+
 
     useEffect(() => {
-        fetchNotifications();
+        // Initial fetch
+        const init = async () => {
+            await fetchNotifications();
+        };
+        init();
+        
         // Poll every 2 minutes
         const interval = setInterval(fetchNotifications, 2 * 60 * 1000);
         return () => clearInterval(interval);
-    }, []);
+    }, [fetchNotifications]);
+
 
     const markAsRead = async (id?: string) => {
         try {

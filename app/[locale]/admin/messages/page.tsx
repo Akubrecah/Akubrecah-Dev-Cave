@@ -48,8 +48,8 @@ export default function AdminMessagesPage() {
       if (res.ok) {
         setMessages(await res.json());
       }
-    } catch (e) {
-      console.error('Failed to fetch messages:', e);
+    } catch (_e) {
+      console.error('Failed to fetch messages:', _e);
     } finally {
       setLoading(false);
     }
@@ -80,11 +80,12 @@ export default function AdminMessagesPage() {
         setSelectedMessage(null);
         fetchMessages();
       }
-    } catch (e) {
-      console.error('Failed to resolve message:', e);
+    } catch (_e) {
+      console.error('Failed to resolve message:', _e);
     } finally {
       setIsSubmitting(false);
     }
+
   };
 
   const filteredMessages = messages.filter(m => {

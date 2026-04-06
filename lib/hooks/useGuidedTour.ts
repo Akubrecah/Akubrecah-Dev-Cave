@@ -56,19 +56,19 @@ export interface UseGuidedTourReturn {
 export function useGuidedTour(steps: TourStep[]): UseGuidedTourReturn {
   const [isActive, setIsActive] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
-  const [isFirstVisit, setIsFirstVisit] = useState(false);
+  const [isFirstVisit, setIsFirstVisit] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    const completed = window.localStorage.getItem('pdfcraft_tour_completed');
+    const dismissed = window.localStorage.getItem('pdfcraft_tour_dismissed');
+    return !completed && !dismissed;
+  });
 
-  // Check if this is the user's first visit
+
+  // Logic moved to lazy initializer
   useEffect(() => {
-    if (!isLocalStorageAvailable()) return;
-    
-    const completed = localStorage.getItem(TOUR_COMPLETED_KEY);
-    const dismissed = localStorage.getItem(TOUR_DISMISSED_KEY);
-    
-    if (!completed && !dismissed) {
-      setIsFirstVisit(true);
-    }
+    // Keep effect if any other mount logic is needed, otherwise can be removed
   }, []);
+
 
   const startTour = useCallback(() => {
     setCurrentStep(0);

@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Timer, Zap, CreditCard, RefreshCw } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Timer, Zap } from 'lucide-react';
 
 export function SubscriptionBanner() {
   const [status, setStatus] = useState<any>(null);
@@ -25,42 +25,33 @@ export function SubscriptionBanner() {
     return () => clearInterval(interval);
   }, []);
 
-  // Timer for Subscription duration (time-based access)
-  useEffect(() => {
-    const end = status?.subscriptionEnd
-      ? new Date(status.subscriptionEnd).getTime()
-      : null;
+  // Helper to format time distance
+  const formatDistance = (distance: number) => {
+    if (distance <= 0) return 'Expired';
+    const days = Math.floor(distance / 86400000);
+    const hours = Math.floor((distance % 86400000) / 3600000);
+    const minutes = Math.floor((distance % 3600000) / 60000);
+    const seconds = Math.floor((distance % 60000) / 1000);
+    if (days > 0) return `${days}d ${hours}h ${String(minutes).padStart(2,'0')}m`;
+    return `${String(hours).padStart(2,'0')}:${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`;
+  };
 
-    if (!end) {
+  // Timer for Subscription duration
+  useEffect(() => {
+    if (!status?.subscriptionEnd) {
       setSubscriptionTimeLeft(null);
       return;
     }
-
-    function updateSubscriptionTimer() {
-      const now = Date.now();
-      const distance = end! - now;
-
-      if (distance <= 0) {
-        setSubscriptionTimeLeft('Expired');
-        return;
-      }
-
-      const days = Math.floor(distance / 86400000);
-      const hours = Math.floor((distance % 86400000) / 3600000);
-      const minutes = Math.floor((distance % 3600000) / 60000);
-      const seconds = Math.floor((distance % 60000) / 1000);
-
-      if (days > 0) {
-        setSubscriptionTimeLeft(`${days}d ${hours}h ${String(minutes).padStart(2,'0')}m`);
-      } else {
-        setSubscriptionTimeLeft(`${String(hours).padStart(2,'0')}:${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`);
-      }
-    }
-
-    updateSubscriptionTimer();
-    const timer = setInterval(updateSubscriptionTimer, 1000);
+    const subscriptionEnd = new Date(status.subscriptionEnd).getTime();
+    
+    const updateTimer = () => {
+      setSubscriptionTimeLeft(formatDistance(subscriptionEnd - Date.now()));
+    };
+    
+    updateTimer();
+    const timer = setInterval(updateTimer, 1000);
     return () => clearInterval(timer);
-  }, [status]);
+  }, [status?.subscriptionEnd]);
 
   // Timer for Credit Refresh (Midnight)
   useEffect(() => {

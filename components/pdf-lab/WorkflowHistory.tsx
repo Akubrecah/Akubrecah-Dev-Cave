@@ -32,16 +32,16 @@ export function WorkflowHistory({ onLoadFromHistory }: WorkflowHistoryProps) {
     const [selectedRecord, setSelectedRecord] = useState<WorkflowExecutionRecord | null>(null);
     const [statistics, setStatistics] = useState<ReturnType<typeof getExecutionStatistics> | null>(null);
 
-    // Load history on mount
-    useEffect(() => {
-        refreshHistory();
-    }, []);
-
     const refreshHistory = () => {
         const history = loadExecutionHistory();
         setRecords(history);
         setStatistics(getExecutionStatistics());
     };
+
+    // Load history on mount
+    useEffect(() => {
+        refreshHistory();
+    }, []);
 
     const handleDelete = (id: string) => {
         if (confirm(tWorkflow('confirmDelete') || 'Are you sure you want to delete this history record?')) {

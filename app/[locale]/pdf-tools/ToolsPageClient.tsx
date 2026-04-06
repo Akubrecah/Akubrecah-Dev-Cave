@@ -36,23 +36,20 @@ export default function ToolsPageClient({ locale, localizedToolContent }: ToolsP
     'secure-pdf': 'securePdf',
   };
 
-  // Read initial values from URL search params (client-side)
-  const initialCategory = searchParams.get('category') || 'all';
-  const initialQuery = searchParams.get('q') || '';
+  const categoryFromUrl = searchParams.get('category') || 'all';
+  const queryFromUrl = searchParams.get('q') || '';
 
-  const [searchQuery, setSearchQuery] = useState(initialQuery);
-  const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>(
-    (initialCategory as ToolCategory) || 'all'
-  );
+  const [searchQuery, setSearchQuery] = useState(queryFromUrl);
+  const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>(categoryFromUrl as CategoryFilter);
 
-  // Sync state with URL params when they change
-  useEffect(() => {
-    const categoryFromUrl = searchParams.get('category') || 'all';
-    const queryFromUrl = searchParams.get('q') || '';
-    
-    setSelectedCategory(current => (current !== categoryFromUrl ? (categoryFromUrl as CategoryFilter) : current));
-    setSearchQuery(current => (current !== queryFromUrl ? queryFromUrl : current));
-  }, [searchParams]);
+  // Sync back if URL changes
+  const [prevUrlParams, setPrevUrlParams] = useState({ category: categoryFromUrl, q: queryFromUrl });
+
+  if (prevUrlParams.category !== categoryFromUrl || prevUrlParams.q !== queryFromUrl) {
+    setPrevUrlParams({ category: categoryFromUrl, q: queryFromUrl });
+    setSelectedCategory(categoryFromUrl as CategoryFilter);
+    setSearchQuery(queryFromUrl);
+  }
   const [showFilters, setShowFilters] = useState(false);
 
   // Filter tools based on search and category

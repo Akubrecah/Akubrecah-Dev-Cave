@@ -144,7 +144,7 @@ function ToolHeader({ tool, content }: ToolHeaderProps) {
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
 
-  const IconComponent = getToolIcon(tool.icon);
+  const Icon = getToolIcon(tool.icon);
 
   return (
     <header className="text-center" data-testid="tool-page-header" itemScope itemType="https://schema.org/SoftwareApplication">
@@ -157,7 +157,7 @@ function ToolHeader({ tool, content }: ToolHeaderProps) {
         className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-[hsl(var(--color-primary)/0.1)] to-[hsl(var(--color-accent)/0.1)] mb-4 shadow-inner"
         aria-hidden="true"
       >
-        <IconComponent className="w-8 h-8 text-[hsl(var(--color-primary))]" />
+        <Icon className="w-8 h-8 text-[hsl(var(--color-primary))]" />
       </div>
       <h1
         className="text-3xl font-bold text-[hsl(var(--color-foreground))] mb-2"
@@ -420,39 +420,60 @@ function RelatedToolsSection({ tools, locale, localizedRelatedTools }: RelatedTo
             .map(word => word.charAt(0).toUpperCase() + word.slice(1))
             .join(' ');
 
-          const IconComponent = getToolIcon(tool.icon);
           const categoryName = t(`home.categories.${categoryTranslationKeys[tool.category]}`);
 
           return (
-            <a
-              key={tool.id}
-              href={`/${locale}/pdf-tools/${tool.slug}`}
-              className="block group"
-            >
-              <Card hover clickable className="h-full glass-card transition-all duration-300 group-hover:-translate-y-1">
-                <div className="flex items-center gap-4">
-                  <div
-                    className="flex-shrink-0 w-12 h-12 rounded-xl bg-[hsl(var(--color-primary)/0.1)] flex items-center justify-center group-hover:bg-[hsl(var(--color-primary))] transition-colors duration-300"
-                    aria-hidden="true"
-                  >
-                    <IconComponent className="w-6 h-6 text-[hsl(var(--color-primary))] group-hover:text-white transition-colors duration-300" />
-                  </div>
-                  <div>
-                    <span className="font-semibold text-[hsl(var(--color-foreground))] block mb-1">
-                      {toolName}
-                    </span>
-                    <span className="text-xs text-[hsl(var(--color-muted-foreground))]">
-                      {categoryName}
-                    </span>
-                  </div>
-                </div>
-              </Card>
-            </a>
+            <RelatedToolItem 
+                key={tool.id} 
+                tool={tool} 
+                locale={locale} 
+                name={toolName} 
+                category={categoryName} 
+            />
           );
         })}
+
       </div>
     </section>
   );
 }
 
+/**
+ * Related Tool Item (Extracted to avoid component creation during render)
+ */
+function RelatedToolItem({ tool, locale, name, category }: { 
+    tool: Tool; 
+    locale: string; 
+    name: string; 
+    category: string;
+}) {
+    const IconComponent = getToolIcon(tool.icon);
+    return (
+        <a
+            href={`/${locale}/pdf-tools/${tool.slug}`}
+            className="block group"
+        >
+            <Card hover clickable className="h-full glass-card transition-all duration-300 group-hover:-translate-y-1">
+                <div className="flex items-center gap-4">
+                    <div
+                        className="flex-shrink-0 w-12 h-12 rounded-xl bg-[hsl(var(--color-primary)/0.1)] flex items-center justify-center group-hover:bg-[hsl(var(--color-primary))] transition-colors duration-300"
+                        aria-hidden="true"
+                    >
+                        <IconComponent className="w-6 h-6 text-[hsl(var(--color-primary))] group-hover:text-white transition-colors duration-300" />
+                    </div>
+                    <div>
+                        <span className="font-semibold text-[hsl(var(--color-foreground))] block mb-1">
+                            {name}
+                        </span>
+                        <span className="text-xs text-[hsl(var(--color-muted-foreground))]">
+                            {category}
+                        </span>
+                    </div>
+                </div>
+            </Card>
+        </a>
+    );
+}
+
 export default ToolPage;
+

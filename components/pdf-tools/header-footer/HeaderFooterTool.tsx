@@ -63,48 +63,6 @@ export function HeaderFooterTool({ className = '' }: HeaderFooterToolProps) {
   const cancelledRef = useRef(false);
   const previewCanvasRef = useRef<HTMLCanvasElement>(null);
 
-  // Load PDF and generate preview
-  const loadPdfPreview = useCallback(async (pdfFile: File) => {
-    try {
-      const pdfjsLib = await loadPdfjsLib();
-      const arrayBuffer = await pdfFile.arrayBuffer();
-      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-      setTotalPages(pdf.numPages);
-      renderPagePreview(pdf, 1);
-    } catch (err) {
-      console.error('Failed to load PDF preview:', err);
-    }
-  }, []);
-
-  // Render page preview with header/footer overlay
-  const renderPagePreview = async (pdf: any, pageNum: number) => {
-    if (!previewCanvasRef.current) return;
-
-    try {
-      const page = await pdf.getPage(pageNum);
-      const scale = 0.6;
-      const viewport = page.getViewport({ scale });
-
-      const canvas = previewCanvasRef.current;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-
-      canvas.width = viewport.width;
-      canvas.height = viewport.height;
-
-      await page.render({ canvasContext: ctx, viewport, canvas: canvas  }).promise;
-
-      // Check if page should show header/footer
-      const shouldShowContent = isPageInRange(pageNum) && !(skipFirstPage && pageNum === 1);
-      if (shouldShowContent) {
-        drawHeaderFooterOverlay(ctx, viewport.width, viewport.height, pageNum, pdf.numPages);
-      }
-
-    } catch (err) {
-      console.error('Failed to render page:', err);
-    }
-  };
-
   // Check if page is in range
   const isPageInRange = (pageNum: number): boolean => {
     if (!pageRange || pageRange.toLowerCase() === 'all' || pageRange.trim() === '') {
@@ -178,6 +136,48 @@ export function HeaderFooterTool({ className = '' }: HeaderFooterToolProps) {
       ctx.fillText(replaceVars(footerRight), width - scaledMargin, height - scaledMargin);
     }
   };
+
+  // Render page preview with header/footer overlay
+  const renderPagePreview = async (pdf: any, pageNum: number) => {
+    if (!previewCanvasRef.current) return;
+
+    try {
+      const page = await pdf.getPage(pageNum);
+      const scale = 0.6;
+      const viewport = page.getViewport({ scale });
+
+      const canvas = previewCanvasRef.current;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+
+      await page.render({ canvasContext: ctx, viewport, canvas: canvas  }).promise;
+
+      // Check if page should show header/footer
+      const shouldShowContent = isPageInRange(pageNum) && !(skipFirstPage && pageNum === 1);
+      if (shouldShowContent) {
+        drawHeaderFooterOverlay(ctx, viewport.width, viewport.height, pageNum, pdf.numPages);
+      }
+
+    } catch (err) {
+      console.error('Failed to render page:', err);
+    }
+  };
+
+  // Load PDF and generate preview
+  const loadPdfPreview = useCallback(async (pdfFile: File) => {
+    try {
+      const pdfjsLib = await loadPdfjsLib();
+      const arrayBuffer = await pdfFile.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      setTotalPages(pdf.numPages);
+      renderPagePreview(pdf, 1);
+    } catch (err) {
+      console.error('Failed to load PDF preview:', err);
+    }
+  }, []);
 
   // Re-render preview when options change
   useEffect(() => {
@@ -460,7 +460,7 @@ export function HeaderFooterTool({ className = '' }: HeaderFooterToolProps) {
                   disabled={isProcessing}
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  Use "all" for all pages, or specify ranges like "1-5, 8, 10-12"
+                  Use &quot;all&quot; for all pages, or specify ranges like &quot;1-5, 8, 10-12&quot;
                 </p>
               </div>
 

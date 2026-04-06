@@ -1,0 +1,18 @@
+
+> kra-next-scaffold@0.1.0 build
+> prisma generate && next build
+
+[dotenv@17.3.1] injecting env (29) from .env -- tip: ⚙️  enable debug logging with { debug: true }
+Loaded Prisma config from prisma.config.ts.
+
+Prisma schema loaded from prisma/schema.prisma.
+
+✔ Generated Prisma Client (v7.6.0) to ./node_modules/@prisma/client in 3.28s
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+
+▲ Next.js 16.2.1 (Turbopack)
+- Environments: .env
+
+  Creating an optimized production build ...

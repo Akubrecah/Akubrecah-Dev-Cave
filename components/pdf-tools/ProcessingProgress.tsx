@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useEffect, useRef } from 'react';
+import React, { useMemo, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 export type ProcessingStatus = 'idle' | 'uploading' | 'processing' | 'complete' | 'error';
@@ -103,17 +103,22 @@ export const ProcessingProgress: React.FC<ProcessingProgressProps> = ({
 
   // Track previous status for announcements
   const prevStatusRef = useRef(status);
-  const announcementRef = useRef<string>('');
+  const [announcement, setAnnouncement] = useState<string>('');
 
   // Update announcement when status changes
   useEffect(() => {
     if (prevStatusRef.current !== status) {
+      let nextAnnouncement = '';
       if (status === 'complete') {
-        announcementRef.current = `${statusText}. ${message || ''}`;
+        nextAnnouncement = `${statusText}. ${message || ''}`;
       } else if (status === 'error') {
-        announcementRef.current = `${statusText}. ${message || ''}`;
+        nextAnnouncement = `${statusText}. ${message || ''}`;
       } else if (status === 'processing' || status === 'uploading') {
-        announcementRef.current = statusText;
+        nextAnnouncement = statusText;
+      }
+      
+      if (nextAnnouncement) {
+        setAnnouncement(nextAnnouncement);
       }
       prevStatusRef.current = status;
     }
@@ -140,7 +145,7 @@ export const ProcessingProgress: React.FC<ProcessingProgressProps> = ({
         aria-atomic="true" 
         className="sr-only"
       >
-        {announcementRef.current}
+        {announcement}
       </div>
       {/* Status and percentage header */}
       <div className="flex items-center justify-between mb-2">

@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { 
   Users, DollarSign, FileCheck2, Shield, Search, 
   ChevronLeft, ChevronRight, RefreshCw, TrendingUp,
-  Activity, Eye, ArrowLeft, Trash2, Edit2, Bell,
+  Activity, Trash2, Edit2, Bell,
   Plus, Zap, Clock, CheckCircle2
 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -163,14 +163,14 @@ export default function AdminDashboard() {
     try {
       const res = await fetch('/api/admin/stats');
       if (res.ok) setStats(await res.json());
-    } catch (e) { console.error('Stats fetch failed:', e); }
+    } catch (_e) { console.error('Stats fetch failed:', _e); }
   }, []);
 
   const fetchTimeSeries = useCallback(async () => {
     try {
       const res = await fetch('/api/admin/time-series');
       if (res.ok) setTimeSeriesData(await res.json());
-    } catch (e) { console.error('Time-series fetch failed:', e); }
+    } catch (_e) { console.error('Time-series fetch failed:', _e); }
   }, []);
 
   const fetchHealth = useCallback(async () => {
@@ -178,7 +178,7 @@ export default function AdminDashboard() {
       setHealthLoading(true);
       const res = await fetch('/api/admin/health');
       if (res.ok) setHealthData(await res.json());
-    } catch (e) { console.error('Health fetch failed:', e); }
+    } catch (_e) { console.error('Health fetch failed:', _e); }
     finally { setHealthLoading(false); }
   }, []);
 
@@ -193,7 +193,7 @@ export default function AdminDashboard() {
         setUsersTotalPages(data.totalPages);
         setUsersTotal(data.total);
       }
-    } catch (e) { console.error('Users fetch failed:', e); }
+    } catch (_e) { console.error('Users fetch failed:', _e); }
   }, [usersPage, userSearch]);
 
   const fetchTransactions = useCallback(async () => {
@@ -204,7 +204,7 @@ export default function AdminDashboard() {
         setTransactions(data.transactions);
         setTxTotalPages(data.totalPages);
       }
-    } catch (e) { console.error('Tx fetch failed:', e); }
+    } catch (_e) { console.error('Tx fetch failed:', _e); }
   }, [txPage]);
 
   const fetchVerifications = useCallback(async () => {
@@ -217,14 +217,14 @@ export default function AdminDashboard() {
         setVerifications(data.verifications);
         setVfTotalPages(data.totalPages);
       }
-    } catch (e) { console.error('Vf fetch failed:', e); }
+    } catch (_e) { console.error('Vf fetch failed:', _e); }
   }, [vfPage, vfSearch]);
 
   const fetchNotifications = useCallback(async () => {
     try {
       const res = await fetch('/api/admin/notifications');
       if (res.ok) setNotifications(await res.json());
-    } catch (e) { console.error('Notifications fetch failed:', e); }
+    } catch (_e) { console.error('Notifications fetch failed:', _e); }
   }, []);
 
   const handlePaystackAction = useCallback(async (action: string, params: any) => {
@@ -242,7 +242,7 @@ export default function AdminDashboard() {
         setPaystackBalance(kesBalance || data.data[0]);
       }
       setPaystackResult(data);
-    } catch (e) { console.error('Paystack action failed:', e); }
+    } catch (_e) { console.error('Paystack action failed:', _e); }
     finally { setPaystackLoading(false); }
   }, []);
 
@@ -304,8 +304,8 @@ export default function AdminDashboard() {
       setIsSyncing(true);
       const res = await fetch('/api/admin/sync-users');
       if (res.ok) refreshAll();
-    } catch (e) {
-      console.error('Failed to sync users:', e);
+    } catch (_e) {
+      console.error('Failed to sync users:', _e);
     } finally {
       setIsSyncing(false);
     }
@@ -327,7 +327,7 @@ export default function AdminDashboard() {
         body: JSON.stringify({ action, params }),
       });
       setSafaricomResult(await res.json());
-    } catch (e) { console.error('Safaricom action failed:', e); }
+    } catch (_e) { console.error('Safaricom action failed:', _e); }
     finally { setSafaricomLoading(false); }
   };
 
@@ -350,7 +350,7 @@ export default function AdminDashboard() {
         body: JSON.stringify(payload),
       });
       if (res.ok) { setEditingUser(null); fetchUsers(); }
-    } catch (e) { console.error('User update failed:', e); }
+    } catch (_e) { console.error('User update failed:', _e); }
   };
 
   const handleAssignLimit = async (e: React.FormEvent) => {
@@ -395,8 +395,8 @@ export default function AdminDashboard() {
       if (res.ok) {
         setUserCertificates(await res.json());
       }
-    } catch (e) {
-      console.error('Failed to fetch user certificates:', e);
+    } catch (_e) {
+      console.error('Failed to fetch user certificates:', _e);
     } finally {
       setCertsLoading(false);
     }
@@ -415,8 +415,8 @@ export default function AdminDashboard() {
       link.download = filename;
       link.click();
       setTimeout(() => URL.revokeObjectURL(link.href), 100);
-    } catch (e) {
-      console.error('Failed to regenerate certificate:', e);
+    } catch (_e) {
+      console.error('Failed to regenerate certificate:', _e);
       alert('Failed to regenerate certificate PDF.');
     }
   };
@@ -447,8 +447,8 @@ export default function AdminDashboard() {
         const err = await res.json();
         alert(`Failed to deploy: ${err.error || 'Unknown error'}`);
       }
-    } catch (e) {
-      console.error('Notification save failed:', e);
+    } catch (_e) {
+      console.error('Notification save failed:', _e);
       alert('Network error while deploying signal.');
     }
   };
@@ -460,8 +460,8 @@ export default function AdminDashboard() {
         method: 'DELETE',
       });
       if (res.ok) fetchNotifications();
-    } catch (e) {
-      console.error('Notification delete failed:', e);
+    } catch (_e) {
+      console.error('Notification delete failed:', _e);
     }
   };
 

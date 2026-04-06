@@ -105,47 +105,6 @@ export function WorkflowControls({
     const isRunning = executionState.status === 'running';
     const canExecute = nodes.length > 0 && selectedFiles.length > 0 && validation.isValid && !isRunning;
 
-    // Status indicator
-    const StatusIndicator = () => {
-        if (executionState.status === 'running') {
-            return (
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-100 text-blue-700 rounded-full">
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span className="text-sm font-medium">
-                        {tWorkflow('running') || 'Running'} ({executionState.progress}%)
-                    </span>
-                </div>
-            );
-        }
-        if (executionState.status === 'complete') {
-            return (
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-green-100 text-green-700 rounded-full">
-                    <CheckCircle className="w-4 h-4" />
-                    <span className="text-sm font-medium">{tWorkflow('complete') || 'Complete'}</span>
-                </div>
-            );
-        }
-        if (executionState.status === 'error') {
-            return (
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-red-100 text-red-700 rounded-full">
-                    <XCircle className="w-4 h-4" />
-                    <span className="text-sm font-medium">{tWorkflow('error') || 'Error'}</span>
-                </div>
-            );
-        }
-        if (!validation.isValid) {
-            return (
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-yellow-100 text-yellow-700 rounded-full">
-                    <AlertCircle className="w-4 h-4" />
-                    <span className="text-sm font-medium">
-                        {validation.errors.length} {tWorkflow('issues') || 'issues'}
-                    </span>
-                </div>
-            );
-        }
-        return null;
-    };
-
     return (
         <>
             <div className="flex items-center justify-between px-4 py-3 bg-[hsl(var(--color-background))] border-b border-[hsl(var(--color-border))]">
@@ -218,8 +177,20 @@ export function WorkflowControls({
                     )}
 
                     {/* Status */}
-                    <StatusIndicator />
+                    <StatusIndicator 
+                        status={executionState.status} 
+                        progress={executionState.progress} 
+                        isValid={validation.isValid} 
+                        issueCount={validation.errors.length}
+                        labels={{
+                            running: tWorkflow('running') || 'Running',
+                            complete: tWorkflow('complete') || 'Complete',
+                            error: tWorkflow('error') || 'Error',
+                            issues: tWorkflow('issues') || 'issues'
+                        }}
+                    />
                 </div>
+
 
                 {/* Right: Save, Import, Clear */}
                 <div className="flex items-center gap-2">
@@ -458,4 +429,61 @@ export function WorkflowControls({
     );
 }
 
+/**
+ * Internal Status Indicator component (Moved outside to avoid cascading renders)
+ */
+interface StatusIndicatorProps {
+    status: WorkflowExecutionState['status'];
+    progress: number;
+    isValid: boolean;
+    issueCount: number;
+    labels: {
+        running: string;
+        complete: string;
+        error: string;
+        issues: string;
+    };
+}
+
+const StatusIndicator = ({ status, progress, isValid, issueCount, labels }: StatusIndicatorProps) => {
+    if (status === 'running') {
+        return (
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-100 text-blue-700 rounded-full">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span className="text-sm font-medium">
+                    {labels.running} ({progress}%)
+                </span>
+            </div>
+        );
+    }
+    if (status === 'complete') {
+        return (
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-green-100 text-green-700 rounded-full">
+                <CheckCircle className="w-4 h-4" />
+                <span className="text-sm font-medium">{labels.complete}</span>
+            </div>
+        );
+    }
+    if (status === 'error') {
+        return (
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-red-100 text-red-700 rounded-full">
+                <XCircle className="w-4 h-4" />
+                <span className="text-sm font-medium">{labels.error}</span>
+            </div>
+        );
+    }
+    if (!isValid) {
+        return (
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-yellow-100 text-yellow-700 rounded-full">
+                <AlertCircle className="w-4 h-4" />
+                <span className="text-sm font-medium">
+                    {issueCount} {labels.issues}
+                </span>
+            </div>
+        );
+    }
+    return null;
+};
+
 export default WorkflowControls;
+

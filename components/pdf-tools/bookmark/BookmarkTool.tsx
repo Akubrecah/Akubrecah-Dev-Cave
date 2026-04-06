@@ -73,37 +73,6 @@ export function BookmarkTool({ className = '' }: BookmarkToolProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const cancelledRef = useRef(false);
 
-  // Load PDF and extract existing bookmarks
-  const loadPdf = useCallback(async (pdfFile: File) => {
-    try {
-      const pdfjsLib = await loadPdfjsLib();
-      const arrayBuffer = await pdfFile.arrayBuffer();
-      const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
-      const doc = await loadingTask.promise;
-
-      setPdfDoc(doc);
-      setTotalPages(doc.numPages);
-      setCurrentPage(1);
-
-      // Extract existing bookmarks
-      setIsExtractingBookmarks(true);
-      try {
-        const outline = await doc.getOutline();
-        if (outline && outline.length > 0) {
-          const extracted = await parseOutline(outline, doc);
-          setBookmarks(extracted);
-        }
-      } catch (err) {
-        console.warn('Failed to extract bookmarks:', err);
-      }
-      setIsExtractingBookmarks(false);
-
-    } catch (err) {
-      setError('Failed to load PDF file.');
-      console.error(err);
-    }
-  }, []);
-
   // Parse PDF outline to bookmark nodes
   const parseOutline = async (
     outline: any[], // PDF.js outline structure
@@ -148,6 +117,37 @@ export function BookmarkTool({ className = '' }: BookmarkToolProps) {
 
     return result;
   };
+
+  // Load PDF and extract existing bookmarks
+  const loadPdf = useCallback(async (pdfFile: File) => {
+    try {
+      const pdfjsLib = await loadPdfjsLib();
+      const arrayBuffer = await pdfFile.arrayBuffer();
+      const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+      const doc = await loadingTask.promise;
+
+      setPdfDoc(doc);
+      setTotalPages(doc.numPages);
+      setCurrentPage(1);
+
+      // Extract existing bookmarks
+      setIsExtractingBookmarks(true);
+      try {
+        const outline = await doc.getOutline();
+        if (outline && outline.length > 0) {
+          const extracted = await parseOutline(outline, doc);
+          setBookmarks(extracted);
+        }
+      } catch (err) {
+        console.warn('Failed to extract bookmarks:', err);
+      }
+      setIsExtractingBookmarks(false);
+
+    } catch (err) {
+      setError('Failed to load PDF file.');
+      console.error(err);
+    }
+  }, []);
 
   // Render current page to canvas
   const renderPage = useCallback(async (pageNum: number) => {

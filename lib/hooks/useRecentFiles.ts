@@ -25,14 +25,25 @@ export interface UseRecentFilesReturn {
 }
 
 export function useRecentFiles(): UseRecentFilesReturn {
-  const [recentFiles, setRecentFiles] = useState<RecentFile[]>([]);
+  const [recentFiles, setRecentFiles] = useState<RecentFile[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('pdfcraft_recent_files');
+        if (stored) return JSON.parse(stored);
+      } catch (e) {
+        console.error('Failed to load recent files:', e);
+      }
+    }
+    return [];
+  });
   const [isLoading, setIsLoading] = useState(true);
+
 
   // Load recent files on mount
   useEffect(() => {
-    setRecentFiles(getRecentFiles());
     setIsLoading(false);
   }, []);
+
 
   const addFile = useCallback(
     (name: string, size: number, toolUsed: string, toolName?: string) => {

@@ -2,18 +2,19 @@
 
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Bell, Settings, User, RefreshCw, Home, MessageSquare } from 'lucide-react';
+import { Search, Bell, User, RefreshCw, Home, MessageSquare } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 
 interface AdminHeaderProps {
-  title: string;
-  subtitle: string;
+  title?: string;
+  subtitle?: string;
   onRefresh?: () => void;
   isSyncing?: boolean;
 }
 
-export function AdminHeader({ title, subtitle, onRefresh, isSyncing }: AdminHeaderProps) {
+export function AdminHeader({ title: _title, subtitle: _subtitle, onRefresh, isSyncing }: AdminHeaderProps) {
+
   const params = useParams();
   const locale = params?.locale as string || 'en';
   const [pendingCount, setPendingCount] = useState(0);

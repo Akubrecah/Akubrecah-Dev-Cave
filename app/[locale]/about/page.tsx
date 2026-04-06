@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { ShieldCheck, Target, Users, Zap, Search, Lock } from 'lucide-react';
+import { ShieldCheck, Target, Zap, Search } from 'lucide-react';
+
 
 export default function About() {
   const values = [

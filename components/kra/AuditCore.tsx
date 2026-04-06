@@ -319,7 +319,7 @@ export function AuditCore({ stats, setStats, subscription }: AuditCoreProps) {
                 {/* Step 1: Start */}
                 {currentStep === 1 && (
                   <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6 max-w-xl mx-auto text-center pt-2">
-                     <h4 className="text-xl font-medium text-white mb-4">Let's find your records</h4>
+                     <h4 className="text-xl font-medium text-white mb-4">Let&apos;s find your records</h4>
                      <div className="flex p-1 border border-white/10 bg-white/5 rounded-2xl mx-auto w-max mb-6">
                        <button onClick={() => setVerifyMode('pin')} className={`px-6 py-2.5 text-sm font-medium rounded-xl transition-all ${verifyMode === 'pin' ? 'bg-white text-black shadow-md' : 'text-white/60 hover:bg-white/5'}`}>I have my PIN</button>
                        <button onClick={() => setVerifyMode('id')} className={`px-6 py-2.5 text-sm font-medium rounded-xl transition-all ${verifyMode === 'id' ? 'bg-white text-black shadow-md' : 'text-white/60 hover:bg-white/5'}`}>I have an ID</button>
@@ -425,7 +425,7 @@ export function AuditCore({ stats, setStats, subscription }: AuditCoreProps) {
                      <div className="bg-white/90 p-3 rounded-2xl w-max mx-auto mb-4 shadow-md">
                        <img src="/logo.png" alt="Brand Logo" className="h-8 mx-auto opacity-90" />
                      </div>
-                     <h4 className="text-2xl font-bold text-white mb-2">You're all set!</h4>
+                     <h4 className="text-2xl font-bold text-white mb-2">You&apos;re all set!</h4>
                      <p className="text-white/60 mb-8 max-w-sm mx-auto">Your details are ready. Click the button below to generate and download your official KRA PIN Certificate.</p>
                      
                      <div className="space-y-4 max-w-xs mx-auto">

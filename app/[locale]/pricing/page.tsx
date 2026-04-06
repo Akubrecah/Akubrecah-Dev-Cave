@@ -23,20 +23,22 @@ function useCountdown(targetDateStr: string | null | undefined) {
   };
 
   const [timeLeft, setTimeLeft] = useState(() => calculateTimeLeft(targetDateStr));
+  const [prevTarget, setPrevTarget] = useState(targetDateStr);
+
+  if (targetDateStr !== prevTarget) {
+    setPrevTarget(targetDateStr);
+    setTimeLeft(calculateTimeLeft(targetDateStr));
+  }
 
   useEffect(() => {
-    // If target changed, sync immediately (once per change)
-    const current = calculateTimeLeft(targetDateStr);
-    setTimeLeft(current);
-
-    if (!targetDateStr || (current && current.expired)) return;
+    if (!targetDateStr || (timeLeft && timeLeft.expired)) return;
 
     const id = setInterval(() => {
       setTimeLeft(calculateTimeLeft(targetDateStr));
     }, 1000);
     
     return () => clearInterval(id);
-  }, [targetDateStr]);
+  }, [targetDateStr, timeLeft?.expired]);
 
   return timeLeft;
 }

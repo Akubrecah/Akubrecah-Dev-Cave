@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useMemo } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { Tool, ToolCategory } from '@/types/tool';
@@ -50,7 +50,8 @@ export function ToolCard({ tool, locale, className = '', localizedContent }: Too
     .map(f => f.replace(/-/g, ' '))
     .join(', ');
 
-  const IconComponent = getToolIcon(tool.icon);
+  const Icon = getToolIcon(tool.icon);
+
 
   const categoryName = t(`home.categories.${categoryTranslationKeys[tool.category]}`);
 
@@ -79,7 +80,7 @@ export function ToolCard({ tool, locale, className = '', localizedContent }: Too
               data-testid="tool-card-icon"
               aria-hidden="true"
             >
-              <IconComponent className="w-7 h-7 text-[var(--color-brand-red)]" />
+              <Icon className="w-7 h-7 text-[var(--color-brand-red)]" />
             </div>
           </div>
 

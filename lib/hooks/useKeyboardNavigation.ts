@@ -5,7 +5,7 @@
  * Provides utilities for keyboard navigation in interactive components
  */
 
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 export interface UseKeyboardNavigationOptions {
   /** Enable arrow key navigation */
@@ -150,19 +150,21 @@ export function useRovingTabIndex(itemCount: number, options: UseKeyboardNavigat
     wrap = true,
   } = options;
 
-  const focusedIndexRef = useRef(0);
+  const [focusedIndex, setFocusedIndexState] = useState(0);
   const itemRefs = useRef<Map<number, HTMLElement>>(new Map());
 
   const setFocusedIndex = useCallback((index: number) => {
-    focusedIndexRef.current = index;
+    setFocusedIndexState(index);
     const element = itemRefs.current.get(index);
     if (element) {
       element.focus();
     }
   }, []);
 
+
   const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
-    const currentIndex = focusedIndexRef.current;
+    const currentIndex = focusedIndex;
+
     let nextIndex: number | null = null;
 
     // Determine which keys to use based on orientation
@@ -216,19 +218,21 @@ export function useRovingTabIndex(itemCount: number, options: UseKeyboardNavigat
         itemRefs.current.delete(index);
       }
     },
-    tabIndex: focusedIndexRef.current === index ? 0 : -1,
+    tabIndex: focusedIndex === index ? 0 : -1,
     onKeyDown: handleKeyDown,
     onFocus: () => {
-      focusedIndexRef.current = index;
+      setFocusedIndexState(index);
     },
+
   }), [handleKeyDown]);
 
   return {
-    focusedIndex: focusedIndexRef.current,
+    focusedIndex,
     setFocusedIndex,
     handleKeyDown,
     getItemProps,
   };
+
 }
 
 export default useRovingTabIndex;

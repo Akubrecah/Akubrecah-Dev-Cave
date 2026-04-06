@@ -32,25 +32,26 @@ export const LiveRegion: React.FC<LiveRegionProps> = ({
   clearOnAnnounce = true,
   clearDelay = 1000,
 }) => {
-  const [announcement, setAnnouncement] = useState('');
+  const [announcement, setAnnouncement] = useState(message);
+  const [prevMessage, setPrevMessage] = useState(message);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  if (message !== prevMessage) {
+    setPrevMessage(message);
+    setAnnouncement(message);
+  }
+
   useEffect(() => {
-    if (message) {
+    if (announcement && clearOnAnnounce) {
       // Clear any existing timeout
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
 
-      // Set the announcement
-      setAnnouncement(message);
-
       // Clear after delay if configured
-      if (clearOnAnnounce) {
-        timeoutRef.current = setTimeout(() => {
-          setAnnouncement('');
-        }, clearDelay);
-      }
+      timeoutRef.current = setTimeout(() => {
+        setAnnouncement('');
+      }, clearDelay);
     }
 
     return () => {
@@ -58,7 +59,7 @@ export const LiveRegion: React.FC<LiveRegionProps> = ({
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [message, clearOnAnnounce, clearDelay]);
+  }, [announcement, clearOnAnnounce, clearDelay]);
 
   return (
     <div

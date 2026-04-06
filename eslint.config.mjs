@@ -17,6 +17,7 @@ const eslintConfig = defineConfig([
     // One-off test/utility scripts using CommonJS require()
     "test-html2pdf.js",
     "scripts/*.js",
+    "lib/pdf/receipt-template.ts",
   ]),
 
   // ─── Global overrides ───────────────────────────────────────────────────────

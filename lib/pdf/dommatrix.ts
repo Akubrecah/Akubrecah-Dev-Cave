@@ -1,3 +1,5 @@
+import CSSMatrix from 'dommatrix';
+
 /**
  * DOMMatrix Polyfill for Node.js
  * Required by pdfjs-dist in server-side environments (Vercel)
@@ -12,15 +14,10 @@ export function setupDOMMatrix() {
       try {
         console.log('[PDF-LOADER] Initializing DOMMatrix polyfill for server-side PDF processing...');
         
-        // Try to load the dommatrix package
-        // Note: Use require for direct node_modules access in CommonJS/ESM mixed environments
-         
-        const DOMMatrix = require('dommatrix');
+        // Use the imported implementation
+        globalAny.DOMMatrix = CSSMatrix;
         
-        // Assign to global
-        globalAny.DOMMatrix = DOMMatrix.DOMMatrix || DOMMatrix;
-        
-        console.log('[PDF-LOADER] DOMMatrix polyfilled successfully using the dommatrix package.');
+        console.log('[PDF-LOADER] DOMMatrix polyfilled successfully.');
       } catch (e: any) {
         console.warn(`[PDF-LOADER] Failed to load dommatrix package: ${e.message}. Using minimal fallback.`);
         

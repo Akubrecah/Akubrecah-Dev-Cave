@@ -68,13 +68,13 @@ export function AdminAIAssistant() {
                 newMessages[newMessages.length - 1].content = assistantMessage;
                 return newMessages;
               });
-            } catch (e) {
+            } catch (_e) {
               // Fragmented JSON, ignore and wait for next chunk
             }
           }
         }
       }
-    } catch (error) {
+    } catch (_error) {
       setMessages(prev => [...prev, { role: 'assistant', content: "Error: Sub-terminal offline. Please verify NVIDIA_API_KEY." }]);
     } finally {
       setIsLoading(false);
