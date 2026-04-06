@@ -17,7 +17,7 @@ export default function CookiesPage() {
             <p className="text-sm text-[#1F6F5B] font-bold">Last updated: {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</p>
             
             <h2 className="text-xl font-bold text-[#2B2B2B] mt-8 mb-4">What Are Cookies</h2>
-            <p>Cookies are small files that a site or its service provider transfers to your computer's hard drive through your Web browser (if you allow) that enable the site's or service provider's systems to recognize your browser and capture and remember certain key operational information.</p>
+            <p>Cookies are small files that a site or its service provider transfers to your computer&apos;s hard drive through your Web browser (if you allow) that enable the site&apos;s or service provider&apos;s systems to recognize your browser and capture and remember certain key operational information.</p>
             
             <h2 className="text-xl font-bold text-[#2B2B2B] mt-8 mb-4">How We Use Cookies</h2>
             <p>We use cookies fundamentally to understand and save your preferences for future visits and compile aggregate data about site traffic. This analytical understanding allows us to continually optimize the UI and offer highly responsive toolkits in the future.</p>

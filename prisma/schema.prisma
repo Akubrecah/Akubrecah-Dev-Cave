@@ -46,9 +46,12 @@ model Transaction {
 model Verification {
   id            String   @id @default(uuid())
   userId        String
+  kraPin        String?
+  taxpayerName  String?
   type          String   @default("legacy") // 'kra_pin', 'nil_return', etc.
   status        String   @default("pending")
-  data          Json?    // Store the search parameters or result data
+  data          Json?    // Store search parameters or original result
+  result        Json?    // Store the result data for verification
   createdAt     DateTime @default(now())
   updatedAt     DateTime @default(now()) @updatedAt
   user          User     @relation(fields: [userId], references: [id])
@@ -60,7 +63,9 @@ model Certificate {
   kraPin        String
   taxpayerName  String
   type          String   @default("KRA") // 'PIN', 'NIL_RETURN'
-  content       String   @default("") @db.Text // Base64 content of the PDF
+  content       String   @default("") @db.Text // Base64 content of the PDF (DEPRECATED: Use pdfContent instead)
+  pdfContent    String?  @db.Text
+  details       Json?
   fileName      String   @default("untitled.pdf")
   createdAt     DateTime @default(now())
   user          User     @relation(fields: [userId], references: [id])
@@ -69,6 +74,8 @@ model Certificate {
 model ContactMessage {
   id          String   @id @default(uuid())
   userId      String
+  name        String?
+  email       String?
   subject     String
   message     String   @db.Text
   status      String   @default("pending") // 'pending', 'resolved'
@@ -120,5 +127,14 @@ model Notification {
   speed     Int      @default(30)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model NavigationSetting {
+  id         String   @id @default(uuid())
+  href       String   @unique
+  label      String
+  isHidden   Boolean  @default(false)
+  isDisabled Boolean  @default(false)
+  updatedAt  DateTime @updatedAt
 }
 

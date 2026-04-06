@@ -281,7 +281,7 @@ export default function AdminMessagesPage() {
                                             </span>
                                         </div>
                                         <p className="text-sm text-green-500/80 leading-relaxed font-bold italic">
-                                            "{selectedMessage.resolution}"
+                                            &quot;{selectedMessage.resolution}&quot;
                                         </p>
                                         <p className="text-[9px] font-black text-green-500/40 uppercase mt-4 tracking-widest">
                                             Verified at {new Date(selectedMessage.updatedAt).toLocaleString()}

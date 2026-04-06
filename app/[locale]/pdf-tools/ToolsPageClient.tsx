@@ -47,10 +47,11 @@ export default function ToolsPageClient({ locale, localizedToolContent }: ToolsP
 
   // Sync state with URL params when they change
   useEffect(() => {
-    const category = searchParams.get('category') || 'all';
-    const query = searchParams.get('q') || '';
-    setSelectedCategory(category as CategoryFilter);
-    setSearchQuery(query);
+    const categoryFromUrl = searchParams.get('category') || 'all';
+    const queryFromUrl = searchParams.get('q') || '';
+    
+    setSelectedCategory(current => (current !== categoryFromUrl ? (categoryFromUrl as CategoryFilter) : current));
+    setSearchQuery(current => (current !== queryFromUrl ? queryFromUrl : current));
   }, [searchParams]);
   const [showFilters, setShowFilters] = useState(false);
 

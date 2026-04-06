@@ -81,7 +81,7 @@ export default function Contact() {
             </div>
             <h3 className="text-2xl font-bold text-white mb-3">Direct Email</h3>
             <p className="text-[#BEA0A0] text-sm mb-8 leading-relaxed flex-grow italic">
-              "24/7 technical assistance for high-priority filing services."
+              &quot;24/7 technical assistance for high-priority filing services.&quot;
             </p>
             <a href="mailto:akubrecah@akubrecah.onmicrosoft.com" className="w-full py-4 bg-white/5 hover:bg-white/10 text-white rounded-xl font-bold border border-white/10 transition-all text-sm tracking-wide">
               akubrecah@akubrecah.onmicrosoft.com

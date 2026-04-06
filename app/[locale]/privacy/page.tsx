@@ -17,7 +17,7 @@ export default function PrivacyPage() {
             <p className="text-sm text-[#1F6F5B] font-bold">Last updated: {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</p>
             
             <h2 className="text-xl font-bold text-[#2B2B2B] mt-8 mb-4">Information We Do Not Collect</h2>
-            <p>Our platform is built strictly on local execution principles for PDF manipulation. When using the PDF functionality, your files are never uploaded to our servers. All parsing, merging, and modifications occur entirely locally within your browser's memory sandbox.</p>
+            <p>Our platform is built strictly on local execution principles for PDF manipulation. When using the PDF functionality, your files are never uploaded to our servers. All parsing, merging, and modifications occur entirely locally within your browser&apos;s memory sandbox.</p>
             
             <h2 className="text-xl font-bold text-[#2B2B2B] mt-8 mb-4">Information We Collect</h2>
             <p>We may collect account-related information (such as your email and name) if you authenticate using our secure authentication providers. When using our authorized APIs (like KRA reporting services), necessary tax station fields and identity records are temporarily relayed securely over HTTPS strictly for fulfilling that real-time operation.</p>

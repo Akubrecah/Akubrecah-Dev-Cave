@@ -20,7 +20,7 @@ export default function TermsPage() {
             <p>By accessing and using this platform, you accept and agree to be bound by the terms and provision of this agreement. Any participation in this service will constitute acceptance of this agreement.</p>
             
             <h2 className="text-xl font-bold text-[#2B2B2B] mt-8 mb-4">2. Description of Service</h2>
-            <p>Akubrecah Entertainment provides users with access to PDF modification tools and KRA reporting verification services. You must provide all equipment necessary for your own Internet connection and agree that the functionality is provided "as is".</p>
+            <p>Akubrecah Entertainment provides users with access to PDF modification tools and KRA reporting verification services. You must provide all equipment necessary for your own Internet connection and agree that the functionality is provided &quot;as is&quot;.</p>
             
             <h2 className="text-xl font-bold text-[#2B2B2B] mt-8 mb-4">3. User Conduct</h2>
             <p>You agree not to use the service to process illegal content, infringe on copyright laws, or purposefully bypass security limitations. Misuse of the verification APIs will result in immediate termination of service access.</p>

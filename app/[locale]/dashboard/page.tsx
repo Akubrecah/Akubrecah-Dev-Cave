@@ -8,23 +8,33 @@ import { useParams } from 'next/navigation';
 
 // Live countdown hook
 function useCountdown(targetDateStr: string | null | undefined) {
-  const [timeLeft, setTimeLeft] = useState<{ days: number; hours: number; minutes: number; seconds: number; expired: boolean } | null>(null);
+  const calculateTimeLeft = (targetStr: string | null | undefined) => {
+    if (!targetStr) return null;
+    const target = new Date(targetStr).getTime();
+    const diff = target - Date.now();
+    if (diff <= 0) return { days: 0, hours: 0, minutes: 0, seconds: 0, expired: true };
+    return {
+      days: Math.floor(diff / 86400000),
+      hours: Math.floor((diff % 86400000) / 3600000),
+      minutes: Math.floor((diff % 3600000) / 60000),
+      seconds: Math.floor((diff % 60000) / 1000),
+      expired: false
+    };
+  };
+
+  const [timeLeft, setTimeLeft] = useState(() => calculateTimeLeft(targetDateStr));
 
   useEffect(() => {
-    if (!targetDateStr) { setTimeLeft(null); return; }
-    const target = new Date(targetDateStr).getTime();
+    // If target changed, sync immediately (once per change)
+    const current = calculateTimeLeft(targetDateStr);
+    setTimeLeft(current);
 
-    const tick = () => {
-      const diff = target - Date.now();
-      if (diff <= 0) { setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0, expired: true }); return; }
-      const days = Math.floor(diff / 86400000);
-      const hours = Math.floor((diff % 86400000) / 3600000);
-      const minutes = Math.floor((diff % 3600000) / 60000);
-      const seconds = Math.floor((diff % 60000) / 1000);
-      setTimeLeft({ days, hours, minutes, seconds, expired: false });
-    };
-    tick();
-    const id = setInterval(tick, 1000);
+    if (!targetDateStr || (current && current.expired)) return;
+
+    const id = setInterval(() => {
+      setTimeLeft(calculateTimeLeft(targetDateStr));
+    }, 1000);
+    
     return () => clearInterval(id);
   }, [targetDateStr]);
 

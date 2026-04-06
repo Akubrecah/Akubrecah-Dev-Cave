@@ -145,7 +145,7 @@ export default function MarketingDashboard() {
                     </div>
                     
                     <div className="mt-12 p-6 rounded-2xl bg-rose-500/05 border border-rose-500/10 border-dashed text-center">
-                       <p className="text-xs font-bold text-rose-500/80 mb-2 font-sans italic opacity-60">"Organic visibility remains our primary leverage."</p>
+                       <p className="text-xs font-bold text-rose-500/80 mb-2 font-sans italic opacity-60">&quot;Organic visibility remains our primary leverage.&quot;</p>
                        <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest">&mdash; AkubrecaH Pulse Analytics</p>
                     </div>
                   </div>

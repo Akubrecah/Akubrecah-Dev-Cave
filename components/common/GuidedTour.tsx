@@ -59,15 +59,15 @@ export const GuidedTour: React.FC<GuidedTourProps> = ({
   // Show welcome dialog for first-time visitors
   useEffect(() => {
     if (isFirstVisit && autoStart) {
-      setShowWelcome(true);
+      setShowWelcome(current => !current ? true : current);
     }
   }, [isFirstVisit, autoStart]);
 
   // Calculate tooltip position when step changes
   useEffect(() => {
     if (!isActive || !currentStepData) {
-      setTooltipPosition(null);
-      setTargetRect(null);
+      setTooltipPosition(current => current !== null ? null : current);
+      setTargetRect(current => current !== null ? null : current);
       return;
     }
 
