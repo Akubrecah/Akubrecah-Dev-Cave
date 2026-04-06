@@ -146,6 +146,3 @@ export function AdminHeader({ title: _title, subtitle: _subtitle, onRefresh, isS
     </>
   );
 }
-
-  );
-}
