@@ -27,7 +27,7 @@ export default function Navbar() {
   ]
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-[100] bg-[#F2F2F2]/90 backdrop-blur-xl border-b border-[#D1D5DB]">
+    <header className="fixed top-0 left-0 right-0 z-[100] bg-background/90 backdrop-blur-xl border-b border-border">
       <nav className="max-w-[1400px] mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
         
         <Link href={`/${locale}`} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
@@ -40,10 +40,10 @@ export default function Navbar() {
             <Link
               key={link.path}
               href={`/${locale}${link.path === '/' ? '' : link.path}`}
-              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-black/5 hover:text-[#1F6F5B] ${
+              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-muted hover:text-primary ${
                 isActive(link.path) 
-                  ? 'text-[#1F6F5B] bg-[#E5E7EB]' 
-                  : 'text-[#2E8B75]'
+                  ? 'text-primary bg-muted' 
+                  : 'text-muted-foreground'
               }`}
             >
               {link.name}
@@ -54,7 +54,7 @@ export default function Navbar() {
         {/* Auth / CTA */}
         <div className="flex items-center gap-4">
           <Show when="signed-out">
-            <div className="hidden sm:block text-sm font-medium text-[#2E8B75] hover:text-[#1F6F5B] transition-colors cursor-pointer">
+            <div className="hidden sm:block text-sm font-medium text-muted-foreground hover:text-primary transition-colors cursor-pointer">
               <SignInButton>Login</SignInButton>
             </div>
             <div className="btn-primary shadow-sm hover:shadow-md transition-all">
@@ -63,7 +63,7 @@ export default function Navbar() {
           </Show>
           
           <Show when="signed-in">
-            <Link href={`/${locale}/dashboard`} className="hidden sm:block text-sm font-medium text-[#2E8B75] hover:text-[#1F6F5B] transition-colors">
+            <Link href={`/${locale}/dashboard`} className="hidden sm:block text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
               Dashboard
             </Link>
             <UserButton appearance={{ elements: { avatarBox: 'w-9 h-9' } }} />

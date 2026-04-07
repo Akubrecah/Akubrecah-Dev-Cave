@@ -21,21 +21,21 @@
   --color-brand-yellow: hsl(57 100% 47%);
   --color-brand-crimson: hsl(164 64% 22%); /* Aliased to Forest Green */
   
-  /* Background Colors - Monochromatic Green Base for "Cave" feel */
-  --color-background: 165 40% 6%; /* Deep Dark Green */
-  --color-foreground: 0 0% 95%; /* #F2F2F2 (Off-White / Light Gray) */
+  /* Background Colors - Neutral Charcoal Base for "Professional" feel */
+  --color-background: 0 0% 10%; /* #1A1A1A - Dark Charcoal */
+  --color-foreground: 0 0% 92%; /* #EBEBEB - Soft White (High Legibility) */
   
   /* Muted Colors */
-  --color-muted: 165 30% 10%; /* Very dark muted green */
-  --color-muted-foreground: 159 29% 56%; /* Soft Sage Green #6FAF98 */
+  --color-muted: 0 0% 15%; /* Slate/Grey Muted */
+  --color-muted-foreground: 0 0% 70%; /* Soft Grey Label */
   
   /* Card Colors */
-  --color-card: 165 40% 4%;
-  --color-card-foreground: 0 0% 95%; /* #F2F2F2 */
+  --color-card: 0 0% 13%; /* Slightly Elevated Charcoal */
+  --color-card-foreground: 0 0% 92%; /* #EBEBEB */
   
   /* Border Colors */
-  --color-border: 0 0% 17%; /* #2B2B2B Charcoal Gray */
-  --color-input: 165 20% 15%;
+  --color-border: 0 0% 20%; /* Defined Grey Border */
+  --color-input: 0 0% 15%;
   --color-ring: 57 100% 47%; /* Bright Yellow Focus Ring */
   
   /* Destructive Colors */
@@ -96,18 +96,18 @@
   --color-accent: 57 100% 47%; /* #F2E600 */
   --color-accent-foreground: 0 0% 17%; /* #2B2B2B */
   
-  /* Shades of Grey Background */
-  --color-background: 0 0% 18%; /* Charcoal Grey Base (#2E2E2E) */
+  /* Neutral Grayscale Dark Mode */
+  --color-background: 0 0% 8%; /* Deeper Charcoal */
   --color-foreground: 0 0% 98%; /* Bright Off-White for contrast */
   
-  --color-muted: 0 0% 25%; /* Medium Grey */
-  --color-muted-foreground: 0 0% 70%; /* Soft Grey Test */
+  --color-muted: 0 0% 15%; /* Medium Grey */
+  --color-muted-foreground: 0 0% 70%; 
   
-  --color-card: 0 0% 15%; /* Deeper Grey for contrast (#262626) */
-  --color-card-foreground: 0 0% 98%; /* Off-White */
+  --color-card: 0 0% 12%; /* #1E1E1E */
+  --color-card-foreground: 0 0% 98%; 
   
-  --color-border: 0 0% 28%; /* Visible Grey Border */
-  --color-input: 0 0% 22%;
+  --color-border: 0 0% 22%; /* Visible Grey Border */
+  --color-input: 0 0% 18%;
   --color-ring: 57 100% 47%; /* Bright Yellow */
 }
 

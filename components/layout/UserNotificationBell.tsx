@@ -76,12 +76,12 @@ export const UserNotificationBell = () => {
         <div className="relative" ref={dropdownRef}>
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="relative p-2 rounded-xl text-[#2B2B2B] hover:text-[#1F6F5B] hover:bg-black/5 transition-all outline-none"
+                className="relative p-2 rounded-xl text-foreground hover:text-primary hover:bg-muted transition-all outline-none"
                 aria-label="Notifications"
             >
                 <Bell className="w-5 h-5" />
                 {unreadCount > 0 && (
-                    <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-[var(--color-brand-red)] text-white text-[8px] font-black rounded-full flex items-center justify-center border-2 border-[#F2F2F2] shadow-[0_0_10px_rgba(227,6,19,0.3)]">
+                    <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-primary text-primary-foreground text-[8px] font-black rounded-full flex items-center justify-center border-2 border-background shadow-[0_0_10px_rgba(31,111,91,0.3)]">
                         {unreadCount > 9 ? '9+' : unreadCount}
                     </span>
                 )}
@@ -93,11 +93,11 @@ export const UserNotificationBell = () => {
                         initial={{ opacity: 0, scale: 0.95, y: 10 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                        className="absolute right-0 mt-3 w-[360px] max-w-[calc(100vw-2rem)] bg-white border border-[#D1D5DB] rounded-[32px] shadow-[0_24px_48px_-12px_rgba(0,0,0,0.15)] overflow-hidden z-[100]"
+                        className="absolute right-0 mt-3 w-[360px] max-w-[calc(100vw-2rem)] bg-card border border-border rounded-[32px] shadow-[0_24px_48px_-12px_rgba(0,0,0,0.5)] overflow-hidden z-[100]"
                     >
-                        <div className="p-6 border-b border-black/5 bg-black/[0.02] flex items-center justify-between">
-                            <h3 className="text-xs font-black text-[#2B2B2B] uppercase tracking-widest flex items-center gap-2">
-                                <Bell size={14} className="text-[#1F6F5B]" />
+                        <div className="p-6 border-b border-border bg-muted/20 flex items-center justify-between">
+                            <h3 className="text-xs font-black text-foreground uppercase tracking-widest flex items-center gap-2">
+                                <Bell size={14} className="text-primary" />
                                 Notifications
                             </h3>
                             {unreadCount > 0 && (
@@ -117,7 +117,7 @@ export const UserNotificationBell = () => {
                                         key={n.id}
                                         onClick={() => !n.isRead && markAsRead(n.id)}
                                         className={`p-4 rounded-2xl transition-all cursor-pointer group relative ${
-                                            n.isRead ? 'opacity-40 grayscale' : 'bg-[#F2F2F2]/50 border border-[#D1D5DB]/50 hover:border-[#1F6F5B]/30 hover:bg-white'
+                                            n.isRead ? 'opacity-40 grayscale' : 'bg-muted/50 border border-border hover:border-primary/30 hover:bg-muted'
                                         }`}
                                     >
                                         <div className="flex gap-4">
@@ -127,10 +127,10 @@ export const UserNotificationBell = () => {
                                                 </div>
                                             </div>
                                             <div className="flex-1 space-y-1">
-                                                <p className="text-xs font-bold text-[#2B2B2B] leading-relaxed">
+                                                <p className="text-xs font-bold text-foreground leading-relaxed">
                                                     {n.message}
                                                 </p>
-                                                <div className="flex items-center gap-2 text-[10px] text-[#2E8B75] font-black uppercase tracking-widest">
+                                                <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-black uppercase tracking-widest">
                                                     <Clock size={10} />
                                                     {new Date(n.createdAt).toLocaleDateString()}
                                                 </div>

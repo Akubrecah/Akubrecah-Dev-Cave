@@ -133,11 +133,11 @@ export const RecentFilesDropdown: React.FC<RecentFilesDropdownProps> = ({
         aria-label={translations.title}
         aria-expanded={isOpen}
         aria-haspopup="true"
-        className="relative group flex items-center gap-2 px-3 py-2 rounded-xl bg-[#1F6F5B]/5 border border-[#1F6F5B]/20 text-[#2B2B2B] hover:text-[#1F6F5B] hover:bg-[#1F6F5B]/10 transition-all font-bold"
+        className="relative group flex items-center gap-2 px-3 py-2 rounded-xl bg-primary/5 border border-primary/20 text-foreground hover:text-primary hover:bg-primary/10 transition-all font-bold"
       >
         <Clock className="h-5 w-5 md:h-4 md:w-4 transition-transform group-hover:scale-110 text-[#1F6F5B]" aria-hidden="true" />
         {recentFiles.length > 0 && (
-          <span className="hidden lg:inline-block text-[10px] text-white uppercase tracking-widest bg-[#1F6F5B] rounded px-1.5 py-0.5 shadow-sm font-black">
+          <span className="hidden lg:inline-block text-[10px] text-primary-foreground uppercase tracking-widest bg-primary rounded px-1.5 py-0.5 shadow-sm font-black">
             {recentFiles.length}
           </span>
         )}
@@ -145,7 +145,7 @@ export const RecentFilesDropdown: React.FC<RecentFilesDropdownProps> = ({
 
       {isOpen && (
         <div
-          className="absolute right-0 top-full mt-2 w-80 max-h-96 overflow-auto rounded-[2.5rem] border border-[#D1D5DB] bg-white shadow-[0_24px_48px_-12px_rgba(0,0,0,0.15)] z-50"
+          className="absolute right-0 top-full mt-2 w-80 max-h-96 overflow-auto rounded-[2.5rem] border border-border bg-card shadow-[0_24px_48px_-12px_rgba(0,0,0,0.5)] z-50"
           role="menu"
           aria-label={translations.title}
         >

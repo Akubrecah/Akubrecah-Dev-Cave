@@ -267,8 +267,8 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
     return (
         <header
             className={`fixed ${hasMarquee ? 'top-10' : 'top-0'} z-50 w-full transition-all duration-300 ${scrolled
-                ? 'bg-[#F2F2F2]/90 backdrop-blur-md border-b border-[#D1D5DB] shadow-sm'
-                : 'bg-[#F2F2F2] border-b border-[#D1D5DB]/50'
+                ? 'bg-background/90 backdrop-blur-md border-b border-border shadow-sm'
+                : 'bg-background border-b border-border/50'
                 }`}
             role="banner"
         >
@@ -278,7 +278,7 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                     <div className={`flex items-center gap-2 ${isSearchOpen ? 'max-md:hidden' : 'flex'}`}>
                         <Link
                             href={`/${locale}`}
-                            className="group flex items-center gap-4 text-xl font-bold text-[#2B2B2B] hover:opacity-90 transition-opacity"
+                            className="group flex items-center gap-4 text-xl font-bold text-foreground hover:opacity-90 transition-opacity"
                             aria-label={`${t('brand')} - ${t('navigation.home')}`}
                         >
                             <div className="relative flex h-12 items-center justify-center transition-transform group-hover:scale-105">
@@ -296,7 +296,7 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
 
                     {/* Desktop Navigation */}
                     <nav
-                        className={`hidden lg:flex items-center gap-1 rounded-full border border-[#D1D5DB] bg-white p-1 shadow-sm transition-all duration-300 ${isSearchOpen ? 'opacity-0 translate-y-[-10px] pointer-events-none' : 'opacity-100 translate-y-0'
+                        className={`hidden lg:flex items-center gap-1 rounded-full border border-border bg-card p-1 shadow-sm transition-all duration-300 ${isSearchOpen ? 'opacity-0 translate-y-[-10px] pointer-events-none' : 'opacity-100 translate-y-0'
                             }`}
                         role="navigation"
                     >
@@ -326,7 +326,7 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                                 onClick={() => setIsResourcesOpen(!isResourcesOpen)}
                                 className={cn(
                                     "group flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full transition-all duration-300",
-                                    complianceItems.some(i => pathname.startsWith(i.href)) ? "text-[#1F6F5B] bg-[#E5E7EB]" : "text-[#2E8B75] hover:text-[#1F6F5B] hover:bg-black/5"
+                                    complianceItems.some(i => pathname.startsWith(i.href)) ? "text-primary bg-muted" : "text-muted-foreground hover:text-primary hover:bg-muted/50"
                                 )}
                             >
                                 <ShieldCheck className="w-3.5 h-3.5" />
@@ -335,7 +335,7 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                             </button>
 
                             {isResourcesOpen && (
-                                <div className="absolute top-full left-0 mt-3 w-64 bg-white border border-[#D1D5DB] rounded-2xl shadow-xl p-2 animate-in fade-in zoom-in-95 duration-200 z-[100]">
+                                <div className="absolute top-full left-0 mt-3 w-64 bg-card border border-border rounded-2xl shadow-xl p-2 animate-in fade-in zoom-in-95 duration-200 z-[100]">
                                     {complianceItems.map((item) => {
                                         const { isDisabled } = getNavStatus(item.href);
                                         return (
@@ -347,16 +347,16 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                                                     else setIsResourcesOpen(false);
                                                 }}
                                                 className={cn(
-                                                    "flex items-center gap-3 p-3 rounded-xl hover:bg-[#F3F4F6] transition-all group",
+                                                    "flex items-center gap-3 p-3 rounded-xl hover:bg-muted transition-all group",
                                                     isDisabled && "opacity-40 grayscale cursor-not-allowed pointer-events-none"
                                                 )}
                                             >
-                                                <div className="p-2 rounded-lg bg-[#1F6F5B]/5 text-[#1F6F5B]">
+                                                <div className="p-2 rounded-lg bg-primary/5 text-primary">
                                                     <item.icon className="w-4 h-4" />
                                                 </div>
                                                 <div>
-                                                    <div className="text-xs font-bold text-[#2B2B2B]">{item.label}</div>
-                                                    <div className="text-[10px] text-[#2E8B75]">{item.desc}</div>
+                                                    <div className="text-xs font-bold text-foreground">{item.label}</div>
+                                                    <div className="text-[10px] text-muted-foreground">{item.desc}</div>
                                                 </div>
                                             </Link>
                                         );
@@ -375,7 +375,7 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                                     onClick={(e) => isDisabled && e.preventDefault()}
                                     className={cn(
                                         "group flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full transition-all duration-300",
-                                        active ? "text-[#1F6F5B] bg-[#E5E7EB]" : "text-[#2E8B75] hover:text-[#1F6F5B] hover:bg-black/5",
+                                        active ? "text-primary bg-muted" : "text-muted-foreground hover:text-primary hover:bg-muted/50",
                                         isDisabled && "opacity-40 grayscale cursor-not-allowed pointer-events-none"
                                     )}
                                 >
@@ -393,8 +393,8 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                             <div className="relative" ref={searchContainerRef}>
                                 {isSearchOpen ? (
                                     <div className="fixed md:absolute left-4 right-4 md:left-auto md:right-0 top-[18px] md:top-1/2 md:-translate-y-1/2 z-[60] md:origin-right animate-in fade-in slide-in-from-right-4 duration-200">
-                                        <div className="relative w-full md:w-96 shadow-2xl rounded-2xl overflow-hidden border border-[#1F6F5B]/30 bg-white group-focus-within:border-[#1F6F5B]">
-                                            <div className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#1F6F5B] flex items-center justify-center">
+                                        <div className="relative w-full md:w-96 shadow-2xl rounded-2xl overflow-hidden border border-primary/30 bg-card group-focus-within:border-primary">
+                                            <div className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-primary flex items-center justify-center">
                                                 <Search className="h-4 w-4" />
                                             </div>
                                             <input
@@ -404,7 +404,7 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                                                 onChange={(e) => setSearchQuery(e.target.value)}
                                                 onKeyDown={handleKeyDown}
                                                 placeholder={t('search.placeholder') || 'Search tools...'}
-                                                className="w-full pl-12 pr-12 py-4 text-sm bg-white text-[#2B2B2B] focus:outline-none border-none"
+                                                className="w-full pl-12 pr-12 py-4 text-sm bg-background text-foreground focus:outline-none border-none"
                                                 aria-label="Search tools"
                                                 autoComplete="off"
                                             />
@@ -413,14 +413,14 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                                                 size="sm"
                                                 onClick={handleSearchToggle}
                                                 aria-label="Close search"
-                                                className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 hover:bg-black/5 text-[#2B2B2B]"
+                                                className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 hover:bg-muted text-foreground"
                                             >
                                                 <X className="h-4 w-4" aria-hidden="true" />
                                             </Button>
 
                                             {/* Search Results Dropdown */}
                                             {searchResults.length > 0 && (
-                                                <div className="absolute top-full left-0 right-0 mt-3 bg-white border border-[#D1D5DB] rounded-2xl shadow-2xl overflow-hidden z-[70] animate-in fade-in slide-in-from-top-2 duration-200 max-h-[70vh] overflow-y-auto">
+                                                <div className="absolute top-full left-0 right-0 mt-3 bg-card border border-border rounded-2xl shadow-2xl overflow-hidden z-[70] animate-in fade-in slide-in-from-top-2 duration-200 max-h-[70vh] overflow-y-auto">
                                                     <ul className="py-2" role="listbox">
                                                         {searchResults.map((result, index) => {
                                                             const localized = localizedTools[result.tool.id];
@@ -435,8 +435,8 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                                                                         className={`
                                                                     w-full px-4 py-2.5 text-left flex items-center gap-3 transition-colors
                                                                     ${index === selectedIndex
-                                                                                ? 'bg-[#E5E7EB] text-[#1F6F5B]'
-                                                                                : 'hover:bg-[#F3F4F6] text-[#2B2B2B]'
+                                                                                ? 'bg-muted text-primary'
+                                                                                : 'hover:bg-muted/50 text-foreground'
                                                                             }
                                                                   `}
                                                                         role="option"
@@ -447,7 +447,7 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                                                                             <div className="font-semibold text-sm truncate">
                                                                                 {toolName}
                                                                             </div>
-                                                                            <div className="text-xs text-[#2E8B75] truncate">
+                                                                            <div className="text-xs text-muted-foreground truncate">
                                                                                 {toolDescription}
                                                                             </div>
                                                                         </div>
@@ -466,11 +466,11 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                                         size="sm"
                                         onClick={handleSearchToggle}
                                         aria-label="Open search"
-                                        className="relative group flex items-center gap-2 px-3 py-2 rounded-xl bg-[#1F6F5B]/5 border border-[#1F6F5B]/20 text-[#2B2B2B] hover:text-[#1F6F5B] hover:bg-[#1F6F5B]/10 transition-all font-bold"
+                                        className="relative group flex items-center gap-2 px-3 py-2 rounded-xl bg-primary/5 border border-primary/20 text-foreground hover:text-primary hover:bg-primary/10 transition-all font-bold"
                                     >
-                                        <Search className="h-5 w-5 md:h-4 md:w-4 transition-transform group-hover:scale-110 text-[#1F6F5B]" aria-hidden="true" />
-                                        <span className="hidden lg:inline-block text-[13px] text-[#2B2B2B] group-hover:text-[#1F6F5B] transition-colors pr-1">Search</span>
-                                        <span className="hidden lg:inline-block text-[10px] text-[#1F6F5B] uppercase tracking-widest bg-white border border-[#1F6F5B]/30 rounded px-1.5 py-0.5 shadow-sm font-black italic">⌘K</span>
+                                        <Search className="h-5 w-5 md:h-4 md:w-4 transition-transform group-hover:scale-110 text-primary" aria-hidden="true" />
+                                        <span className="hidden lg:inline-block text-[13px] text-foreground group-hover:text-primary transition-colors pr-1">Search</span>
+                                        <span className="hidden lg:inline-block text-[10px] text-primary uppercase tracking-widest bg-background border border-primary/30 rounded px-1.5 py-0.5 shadow-sm font-black italic">⌘K</span>
                                     </Button>
                                 )}
                             </div>
@@ -493,7 +493,7 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                             {(isAdmin || isSuperAdmin) && (
                                 <Link
                                     href={`/${locale}/admin`}
-                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#1F6F5B]/10 border border-[#1F6F5B]/30 text-[#1F6F5B] hover:bg-[#1F6F5B]/20 hover:border-[#1F6F5B]/50 transition-all text-xs font-medium"
+                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 hover:border-primary/50 transition-all text-xs font-medium"
                                     title="Admin Dashboard"
                                 >
                                     <Shield className="w-3.5 h-3.5" />
@@ -502,12 +502,12 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                             )}
                             <Show when="signed-out">
                                 <SignInButton mode="modal">
-                                    <Button variant="ghost" size="sm" className="hidden sm:inline-flex text-[#2B2B2B] hover:text-[#1F6F5B] hover:bg-black/5">
+                                    <Button variant="ghost" size="sm" className="hidden sm:inline-flex text-foreground hover:text-primary hover:bg-muted/50">
                                         Sign in
                                     </Button>
                                 </SignInButton>
                                 <SignInButton mode="modal">
-                                    <Button size="sm" className="hidden sm:inline-flex bg-[#1F6F5B] text-white hover:bg-[#145A47]">
+                                    <Button size="sm" className="hidden sm:inline-flex bg-primary text-primary-foreground hover:bg-primary/90">
                                         Sign up
                                     </Button>
                                 </SignInButton>
@@ -518,7 +518,7 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                                     <UserNotificationBell />
                                     <Link 
                                         href={`/${locale}/profile`}
-                                        className="h-9 w-9 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-white/40 hover:text-emerald-500 hover:border-emerald-500/50 transition-all group"
+                                        className="h-9 w-9 flex items-center justify-center rounded-xl bg-muted border border-border text-muted-foreground hover:text-primary hover:border-primary/50 transition-all group"
                                         title="User Profile & Settings"
                                     >
                                         <Settings size={18} className="transition-transform group-hover:rotate-45" />
@@ -532,7 +532,7 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                         <Button
                             variant="ghost"
                             size="sm"
-                            className="md:hidden text-[#2B2B2B] hover:text-[#1F6F5B] hover:bg-black/5"
+                            className="md:hidden text-foreground hover:text-primary hover:bg-muted/50"
                             onClick={handleMobileMenuToggle}
                             aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
                             aria-expanded={isMobileMenuOpen}
@@ -551,7 +551,7 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                 {isMobileMenuOpen && (
                     <nav
                         id="mobile-menu"
-                        className="md:hidden py-4 border-t border-[#D1D5DB] bg-white shadow-lg"
+                        className="md:hidden py-4 border-t border-border bg-background shadow-lg"
                         role="navigation"
                         aria-label="Mobile navigation"
                     >
