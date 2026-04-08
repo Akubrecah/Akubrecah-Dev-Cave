@@ -1,11 +1,15 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { requireAdmin } from '@/lib/admin-guard';
+import { rateLimit } from '@/lib/rate-limit';
 
 // Use Node.js runtime to support crypto and prismatic dependencies
 export const runtime = 'nodejs';
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
+  const limited = rateLimit(req);
+  if (limited) return limited;
+
   const adminOrError = await requireAdmin();
   if (adminOrError instanceof NextResponse) return adminOrError;
 

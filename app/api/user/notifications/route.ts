@@ -1,8 +1,12 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getAuth } from '@clerk/nextjs/server';
 import prisma from '@/lib/prisma';
+import { rateLimit } from '@/lib/rate-limit';
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
+  const limited = rateLimit(req);
+  if (limited) return limited;
+
   const { userId: clerkId } = getAuth(req as any);
 
   if (!clerkId) {
@@ -25,7 +29,10 @@ export async function GET(req: Request) {
   }
 }
 
-export async function PATCH(req: Request) {
+export async function PATCH(req: NextRequest) {
+  const limited = rateLimit(req);
+  if (limited) return limited;
+
   const { userId: clerkId } = getAuth(req as any);
 
   if (!clerkId) {

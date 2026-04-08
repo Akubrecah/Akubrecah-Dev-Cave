@@ -1,14 +1,16 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import prisma from '@/lib/prisma';
 import { getAccessToken } from '@/lib/kra-client';
-import { checkUsageLimit, incrementUsage } from '@/lib/pdf/usage';
+import { incrementUsage } from '@/lib/pdf/usage';
+import { rateLimit } from '@/lib/rate-limit';
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
+    const limited = rateLimit(req);
+    if (limited) return limited;
+
     try {
         const { pin } = await req.json();
-
-        // Rate limiting disabled - Always allowed
 
         const token = await getAccessToken('pinByPIN');
         const BASE_URL = process.env.KRA_API_BASE_URL || 'https://sbx.kra.go.ke';

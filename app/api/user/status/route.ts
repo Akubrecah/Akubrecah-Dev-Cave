@@ -1,11 +1,15 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { auth, currentUser } from '@clerk/nextjs/server';
 import prisma from '@/lib/prisma';
 import { TIERS, isValidTier } from '@/lib/pricing';
+import { rateLimit } from '@/lib/rate-limit';
 
 const SUPER_ADMIN_EMAIL = 'poweldayck@gmail.com';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const limited = rateLimit(req);
+  if (limited) return limited;
+
   try {
     const { userId } = await auth();
     if (!userId) {

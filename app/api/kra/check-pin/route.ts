@@ -1,8 +1,9 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import prisma from '@/lib/prisma';
 import { getAccessToken } from '@/lib/kra-client';
-import { checkUsageLimit, incrementUsage } from '@/lib/pdf/usage';
+import { incrementUsage } from '@/lib/pdf/usage';
+import { rateLimit } from '@/lib/rate-limit';
 
 /**
  * KRA PIN Checker by ID API
@@ -14,10 +15,11 @@ import { checkUsageLimit, incrementUsage } from '@/lib/pdf/usage';
  *   NKENR - Non-Kenyan Non-Resident
  *   COMP  - Company / Non-Individual
  */
-export async function POST(req: Request) {
-    try {
-        // Rate limiting disabled per request - Always allowed
+export async function POST(req: NextRequest) {
+    const limited = rateLimit(req);
+    if (limited) return limited;
 
+    try {
         const { idType = 'KE', idNumber } = await req.json();
         const token = await getAccessToken('pinByID');
         const BASE_URL = process.env.KRA_API_BASE_URL || 'https://sbx.kra.go.ke';
