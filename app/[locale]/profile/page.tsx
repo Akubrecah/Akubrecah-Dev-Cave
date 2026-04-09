@@ -263,7 +263,8 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      <style jsx global>{`
+      {/* eslint-disable-next-line react/no-unknown-property */}
+      <style>{`
          .clerk-profile-wrapper .cl-internal-2f9ih3 { display: none !important; }
          .clerk-profile-wrapper .cl-card { 
             background: transparent !important; 
@@ -271,7 +272,6 @@ export default function ProfilePage() {
             border: none !important;
          }
          .clerk-profile-wrapper .cl-profileSectionTitle { border-bottom: 1px solid rgba(255,255,255,0.1) !important; }
-         /* Hide the side nav of Clerk Profile */
          .clerk-profile-wrapper .cl-navbar { display: none !important; }
          .clerk-profile-wrapper .cl-scrollBox { background: transparent !important; }
          .clerk-profile-wrapper .cl-headerTitle { color: white !important; font-style: italic !important; font-weight: 900 !important; text-transform: uppercase !important; }

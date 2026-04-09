@@ -95,6 +95,12 @@ export default function RootLayout({
               __html: serializeStructuredData(organizationSchema),
             }}
           />
+          {/* Anti-flicker: apply saved theme class before first paint */}
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `(function(){try{var t=localStorage.getItem('akubreca-theme');var root=document.documentElement;root.classList.remove('light','dark');if(t==='light'){root.classList.add('light');}else if(t==='system'){var sys=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';root.classList.add(sys);}else{root.classList.add('dark');}}catch(e){}})();`,
+            }}
+          />
         </head>
         <body className={`${plusJakartaSans.variable} ${geistMono.variable} font-sans antialiased text-[hsl(var(--color-foreground))] bg-[hsl(var(--color-background))] transition-colors duration-300`}>
           <NextTopLoader color="#FF0000" showSpinner={false} />
