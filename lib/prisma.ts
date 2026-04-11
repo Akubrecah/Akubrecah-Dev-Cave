@@ -1,23 +1,19 @@
-import { Pool } from 'pg'
-import { PrismaPg } from '@prisma/adapter-pg'
+import { neonConfig, Pool } from '@neondatabase/serverless'
+import { PrismaNeon } from '@prisma/adapter-neon'
 import { PrismaClient } from '@prisma/client'
+import ws from 'ws'
+
+// Configure Neon to use the ws package for WebSockets
+neonConfig.webSocketConstructor = ws
 
 // Use the database URL exactly as provided in .env
 const connectionString = (process.env.DATABASE_URL || '').replace(/^["']|["']$/g, '')
 
-const pool = new Pool({ 
-  connectionString,
-  max: 20,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 30000,
-  ssl: {
-    rejectUnauthorized: false // Required for some environments connecting to Neon
-  }
-})
-
-const adapter = new PrismaPg(pool)
-
 const prismaClientSingleton = () => {
+  // Use Pooling only if it's a standard connection string, 
+  // though adapter-neon handles pooling internally via HTTP/WS.
+  const pool = new Pool({ connectionString })
+  const adapter = new PrismaNeon(pool)
   return new PrismaClient({ adapter })
 }
 
@@ -30,3 +26,4 @@ const prisma = globalThis.prismaGlobal ?? prismaClientSingleton()
 export default prisma
 
 if (process.env.NODE_ENV !== 'production') globalThis.prismaGlobal = prisma
+
