@@ -1,4 +1,4 @@
-import { Plus_Jakarta_Sans, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import { ClerkProvider } from "@clerk/nextjs";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { siteConfig } from "@/config/site";
@@ -6,15 +6,10 @@ import { generateWebSiteSchema, generateOrganizationSchema, serializeStructuredD
 import NextTopLoader from "nextjs-toploader";
 import "./globals.css";
 
-const plusJakartaSans = Plus_Jakarta_Sans({
-  variable: "--font-plus-jakarta",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-});
-
-const geistMono = Geist_Mono({
+const geistMono = localFont({
+  src: "./fonts/geist-mono.woff2",
   variable: "--font-geist-mono",
-  subsets: ["latin"],
+  weight: "100 900",
 });
 
 export const metadata = {
@@ -102,7 +97,7 @@ export default function RootLayout({
             }}
           />
         </head>
-        <body className={`${plusJakartaSans.variable} ${geistMono.variable} font-sans antialiased text-[hsl(var(--color-foreground))] bg-[hsl(var(--color-background))] transition-colors duration-300`}>
+        <body className={`${geistMono.variable} font-sans antialiased text-[hsl(var(--color-foreground))] bg-[hsl(var(--color-background))] transition-colors duration-300`}>
           <NextTopLoader color="#FF0000" showSpinner={false} />
           <ThemeProvider>
             {children}

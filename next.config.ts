@@ -4,7 +4,7 @@ import createNextIntlPlugin from 'next-intl/plugin';
 const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
 
 const nextConfig: NextConfig = {
-  transpilePackages: ['lucide-react'],
+  transpilePackages: ['lucide-react', '@prisma/client'],
   webpack: (config, { isServer, webpack }) => {
     // Add polyfills for client-side PDF processing
     if (!isServer) {
@@ -56,6 +56,7 @@ const nextConfig: NextConfig = {
   turbopack: {
     resolveAlias: {
       canvas: './lib/mocks/canvas.js',
+      '.prisma/client': './node_modules/.prisma/client',
     },
   },
   // Note: App-wide headers are now consolidated here 
