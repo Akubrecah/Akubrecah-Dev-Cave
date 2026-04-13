@@ -49,7 +49,12 @@ export function NilReturnForm() {
         if (!isLoaded || !user) return;
         const checkStatus = async () => {
             try {
-                const res = await fetch('/api/user/status');
+                const res = await fetch('/api/user/status', {
+                  credentials: 'include',
+                  headers: {
+                    Accept: 'application/json',
+                  },
+                });
                 if (res.ok) {
                     const data = await res.json();
                     setIsAdmin(data.role === 'admin');

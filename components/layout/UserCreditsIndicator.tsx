@@ -27,7 +27,13 @@ export const UserCreditsIndicator = () => {
   const fetchStatus = useCallback(async () => {
     if (!isSignedIn) return;
     try {
-      const res = await fetch('/api/user/status', { cache: 'no-store' });
+      const res = await fetch('/api/user/status', {
+        cache: 'no-store',
+        credentials: 'include',
+        headers: {
+          Accept: 'application/json',
+        },
+      });
       if (res.ok) {
         const data = await res.json();
         setStatus(data);

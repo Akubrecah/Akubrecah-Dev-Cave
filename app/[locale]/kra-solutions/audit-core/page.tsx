@@ -15,12 +15,18 @@ export default function AuditCorePage() {
   const [subscription, setSubscription] = useState<any>(null);
 
   useEffect(() => {
-    fetch('/api/user/status')
+    fetch('/api/user/status', {
+      credentials: 'include',
+      headers: {
+        Accept: 'application/json',
+      },
+    })
       .then(res => res.json())
       .then(data => {
         setSubscription(data);
         setStats(prev => ({ ...prev, credits: data.credits ?? prev.credits }));
-      });
+      })
+      .catch((err) => console.error('[AUDIT CORE] status fetch failed', err));
   }, []);
 
   return (

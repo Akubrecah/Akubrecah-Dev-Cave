@@ -62,8 +62,23 @@ export async function POST(req: NextRequest) {
                 // Increment usage upon success (best-effort)
                 try { await incrementUsage('KRA'); } catch (e) { console.warn('[KRA-PIN] incrementUsage failed:', e); }
 
-                if (data && data.TaxpayerName) {
-                    data.TaxpayerName = data.TaxpayerName.toUpperCase();
+                // Normalization: KRA APIs sometimes nest data inside 'Data', 'Result', or 'TaxpayerDetails'
+                let normalizedData = data;
+                const commonWrappers = ['Data', 'Result', 'TaxpayerDetails', 'TaxpayerDetailsResponse'];
+                for (const wrapper of commonWrappers) {
+                  if (data[wrapper] && typeof data[wrapper] === 'object' && !Array.isArray(data[wrapper])) {
+                    normalizedData = { ...data, ...data[wrapper] };
+                    console.log(`[KRA-PIN] Normalized data from wrapper: ${wrapper}`);
+                    break;
+                  } else if (Array.isArray(data[wrapper]) && data[wrapper].length > 0) {
+                    normalizedData = { ...data, ...data[wrapper][0] };
+                    console.log(`[KRA-PIN] Normalized data from array wrapper: ${wrapper}`);
+                    break;
+                  }
+                }
+
+                if (normalizedData && normalizedData.TaxpayerName) {
+                    normalizedData.TaxpayerName = normalizedData.TaxpayerName.toUpperCase();
                 }
 
                 // Persistence: Save verification record to DB
@@ -76,9 +91,9 @@ export async function POST(req: NextRequest) {
                     await prisma.verification.create({
                       data: {
                         userId: dbUser.id,
-                        kraPin: data.KRAPIN || pin || 'UNKNOWN',
-                        taxpayerName: data.TaxpayerName || 'UNKNOWN',
-                        result: data
+                        kraPin: normalizedData.KRAPIN || normalizedData.TaxpayerPIN || pin || 'UNKNOWN',
+                        taxpayerName: normalizedData.TaxpayerName || 'UNKNOWN',
+                        result: normalizedData
                       }
                     });
                   }
@@ -86,7 +101,7 @@ export async function POST(req: NextRequest) {
                   console.warn('[KRA-PIN] Verification record creation failed:', saveErr);
                 }
 
-                return NextResponse.json(data);
+                return NextResponse.json(normalizedData);
             } catch (error: unknown) {
                 clearTimeout(timeout);
                 if (error instanceof Error) {

@@ -87,9 +87,11 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                 // Add a timestamp to bypass any browser caching despite no-store
                 const res = await fetch(`/api/user/status?t=${Date.now()}`, { 
                     cache: 'no-store',
+                    credentials: 'include',
                     headers: {
                         'Pragma': 'no-cache',
-                        'Cache-Control': 'no-cache'
+                        'Cache-Control': 'no-cache',
+                        'Accept': 'application/json',
                     }
                 });
                 if (res.ok) {

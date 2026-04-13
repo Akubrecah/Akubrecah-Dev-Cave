@@ -51,13 +51,26 @@ export default function UserDashboard() {
 
   useEffect(() => {
     // Add cache buster to status check
-    fetch(`/api/user/status?t=${Date.now()}`, { cache: 'no-store' })
+    fetch(`/api/user/status?t=${Date.now()}`, {
+      cache: 'no-store',
+      credentials: 'include',
+      headers: {
+        Accept: 'application/json',
+      },
+    })
       .then(res => res.json())
-      .then(data => setSubscription(data));
+      .then(data => setSubscription(data))
+      .catch((err) => console.error('[DASHBOARD] status fetch failed', err));
     
-    fetch('/api/user/certificates')
+    fetch('/api/user/certificates', {
+      credentials: 'include',
+      headers: {
+        Accept: 'application/json',
+      },
+    })
       .then(res => res.json())
-      .then(data => setCerts(Array.isArray(data) ? data : []));
+      .then(data => setCerts(Array.isArray(data) ? data : []))
+      .catch((err) => console.error('[DASHBOARD] certificates fetch failed', err));
   }, []);
 
   const countdown = useCountdown(subscription?.subscriptionEnd);

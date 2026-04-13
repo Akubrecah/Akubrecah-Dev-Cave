@@ -20,7 +20,12 @@ export const UserNotificationBell = () => {
 
     const fetchNotifications = useCallback(async () => {
         try {
-            const res = await fetch('/api/user/notifications');
+            const res = await fetch('/api/user/notifications', {
+                credentials: 'include',
+                headers: {
+                    Accept: 'application/json',
+                },
+            });
             if (res.ok) {
                 setNotifications(await res.json());
             }
@@ -47,6 +52,7 @@ export const UserNotificationBell = () => {
         try {
             const res = await fetch('/api/user/notifications', {
                 method: 'PATCH',
+                credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ id }),
             });

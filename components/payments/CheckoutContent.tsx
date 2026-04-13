@@ -24,10 +24,18 @@ export function CheckoutContent() {
 
   // Fetch current subscription status
   useEffect(() => {
-    fetch('/api/user/status')
+    fetch('/api/user/status', {
+      credentials: 'include',
+      headers: {
+        Accept: 'application/json',
+      },
+    })
       .then(res => res.json())
       .then(data => { setUserStatus(data); setStatusLoading(false); })
-      .catch(() => setStatusLoading(false));
+      .catch((err) => {
+        console.error('[CHECKOUT] status fetch failed', err);
+        setStatusLoading(false);
+      });
   }, []);
 
   // Plan Details 

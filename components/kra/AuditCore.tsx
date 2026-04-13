@@ -86,11 +86,24 @@ export function AuditCore({ stats, setStats, subscription }: AuditCoreProps) {
   };
 
   const getKRAValue = (obj: any, ...keys: string[]): string => {
+    if (!obj || typeof obj !== 'object') return '';
+    
+    // First pass: Direct match (case-insensitive)
     for (const key of keys) {
       if (obj[key] !== undefined && obj[key] !== null) return String(obj[key]);
       const foundKey = Object.keys(obj).find(k => k.toLowerCase() === key.toLowerCase());
       if (foundKey) return String(obj[foundKey]);
     }
+
+    // Second pass: Check deeply in 'data', 'result', or 'TaxpayerDetails' if not found at root
+    const commonWrappers = ['Data', 'Result', 'TaxpayerDetails', 'TaxpayerDetailsResponse'];
+    for (const wrapper of commonWrappers) {
+      if (obj[wrapper] && typeof obj[wrapper] === 'object') {
+        const value = getKRAValue(obj[wrapper], ...keys);
+        if (value) return value;
+      }
+    }
+    
     return '';
   };
 
@@ -115,10 +128,11 @@ export function AuditCore({ stats, setStats, subscription }: AuditCoreProps) {
       
       setFormData(prev => ({
         ...prev,
-        kraPin: getKRAValue(result, 'KRAPIN', 'TaxpayerPIN', 'PIN') || prev.kraPin,
-        taxpayerName: (getKRAValue(result, 'TaxpayerName', 'Name') || prev.taxpayerName || '').toUpperCase(),
-        obligation: getKRAValue(result, 'Type', 'TaxpayerType') || prev.obligation,
-        status: getKRAValue(result, 'Status') || prev.status
+        kraPin: getKRAValue(result, 'KRAPIN', 'TaxpayerPIN', 'PIN', 'PinNumber') || prev.kraPin,
+        taxpayerName: (getKRAValue(result, 'TaxpayerName', 'Name', 'FullName', 'Taxpayer_Name') || prev.taxpayerName || '').toUpperCase(),
+        obligation: getKRAValue(result, 'Type', 'TaxpayerType', 'Obligation', 'ObligationName') || prev.obligation,
+        status: getKRAValue(result, 'Status', 'TaxpayerStatus', 'EffectiveStatus') || prev.status,
+        station: getKRAValue(result, 'Station', 'TaxStation', 'StationName') || prev.station
       }));
 
       setStats(prev => ({ ...prev, verifications: prev.verifications + 1 }));
@@ -188,6 +202,7 @@ export function AuditCore({ stats, setStats, subscription }: AuditCoreProps) {
 
       fetch('/api/user/certificates', {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           kraPin: formData.kraPin, 

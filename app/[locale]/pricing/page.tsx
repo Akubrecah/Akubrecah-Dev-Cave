@@ -224,10 +224,18 @@ export default function Pricing() {
   const [statusLoading, setStatusLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/user/status')
+    fetch('/api/user/status', {
+      credentials: 'include',
+      headers: {
+        Accept: 'application/json',
+      },
+    })
       .then(res => res.json())
       .then(data => { setUserStatus(data); setStatusLoading(false); })
-      .catch(() => setStatusLoading(false));
+      .catch((err) => {
+        console.error('[PRICING] status fetch failed', err);
+        setStatusLoading(false);
+      });
   }, []);
 
   const countdown = useCountdown(userStatus?.subscriptionEnd);

@@ -144,6 +144,7 @@ export const DownloadButton: React.FC<DownloadButtonProps> = ({
               const base64Content = (reader.result as string).split(',')[1];
               await fetch('/api/user/certificates', {
                 method: 'POST',
+                credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                   kraPin: toolSlug || 'PDF_TOOL',
