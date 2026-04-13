@@ -12,7 +12,7 @@ const prismaClientSingleton = () => {
   // Use Pooling only if it's a standard connection string, 
   // though adapter-neon handles pooling internally via HTTP/WS.
   const pool = new Pool({ connectionString });
-  const adapter = new PrismaNeon(pool);
+  const adapter = new PrismaNeon(pool as any);
   return new PrismaClient({ adapter });
 }
 
