@@ -9,8 +9,13 @@ neonConfig.webSocketConstructor = ws
 const prismaClientSingleton = () => {
   // Use the database URL exactly as provided in .env
   const connectionString = (process.env.DATABASE_URL || '').replace(/^["']|["']$/g, '');
-  // Use Pooling only if it's a standard connection string, 
-  // though adapter-neon handles pooling internally via HTTP/WS.
+  
+  // If no connection string is provided (common during build time), 
+  // return a standard client without the Neon adapter to avoid hangs.
+  if (!connectionString) {
+    return new PrismaClient();
+  }
+
   const pool = new Pool({ connectionString });
   const adapter = new PrismaNeon(pool as any);
   return new PrismaClient({ adapter });
