@@ -7,9 +7,26 @@ import { AdminSidebar } from '../_components/AdminSidebar';
 import { AdminHeader } from '../_components/AdminHeader';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Cell } from 'recharts';
 
+interface TransactionLedgerItem {
+  id: string;
+  desc: string;
+  amount: string;
+  type: 'credit' | 'debit';
+  date: string;
+  user: string;
+}
+
+interface SalesStats {
+  totalUsers: number;
+  totalTransactions: number;
+  totalRevenue: number;
+  activeSubscriptions: number;
+  recentTransactions: TransactionLedgerItem[];
+}
+
 export default function SalesDashboard() {
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<SalesStats | null>(null);
 
   useEffect(() => {
     fetch('/api/admin/stats')
@@ -138,7 +155,7 @@ export default function SalesDashboard() {
                   <div className="p-6 rounded-[32px] bg-[#0f0f0f] border border-white/5">
                     <h3 className="text-sm font-black text-white uppercase tracking-widest mb-6">Live Deal Feed</h3>
                     <div className="space-y-4">
-                      {stats?.recentTransactions?.slice(0, 4).map((deal: any, i: number) => (
+                      {stats?.recentTransactions?.slice(0, 4).map((deal: TransactionLedgerItem, i: number) => (
                          <div key={i} className="p-4 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-between group hover:border-emerald-500/20 transition-all overflow-hidden font-sans">
                             <div className="overflow-hidden">
                                <p className="text-sm font-bold text-white tracking-tight truncate">{deal.user}</p>

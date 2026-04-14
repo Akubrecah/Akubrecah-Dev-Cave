@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { 
-  Users, DollarSign, FileCheck2, Shield, Search, 
-  ChevronLeft, ChevronRight, RefreshCw, TrendingUp,
-  Activity, Trash2, Edit2, Bell,
+  FileCheck2, Shield, 
+  RefreshCw,
+  Trash2,
   Plus, Zap, Clock, CheckCircle2
 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -16,9 +16,7 @@ import { twMerge } from 'tailwind-merge';
 // Premium Components
 import { AdminSidebar } from './_components/AdminSidebar';
 import { AdminHeader } from './_components/AdminHeader';
-import { AdminMetricCard } from './_components/AdminMetricCard';
-import { PremiumAreaChart } from './_components/PremiumAreaChart';
-import { ActivityStream, type ActivityItem } from './_components/ActivityStream';
+import { type ActivityItem } from './_components/ActivityStream';
 
 
 import { OverviewTab } from './_components/tabs/OverviewTab';
@@ -81,8 +79,51 @@ interface NotificationRow {
   createdAt: string;
 }
 
+interface HealthData {
+  status: 'operational' | 'degraded' | 'down';
+  score: number;
+  latency: number;
+  nodes: {
+    database: 'up' | 'down';
+    auth: 'up' | 'down';
+    payments: 'up' | 'down';
+    compliance: 'up' | 'down';
+  };
+  timestamp: string;
+  error?: string;
+}
+
+interface TimeSeriesDataItem {
+  date: string;
+  users: number;
+  transactions: number;
+  revenue: number;
+  traffic: number;
+  active_users: number;
+}
+
+interface UserCertificate {
+  id: string;
+  userId: string;
+  pinNumber: string;
+  kraPin: string;
+  details: Record<string, any>;
+  createdAt: string;
+}
+
+interface SafaricomApiResponse {
+  MerchantRequestID?: string;
+  CheckoutRequestID?: string;
+  ResponseCode?: string;
+  ResponseDescription?: string;
+  CustomerMessage?: string;
+  ResultCode?: number;
+  ResultDesc?: string;
+  [key: string]: any;
+}
+
 export default function AdminDashboard() {
-  const router = useRouter();
+  // const router = useRouter();
   const searchParams = useSearchParams();
   const tabParam = searchParams.get('tab') as Tab;
   
@@ -93,8 +134,8 @@ export default function AdminDashboard() {
     return twMerge(clsx(inputs));
   }
   const [stats, setStats] = useState<Stats | null>(null);
-  const [healthData, setHealthData] = useState<any>(null);
-  const [timeSeriesData, setTimeSeriesData] = useState<any[]>([]);
+  const [healthData, setHealthData] = useState<HealthData | null>(null);
+  const [timeSeriesData, setTimeSeriesData] = useState<TimeSeriesDataItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [healthLoading, setHealthLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -137,7 +178,7 @@ export default function AdminDashboard() {
   // Editing user
   const [editingUser, setEditingUser] = useState<UserRow | null>(null);
   const [viewingCertificatesUser, setViewingCertificatesUser] = useState<UserRow | null>(null);
-  const [userCertificates, setUserCertificates] = useState<any[]>([]);
+  const [userCertificates, setUserCertificates] = useState<UserCertificate[]>([]);
   const [certsLoading, setCertsLoading] = useState(false);
 
   const [editForm, setEditForm] = useState({
@@ -227,24 +268,29 @@ export default function AdminDashboard() {
     } catch (_e) { console.error('Notifications fetch failed:', _e); }
   }, []);
 
+  /*
   const handlePaystackAction = useCallback(async (action: string, params: any) => {
     try {
       setPaystackLoading(true);
-      const res = await fetch('/api/admin/paystack', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/admin/paystack", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action, params }),
       });
       const data = await res.json();
-      if (action === 'balance' && Array.isArray(data.data)) {
+      if (action === "balance" && Array.isArray(data.data)) {
         // Find KES balance specifically, otherwise fallback to the first one
-        const kesBalance = data.data.find((b: any) => b.currency === 'KES');
+        const kesBalance = data.data.find((b: any) => b.currency === "KES");
         setPaystackBalance(kesBalance || data.data[0]);
       }
       setPaystackResult(data);
-    } catch (_e) { console.error('Paystack action failed:', _e); }
-    finally { setPaystackLoading(false); }
+    } catch (_e) {
+      console.error("Paystack action failed:", _e);
+    } finally {
+      setPaystackLoading(false);
+    }
   }, []);
+  */
 
   const refreshAll = useCallback(() => {
     setLoading(true);
@@ -312,10 +358,10 @@ export default function AdminDashboard() {
   };
 
   const [safaricomLoading, setSafaricomLoading] = useState(false);
-  const [safaricomResult, setSafaricomResult] = useState<any>(null);
-  const [paystackLoading, setPaystackLoading] = useState(false);
-  const [paystackBalance, setPaystackBalance] = useState<any>(null);
-  const [paystackResult, setPaystackResult] = useState<any>(null);
+  const [safaricomResult, setSafaricomResult] = useState<SafaricomApiResponse | null>(null);
+  // const [paystackLoading, setPaystackLoading] = useState(false);
+  // const [paystackBalance, setPaystackBalance] = useState<any>(null);
+  // const [paystackResult, setPaystackResult] = useState<any>(null);
   const [stkForm, setStkForm] = useState({ phoneNumber: '', amount: '1', accountRef: 'AdminTest' });
 
   const handleSafaricomAction = async (action: string, params: any) => {
@@ -402,7 +448,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleDownloadCertificate = async (cert: any) => {
+  const handleDownloadCertificate = async (cert: UserCertificate) => {
     try {
       const { generateKraPdf } = await import('@/lib/pdf/generate-kra-pdf');
       const filename = `RE_DOWNLOAD_KRA_PIN_${cert.kraPin}.pdf`;

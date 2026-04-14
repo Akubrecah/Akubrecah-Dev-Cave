@@ -41,7 +41,7 @@ export function useRecentFiles(): UseRecentFilesReturn {
 
   // Load recent files on mount
   useEffect(() => {
-    setIsLoading(false);
+    setTimeout(() => setIsLoading(false), 0);
   }, []);
 
 

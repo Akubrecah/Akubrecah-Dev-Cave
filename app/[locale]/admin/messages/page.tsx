@@ -3,11 +3,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  MessageSquare, Search, Filter, Clock, CheckCircle2, 
-  AlertCircle, ChevronRight, User, Mail, Send, Loader2,
-  ArrowLeft, RefreshCw
+  MessageSquare, Search, ChevronRight, RefreshCw
 } from 'lucide-react';
-import { useParams, useRouter } from 'next/navigation';
 import { AdminHeader } from '../_components/AdminHeader';
 import { AdminSidebar } from '../_components/AdminSidebar';
 
@@ -29,9 +26,9 @@ interface ContactMessage {
 }
 
 export default function AdminMessagesPage() {
-  const params = useParams();
-  const router = useRouter();
-  const locale = params?.locale as string || 'en';
+  // const params = useParams();
+  // const router = useRouter();
+  // const locale = params?.locale as string || 'en';
 
   const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [loading, setLoading] = useState(true);

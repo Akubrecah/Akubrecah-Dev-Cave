@@ -118,7 +118,7 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
         URL.revokeObjectURL(previewUrl);
       }
     };
-  }, [file]);
+  }, [file, onPageChange]);
 
   /**
    * Render current page

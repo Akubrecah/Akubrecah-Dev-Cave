@@ -19,13 +19,13 @@ export function useFavorites() {
             if (stored) {
                 const parsed = JSON.parse(stored);
                 if (Array.isArray(parsed)) {
-                    setFavorites(parsed);
+                    setTimeout(() => setFavorites(parsed), 0);
                 }
             }
         } catch (error) {
             console.error('Failed to load favorites from localStorage:', error);
         }
-        setIsLoaded(true);
+        setTimeout(() => setIsLoaded(true), 0);
     }, []);
 
     // Save favorites to localStorage whenever they change

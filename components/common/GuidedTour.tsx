@@ -55,20 +55,19 @@ export const GuidedTour: React.FC<GuidedTourProps> = ({
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const [showWelcome, setShowWelcome] = useState(isFirstVisit && autoStart);
-  const [prevTourState, setPrevTourState] = useState({ isFirstVisit, autoStart });
-
-  if (prevTourState.isFirstVisit !== isFirstVisit || prevTourState.autoStart !== autoStart) {
-    setPrevTourState({ isFirstVisit, autoStart });
+  useEffect(() => {
     if (isFirstVisit && autoStart) {
-      setShowWelcome(true);
+      setTimeout(() => setShowWelcome(true), 0);
     }
-  }
+  }, [isFirstVisit, autoStart]);
 
   // Calculate tooltip position when step changes
   useEffect(() => {
     if (!isActive || !currentStepData) {
-      setTooltipPosition(current => current !== null ? null : current);
-      setTargetRect(current => current !== null ? null : current);
+      setTimeout(() => {
+        setTooltipPosition(current => current !== null ? null : current);
+        setTargetRect(current => current !== null ? null : current);
+      }, 0);
       return;
     }
 

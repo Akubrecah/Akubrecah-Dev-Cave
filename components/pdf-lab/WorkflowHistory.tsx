@@ -40,7 +40,7 @@ export function WorkflowHistory({ onLoadFromHistory }: WorkflowHistoryProps) {
 
     // Load history on mount
     useEffect(() => {
-        refreshHistory();
+        setTimeout(refreshHistory, 0);
     }, []);
 
     const handleDelete = (id: string) => {

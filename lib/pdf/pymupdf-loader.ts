@@ -3,9 +3,66 @@
  * Dynamically loads PyMuPDF WASM module using ES module import
  */
 
+export interface OCGLayer {
+  id: string;
+  name: string;
+  visible: boolean;
+  locked: boolean;
+}
+
+export interface DeskewResult {
+  totalPages: number;
+  correctedPages: number;
+  angles: number[];
+  corrected: boolean[];
+}
+
+export interface OutlineResult {
+  pdf: Blob;
+  fontsConverted: number;
+  pagesProcessed: number;
+  totalPages: number;
+}
+
+export interface HtmlToPdfOptions {
+  pageSize?: 'a4' | 'letter' | 'legal';
+  margins?: {
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
+  };
+  attachments?: Array<{
+    filename: string;
+    contentType: string;
+    content: ArrayBuffer | Uint8Array;
+  }>;
+}
+
+export interface CompressOptions {
+  quality?: 'low' | 'medium' | 'high' | 'maximum';
+  removeMetadata?: boolean;
+}
+
+export interface PyMuPDFInstance {
+  pyodide: any;
+  pdfToDocx(file: File): Promise<Blob>;
+  pdfToPdfa(file: File, options?: any): Promise<{ pdf: Blob }>;
+  htmlToPdf(html: string, options?: HtmlToPdfOptions): Promise<Blob>;
+  deskewPdf(file: File, options?: { threshold?: number; dpi?: number }): Promise<{ pdf: Blob; result: DeskewResult }>;
+  fontToOutline(file: File, options?: { dpi?: number; preserveSelectableText?: boolean; pageRange?: string }): Promise<OutlineResult>;
+  getOCGLayers(file: File): Promise<OCGLayer[]>;
+  toggleOCGLayer(file: File, options: { layerId: string; visible: boolean }): Promise<{ pdf: Blob }>;
+  addOCGLayer(file: File, options: { name: string }): Promise<{ pdf: Blob; layerId: string }>;
+  deleteOCGLayer(file: File, options: { layerId: string }): Promise<{ pdf: Blob }>;
+  renameOCGLayer(file: File, options: { layerId: string; newName: string }): Promise<{ pdf: Blob }>;
+  compress(file: File, options?: CompressOptions): Promise<Blob>;
+  photonCompress(file: File, options?: { dpi?: number; format?: string; quality?: number }): Promise<Blob>;
+}
+
 // Singleton instance
-let pymupdfInstance: any = null;
-let loadingPromise: Promise<any> | null = null;
+let pymupdfInstance: PyMuPDFInstance | null = null;
+let loadingPromise: Promise<PyMuPDFInstance> | null = null;
 
 function resolvePublicAssetPath(assetPath: string): string {
   if (typeof window === 'undefined') return assetPath;
@@ -31,7 +88,7 @@ function resolvePublicAssetPath(assetPath: string): string {
 /**
  * Load PyMuPDF using Pyodide directly
  */
-export async function loadPyMuPDF(): Promise<any> {
+export async function loadPyMuPDF(): Promise<PyMuPDFInstance> {
   if (pymupdfInstance) {
     return pymupdfInstance;
   }
@@ -135,7 +192,7 @@ base64.b64encode(docx_data).decode('ascii')
           });
         },
 
-        async pdfToPdfa(file: File, options: any): Promise<{ pdf: Blob }> {
+        async pdfToPdfa(file: File, options?: { level?: string; embedFonts?: boolean; flattenTransparency?: boolean }): Promise<{ pdf: Blob }> {
           const arrayBuffer = await file.arrayBuffer();
           const pdfData = new Uint8Array(arrayBuffer);
           // Options are available for future use (level, embedFonts, flattenTransparency)
@@ -191,7 +248,7 @@ base64.b64encode(pdf_data).decode('ascii')
           };
         },
 
-        async htmlToPdf(html: string, options: any): Promise<Blob> {
+        async htmlToPdf(html: string, options?: HtmlToPdfOptions): Promise<Blob> {
           const { pageSize = 'a4', margins = { top: 50, right: 50, bottom: 50, left: 50 }, attachments = [] } = options || {};
 
           // Page dimensions in points (72 points per inch)
@@ -335,7 +392,7 @@ base64.b64encode(pdf_bytes).decode('ascii')
           return new Blob([bytes], { type: 'application/pdf' });
         },
 
-        async deskewPdf(file: File, options: any): Promise<{ pdf: Blob; result: any }> {
+        async deskewPdf(file: File, options?: { threshold?: number; dpi?: number }): Promise<{ pdf: Blob; result: DeskewResult }> {
           const arrayBuffer = await file.arrayBuffer();
           const pdfData = new Uint8Array(arrayBuffer);
           const { threshold = 0.5, dpi = 150 } = options || {};
@@ -586,7 +643,7 @@ json.dumps(result_data) + "|||" + base64.b64encode(pdf_bytes).decode('ascii')
           };
         },
 
-        async fontToOutline(file: File, options: any): Promise<{ pdf: Blob; fontsConverted: number; pagesProcessed: number; totalPages: number }> {
+        async fontToOutline(file: File, options?: { dpi?: number; preserveSelectableText?: boolean; pageRange?: string }): Promise<OutlineResult> {
           const arrayBuffer = await file.arrayBuffer();
           const pdfData = new Uint8Array(arrayBuffer);
           const { dpi = 300, preserveSelectableText = false, pageRange = '' } = options || {};
@@ -765,7 +822,7 @@ json.dumps(result_data) + "|||" + base64.b64encode(pdf_bytes).decode('ascii')
           };
         },
 
-        async getOCGLayers(file: File): Promise<any[]> {
+        async getOCGLayers(file: File): Promise<OCGLayer[]> {
           const arrayBuffer = await file.arrayBuffer();
           const pdfData = new Uint8Array(arrayBuffer);
 
@@ -803,7 +860,7 @@ json.dumps(layers)
           return JSON.parse(result);
         },
 
-        async toggleOCGLayer(file: File, options: any): Promise<{ pdf: Blob }> {
+        async toggleOCGLayer(file: File, options: { layerId: string, visible: boolean }): Promise<{ pdf: Blob }> {
           const arrayBuffer = await file.arrayBuffer();
           const pdfData = new Uint8Array(arrayBuffer);
           const { layerId, visible } = options;
@@ -840,7 +897,7 @@ base64.b64encode(pdf_bytes).decode('ascii')
           return { pdf: new Blob([bytes], { type: 'application/pdf' }) };
         },
 
-        async addOCGLayer(file: File, options: any): Promise<{ pdf: Blob; layerId: string }> {
+        async addOCGLayer(file: File, options: { name: string }): Promise<{ pdf: Blob; layerId: string }> {
           const arrayBuffer = await file.arrayBuffer();
           const pdfData = new Uint8Array(arrayBuffer);
           const { name } = options;
@@ -882,7 +939,7 @@ str(xref) + "|||" + base64.b64encode(pdf_bytes).decode('ascii')
           };
         },
 
-        async deleteOCGLayer(file: File, options: any): Promise<{ pdf: Blob }> {
+        async deleteOCGLayer(file: File, options: { layerId: string }): Promise<{ pdf: Blob }> {
           const arrayBuffer = await file.arrayBuffer();
           const pdfData = new Uint8Array(arrayBuffer);
 
@@ -918,7 +975,7 @@ base64.b64encode(pdf_bytes).decode('ascii')
           return { pdf: new Blob([bytes], { type: 'application/pdf' }) };
         },
 
-        async renameOCGLayer(file: File, options: any): Promise<{ pdf: Blob }> {
+        async renameOCGLayer(file: File, options: { layerId: string, newName: string }): Promise<{ pdf: Blob }> {
           const arrayBuffer = await file.arrayBuffer();
           const pdfData = new Uint8Array(arrayBuffer);
 
@@ -954,7 +1011,7 @@ base64.b64encode(pdf_bytes).decode('ascii')
           return { pdf: new Blob([bytes], { type: 'application/pdf' }) };
         },
 
-        async compress(file: File, options: any): Promise<Blob> {
+        async compress(file: File, options?: CompressOptions): Promise<Blob> {
           const arrayBuffer = await file.arrayBuffer();
           const pdfData = new Uint8Array(arrayBuffer);
           const { quality = 'medium', removeMetadata = false } = options || {};
@@ -1086,7 +1143,7 @@ base64.b64encode(pdf_bytes).decode('ascii')
           return new Blob([bytes], { type: 'application/pdf' });
         },
 
-        async photonCompress(file: File, options: any): Promise<Blob> {
+        async photonCompress(file: File, options?: { dpi?: number; format?: string; quality?: number }): Promise<Blob> {
           const arrayBuffer = await file.arrayBuffer();
           const pdfData = new Uint8Array(arrayBuffer);
           const { dpi = 150, format = 'jpeg', quality = 85 } = options || {};

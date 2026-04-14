@@ -162,7 +162,7 @@ export function useRovingTabIndex(itemCount: number, options: UseKeyboardNavigat
   }, []);
 
 
-  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
+  const handleKeyDown = (event: React.KeyboardEvent) => {
     const currentIndex = focusedIndex;
 
     let nextIndex: number | null = null;
@@ -208,9 +208,9 @@ export function useRovingTabIndex(itemCount: number, options: UseKeyboardNavigat
     if (nextIndex !== null) {
       setFocusedIndex(nextIndex);
     }
-  }, [itemCount, enableArrowKeys, enableHomeEnd, enableEscape, orientation, wrap, onEscape, onEnter, setFocusedIndex]);
+  };
 
-  const getItemProps = useCallback((index: number) => ({
+  const getItemProps = (index: number) => ({
     ref: (el: HTMLElement | null) => {
       if (el) {
         itemRefs.current.set(index, el);
@@ -224,7 +224,7 @@ export function useRovingTabIndex(itemCount: number, options: UseKeyboardNavigat
       setFocusedIndexState(index);
     },
 
-  }), [handleKeyDown]);
+  });
 
   return {
     focusedIndex,

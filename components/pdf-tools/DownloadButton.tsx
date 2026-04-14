@@ -77,14 +77,14 @@ export const DownloadButton: React.FC<DownloadButtonProps> = ({
   useEffect(() => {
     if (file) {
       const url = URL.createObjectURL(file);
-      setBlobUrl(url);
+      setTimeout(() => setBlobUrl(url), 0);
       
       // Cleanup function to revoke URL when component unmounts or file changes
       return () => {
         URL.revokeObjectURL(url);
       };
     } else {
-      setBlobUrl(null);
+      setTimeout(() => setBlobUrl(null), 0);
     }
   }, [file]);
 

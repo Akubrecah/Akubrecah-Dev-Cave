@@ -50,7 +50,7 @@ export function ToolCard({ tool, locale, className = '', localizedContent }: Too
     .map(f => f.replace(/-/g, ' '))
     .join(', ');
 
-  const Icon = getToolIcon(tool.icon);
+  const iconComponent = getToolIcon(tool.icon);
 
 
   const categoryName = t(`home.categories.${categoryTranslationKeys[tool.category]}`);
@@ -80,7 +80,7 @@ export function ToolCard({ tool, locale, className = '', localizedContent }: Too
               data-testid="tool-card-icon"
               aria-hidden="true"
             >
-              <Icon className="w-7 h-7 text-[var(--color-brand-red)]" />
+              {React.createElement(iconComponent, { className: 'w-7 h-7 text-[var(--color-brand-red)]' })}
             </div>
           </div>
 

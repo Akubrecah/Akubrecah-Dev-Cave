@@ -1,17 +1,15 @@
 'use client';
 
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import { Search, X, Filter, Star } from 'lucide-react';
 import { ToolGrid } from '@/components/pdf-tools/ToolGrid';
-import { ToolCard } from '@/components/pdf-tools/ToolCard';
 import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
 import { getAllTools, getToolsByCategory, getToolById } from '@/config/pdf-tools';
 import { toolMatchesQuery } from '@/lib/utils/search';
 import { type Locale } from '@/lib/i18n/config';
-import { CATEGORY_INFO, type ToolCategory } from '@/types/tool';
+import { type ToolCategory } from '@/types/tool';
 import { useFavorites } from '@/hooks/useFavorites';
 
 type CategoryFilter = ToolCategory | 'all' | 'favorites';
@@ -74,7 +72,7 @@ export default function ToolsPageClient({ locale, localizedToolContent }: ToolsP
     }
 
     return tools;
-  }, [allTools, selectedCategory, searchQuery, favorites]);
+  }, [allTools, selectedCategory, searchQuery, favorites, localizedToolContent]);
 
   // Category options
   const categories: { value: CategoryFilter; label: string; icon?: React.ReactNode }[] = [

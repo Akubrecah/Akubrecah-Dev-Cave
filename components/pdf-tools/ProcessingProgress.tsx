@@ -101,27 +101,17 @@ export const ProcessingProgress: React.FC<ProcessingProgressProps> = ({
   // Determine if we should show the cancel button
   const showCancel = onCancel && (status === 'uploading' || status === 'processing');
 
-  // Track previous status for announcements
-  const prevStatusRef = useRef(status);
-  const [announcement, setAnnouncement] = useState<string>('');
-
   // Update announcement when status changes
-  useEffect(() => {
-    if (prevStatusRef.current !== status) {
-      let nextAnnouncement = '';
-      if (status === 'complete') {
-        nextAnnouncement = `${statusText}. ${message || ''}`;
-      } else if (status === 'error') {
-        nextAnnouncement = `${statusText}. ${message || ''}`;
-      } else if (status === 'processing' || status === 'uploading') {
-        nextAnnouncement = statusText;
-      }
-      
-      if (nextAnnouncement) {
-        setAnnouncement(nextAnnouncement);
-      }
-      prevStatusRef.current = status;
+  const announcement = useMemo(() => {
+    let nextAnnouncement = '';
+    if (status === 'complete') {
+      nextAnnouncement = `${statusText}. ${message || ''}`;
+    } else if (status === 'error') {
+      nextAnnouncement = `${statusText}. ${message || ''}`;
+    } else if (status === 'processing' || status === 'uploading') {
+      nextAnnouncement = statusText;
     }
+    return nextAnnouncement;
   }, [status, statusText, message]);
 
   // Don't render if idle

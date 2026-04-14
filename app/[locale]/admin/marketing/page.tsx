@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Megaphone, Users, Globe, MousePointer2, PieChart, TrendingUp } from 'lucide-react';
+import { MousePointer2, TrendingUp } from 'lucide-react';
 import { AdminSidebar } from '../_components/AdminSidebar';
 import { AdminHeader } from '../_components/AdminHeader';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Cell, LineChart, Line } from 'recharts';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Cell } from 'recharts';
 
 export default function MarketingDashboard() {
   const [loading, setLoading] = useState(true);

@@ -1,17 +1,17 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  User, Mail, Camera, Shield, Zap, 
-  Palette, Sun, Moon, Monitor, Check,
-  ArrowLeft, Settings, Bell, Lock,
-  Globe, CreditCard, Sparkles
+  Shield, 
+  Sun, Moon, Monitor, Check,
+  ArrowLeft, Bell, Lock,
+  Sparkles, Palette, Globe
 } from 'lucide-react';
 import { UserProfile, useUser } from '@clerk/nextjs';
 import { useParams, useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { useTheme, type Theme } from '@/components/providers/ThemeProvider';
-import { Button } from '@/components/ui/Button';
 
 export default function ProfilePage() {
   const { user, isLoaded } = useUser();
@@ -75,11 +75,13 @@ export default function ProfilePage() {
               
               <div className="relative inline-block mb-6">
                 <div className="w-32 h-32 rounded-[2.5rem] overflow-hidden border-4 border-white/10 shadow-2xl mx-auto">
-                   <img 
-                    src={user?.imageUrl} 
-                    alt={user?.fullName || 'User'} 
-                    className="w-full h-full object-cover"
-                   />
+                    <Image 
+                      src={user?.imageUrl || ''} 
+                      alt={user?.fullName || 'User'} 
+                      width={128}
+                      height={128}
+                      className="w-full h-full object-cover"
+                    />
                 </div>
                 <div className="absolute -bottom-2 -right-2 p-3 bg-emerald-500 text-white rounded-2xl shadow-xl border-4 border-black">
                    <Shield size={16} />

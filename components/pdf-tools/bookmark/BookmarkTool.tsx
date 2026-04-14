@@ -28,6 +28,8 @@ const loadPdfjsLib = async () => {
   return pdfjsLib;
 };
 
+const generateId = () => `bm-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
 export interface BookmarkToolProps {
   className?: string;
 }
@@ -100,7 +102,7 @@ export function BookmarkTool({ className = '' }: BookmarkToolProps) {
       }
 
       const node: BookmarkNode = {
-        id: `bm-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        id: generateId(),
         title: item.title || 'Untitled',
         pageNumber,
         children: [],
@@ -216,7 +218,7 @@ export function BookmarkTool({ className = '' }: BookmarkToolProps) {
   // Add new bookmark at current page
   const handleAddBookmark = useCallback(() => {
     const newBookmark: BookmarkNode = {
-      id: `bm-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id: generateId(),
       title: `New Bookmark (Page ${currentPage})`,
       pageNumber: currentPage,
       children: [],
@@ -230,7 +232,7 @@ export function BookmarkTool({ className = '' }: BookmarkToolProps) {
   // Add child bookmark
   const handleAddChild = useCallback((parentId: string) => {
     const newChild: BookmarkNode = {
-      id: `bm-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id: generateId(),
       title: `New Bookmark (Page ${currentPage})`,
       pageNumber: currentPage,
       children: [],

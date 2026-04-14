@@ -2,12 +2,12 @@
 
 import React, { useState, useRef } from 'react';
 import { Mail, MessageSquare, Phone, Calendar, Clock, Globe, Send, Loader2, CheckCircle2 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
 import { useUser, Show, SignInButton } from '@clerk/nextjs';
 
 export default function Contact() {
-  const { user, isLoaded } = useUser();
+  const { user } = useUser();
   const [subject, setSubject] = useState('General Inquiry');
   const [message, setMessage] = useState('');
   const [status, setStatus] = useState<'IDLE' | 'SENDING' | 'SUCCESS' | 'ERROR'>('IDLE');

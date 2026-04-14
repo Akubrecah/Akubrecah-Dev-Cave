@@ -2,8 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { AuditCore } from '@/components/kra/AuditCore';
-import { ShieldCheck, ArrowLeft, Activity, FileText, Coins, CheckCircle2 } from 'lucide-react';
-import Link from 'next/navigation';
+import { ShieldCheck, ArrowLeft, FileText, Coins, CheckCircle2 } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 
 export default function AuditCorePage() {

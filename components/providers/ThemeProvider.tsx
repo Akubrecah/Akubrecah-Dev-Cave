@@ -18,7 +18,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const savedTheme = localStorage.getItem("akubreca-theme") as Theme;
     if (savedTheme) {
-      setThemeState(savedTheme);
+      setTimeout(() => setThemeState(savedTheme), 0);
     }
   }, []);
 

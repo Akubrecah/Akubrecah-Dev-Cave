@@ -44,7 +44,7 @@ export function SubscriptionBanner() {
   // Timer for Subscription duration
   useEffect(() => {
     if (!status?.subscriptionEnd) {
-      setSubscriptionTimeLeft(null);
+      setTimeout(() => setSubscriptionTimeLeft(null), 0);
       return;
     }
     const subscriptionEnd = new Date(status.subscriptionEnd).getTime();
@@ -53,7 +53,7 @@ export function SubscriptionBanner() {
       setSubscriptionTimeLeft(formatDistance(subscriptionEnd - Date.now()));
     };
     
-    updateTimer();
+    setTimeout(updateTimer, 0);
     const timer = setInterval(updateTimer, 1000);
     return () => clearInterval(timer);
   }, [status?.subscriptionEnd]);
@@ -80,7 +80,7 @@ export function SubscriptionBanner() {
       setRefreshTimeLeft(`${hours}h ${minutes}m ${seconds}s`);
     }
 
-    updateRefreshTimer();
+    setTimeout(updateRefreshTimer, 0);
     const timer = setInterval(updateRefreshTimer, 1000);
     return () => clearInterval(timer);
   }, [status]);

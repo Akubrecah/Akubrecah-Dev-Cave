@@ -33,17 +33,24 @@ interface UseUndoRedoReturn {
 
 const MAX_HISTORY_SIZE = 50;
 
+interface HistoryWrapper {
+    history: HistoryState[];
+    index: number;
+}
+
 /**
  * Custom hook for undo/redo functionality
  */
 export function useUndoRedo(): UseUndoRedoReturn {
-    const [historyIndex, setHistoryIndex] = useState(-1);
-    const [history, setHistory] = useState<HistoryState[]>([]);
+    const [state, setState] = useState<HistoryWrapper>({
+        history: [],
+        index: -1,
+    });
+    
     const isUndoRedoAction = useRef(false);
 
-    const canUndo = historyIndex > 0;
-    const canRedo = historyIndex < history.length - 1;
-
+    const canUndo = state.index > 0;
+    const canRedo = state.index < state.history.length - 1;
 
     /**
      * Push a new state to history
@@ -56,69 +63,77 @@ export function useUndoRedo(): UseUndoRedoReturn {
         }
 
         // Create a deep copy of the state
-        const state: HistoryState = {
+        const newState: HistoryState = {
             nodes: JSON.parse(JSON.stringify(nodes)),
             edges: JSON.parse(JSON.stringify(edges)),
         };
 
-        setHistory(prev => {
-            const nextHistory = historyIndex < prev.length - 1 
-                ? prev.slice(0, historyIndex + 1) 
-                : prev;
+        setState(prev => {
+            const nextHistory = prev.index < prev.history.length - 1 
+                ? prev.history.slice(0, prev.index + 1) 
+                : prev.history;
             
-            const updated = [...nextHistory, state];
-            return updated.length > MAX_HISTORY_SIZE ? updated.slice(1) : updated;
+            const updatedHistory = [...nextHistory, newState];
+            const finalHistory = updatedHistory.length > MAX_HISTORY_SIZE ? updatedHistory.slice(1) : updatedHistory;
+            
+            return {
+                history: finalHistory,
+                index: updatedHistory.length > MAX_HISTORY_SIZE ? MAX_HISTORY_SIZE - 1 : updatedHistory.length - 1,
+            };
         });
-
-        setHistoryIndex(prev => {
-            // We can't easily know history.length inside the functional update of another state 
-            // without being careful, but we know the new length will be min(historyIndex+2, MAX_HISTORY_SIZE).
-            // Actually, simply incrementing is fine if the call is valid.
-            return prev + 1;
-        });
-    }, [historyIndex]);
-
+    }, []);
 
     /**
      * Undo last action
      */
     const undo = useCallback((): HistoryState | null => {
-        if (!canUndo) return null;
-
-        isUndoRedoAction.current = true;
-        const newIndex = historyIndex - 1;
-        setHistoryIndex(newIndex);
-
-        return history[newIndex];
-    }, [canUndo, historyIndex, history]);
-
+        let result: HistoryState | null = null;
+        
+        setState(prev => {
+            if (prev.index <= 0) return prev;
+            
+            isUndoRedoAction.current = true;
+            const newIndex = prev.index - 1;
+            result = prev.history[newIndex];
+            
+            return { ...prev, index: newIndex };
+        });
+        
+        return result;
+    }, []);
 
     /**
      * Redo last undone action
      */
     const redo = useCallback((): HistoryState | null => {
-        if (!canRedo) return null;
-
-        isUndoRedoAction.current = true;
-        const newIndex = historyIndex + 1;
-        setHistoryIndex(newIndex);
-
-        return history[newIndex];
-    }, [canRedo, historyIndex, history]);
-
+        let result: HistoryState | null = null;
+        
+        setState(prev => {
+            if (prev.index >= prev.history.length - 1) return prev;
+            
+            isUndoRedoAction.current = true;
+            const newIndex = prev.index + 1;
+            result = prev.history[newIndex];
+            
+            return { ...prev, index: newIndex };
+        });
+        
+        return result;
+    }, []);
 
     /**
      * Clear all history
      */
     const clearHistory = useCallback(() => {
-        setHistory([]);
-        setHistoryIndex(-1);
+        setState({
+            history: [],
+            index: -1,
+        });
     }, []);
 
-
     return {
-        historyIndex,
-        historyLength: history.length,
+        historyIndex: state.index,
+        historyLength: state.history.length,
         canUndo,
         canRedo,
         pushHistory,
@@ -126,7 +141,6 @@ export function useUndoRedo(): UseUndoRedoReturn {
         redo,
         clearHistory,
     };
-
 }
 
 export default useUndoRedo;

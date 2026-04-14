@@ -53,7 +53,7 @@ export function ToolSidebar({ onDragStart, isCollapsed = false, onToggleCollapse
     };
 
     // Group tools by category
-    const categories: CategoryGroup[] = useMemo(() => {
+    const categories: CategoryGroup[] = (() => {
         const categoryMap: Record<string, typeof tools> = {};
 
         // Tools that require interactive UI and should be excluded from workflow
@@ -122,10 +122,10 @@ export function ToolSidebar({ onDragStart, isCollapsed = false, onToggleCollapse
                 icon: categoryIcons[cat],
                 tools: categoryMap[cat],
             }));
-    }, []);
+    })();
 
     // Filter tools based on search query
-    const filteredCategories = useMemo(() => {
+    const filteredCategories = (() => {
         if (!searchQuery.trim()) return categories;
 
         const query = searchQuery.toLowerCase();
@@ -141,7 +141,7 @@ export function ToolSidebar({ onDragStart, isCollapsed = false, onToggleCollapse
                 }),
             }))
             .filter(cat => cat.tools.length > 0);
-    }, [categories, searchQuery]);
+    })();
 
     const toggleCategory = (categoryId: string) => {
         setExpandedCategories(prev => {

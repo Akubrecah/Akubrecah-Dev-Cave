@@ -6,9 +6,28 @@ import { LifeBuoy, Clock, CheckCircle2, MessageSquare, AlertCircle } from 'lucid
 import { AdminSidebar } from '../_components/AdminSidebar';
 import { AdminHeader } from '../_components/AdminHeader';
 
+interface SupportTicket {
+  id: string;
+  user: string;
+  subject: string;
+  status: 'pending' | 'resolved';
+  date: string;
+}
+
+interface SupportStats {
+  open: number;
+  resolved: number;
+  total: number;
+  recent: SupportTicket[];
+}
+
+interface AdminStats {
+  supportStats: SupportStats;
+}
+
 export default function SupportDashboard() {
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<AdminStats | null>(null);
 
   useEffect(() => {
     fetch('/api/admin/stats')
@@ -114,7 +133,7 @@ export default function SupportDashboard() {
                       <button className="text-[10px] font-black text-sky-500 uppercase tracking-widest hover:text-sky-400 transition-colors">Resolve All Items</button>
                    </div>
                    <div className="space-y-4">
-                      {support.recent.map((ticket: any, i: number) => (
+                      {support.recent.map((ticket: SupportTicket, i: number) => (
                          <div key={i} className="p-5 rounded-2xl bg-white/[0.02] border border-white/5 flex items-center justify-between group hover:border-sky-500/20 transition-all">
                             <div className="flex items-center gap-4 overflow-hidden">
                                <div className={`p-2 rounded-lg ${ticket.status === 'pending' ? 'bg-[#F5C200]/10' : 'bg-emerald-500/10'}`}>

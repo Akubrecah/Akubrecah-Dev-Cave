@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Activity, DollarSign, Users, TrendingUp, BarChart3, Globe } from 'lucide-react';
+import { Activity, DollarSign, Users, BarChart3 } from 'lucide-react';
 import { AdminSidebar } from '../_components/AdminSidebar';
 import { AdminHeader } from '../_components/AdminHeader';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';

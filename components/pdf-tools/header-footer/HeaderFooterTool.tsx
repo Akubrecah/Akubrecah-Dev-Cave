@@ -167,7 +167,7 @@ export function HeaderFooterTool({ className = '' }: HeaderFooterToolProps) {
   };
 
   // Load PDF and generate preview
-  const loadPdfPreview = useCallback(async (pdfFile: File) => {
+  const loadPdfPreview = async (pdfFile: File) => {
     try {
       const pdfjsLib = await loadPdfjsLib();
       const arrayBuffer = await pdfFile.arrayBuffer();
@@ -177,7 +177,7 @@ export function HeaderFooterTool({ className = '' }: HeaderFooterToolProps) {
     } catch (err) {
       console.error('Failed to load PDF preview:', err);
     }
-  }, []);
+  };
 
   // Re-render preview when options change
   useEffect(() => {
@@ -192,14 +192,14 @@ export function HeaderFooterTool({ className = '' }: HeaderFooterToolProps) {
     }
   }, [file, headerLeft, headerCenter, headerRight, footerLeft, footerCenter, footerRight, fontSize, fontColor, margin, skipFirstPage, pageRange, currentPreviewPage, totalPages]);
 
-  const handleFilesSelected = useCallback((files: File[]) => {
+  const handleFilesSelected = (files: File[]) => {
     if (files.length > 0) {
       setFile(files[0]);
       setError(null);
       setResult(null);
       loadPdfPreview(files[0]);
     }
-  }, [loadPdfPreview]);
+  };
 
   const handleClearFile = useCallback(() => {
     setFile(null);

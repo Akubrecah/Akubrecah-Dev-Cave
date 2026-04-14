@@ -144,7 +144,7 @@ function ToolHeader({ tool, content }: ToolHeaderProps) {
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
 
-  const Icon = getToolIcon(tool.icon);
+  const iconComponent = getToolIcon(tool.icon);
 
   return (
     <header className="text-center" data-testid="tool-page-header" itemScope itemType="https://schema.org/SoftwareApplication">
@@ -157,7 +157,7 @@ function ToolHeader({ tool, content }: ToolHeaderProps) {
         className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-[hsl(var(--color-primary)/0.1)] to-[hsl(var(--color-accent)/0.1)] mb-4 shadow-inner"
         aria-hidden="true"
       >
-        <Icon className="w-8 h-8 text-[hsl(var(--color-primary))]" />
+        {React.createElement(iconComponent, { className: 'w-8 h-8 text-[hsl(var(--color-primary))]' })}
       </div>
       <h1
         className="text-3xl font-bold text-[hsl(var(--color-foreground))] mb-2"
@@ -447,7 +447,7 @@ function RelatedToolItem({ tool, locale, name, category }: {
     name: string; 
     category: string;
 }) {
-    const IconComponent = getToolIcon(tool.icon);
+    const iconComponent = getToolIcon(tool.icon);
     return (
         <a
             href={`/${locale}/pdf-tools/${tool.slug}`}
@@ -459,7 +459,7 @@ function RelatedToolItem({ tool, locale, name, category }: {
                         className="flex-shrink-0 w-12 h-12 rounded-xl bg-[hsl(var(--color-primary)/0.1)] flex items-center justify-center group-hover:bg-[hsl(var(--color-primary))] transition-colors duration-300"
                         aria-hidden="true"
                     >
-                        <IconComponent className="w-6 h-6 text-[hsl(var(--color-primary))] group-hover:text-white transition-colors duration-300" />
+                        {React.createElement(iconComponent, { className: 'w-6 h-6 text-[hsl(var(--color-primary))] flex-shrink-0 group-hover:text-white transition-colors duration-300' })}
                     </div>
                     <div>
                         <span className="font-semibold text-[hsl(var(--color-foreground))] block mb-1">

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { NilReturnForm } from '@/components/kra/NilReturnForm';
-import { Activity, ArrowLeft, ShieldCheck, Sparkles } from 'lucide-react';
+import { ArrowLeft, Sparkles } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 
 export default function NilReturnPage() {

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ShieldCheck, FileCheck2, Activity, ArrowRight, Sparkles } from 'lucide-react';
+import { FileCheck2, Activity, ArrowRight, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 

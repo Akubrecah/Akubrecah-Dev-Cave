@@ -162,7 +162,7 @@ function WorkflowEditorContent() {
         if (nodes.length > 0 || edges.length > 0) {
             pushHistory(nodes as WorkflowNode[], edges as WorkflowEdge[]);
         }
-    }, [nodesSnapshot, edgesSnapshot]);
+    }, [nodesSnapshot, edgesSnapshot, pushHistory, nodes, edges]);
 
     // Keyboard shortcuts for undo/redo
     useEffect(() => {
@@ -187,7 +187,7 @@ function WorkflowEditorContent() {
 
         document.addEventListener('keydown', handleKeyDown);
         return () => document.removeEventListener('keydown', handleKeyDown);
-    }, [canUndo, canRedo]);
+    }, [canUndo, canRedo, handleUndo, handleRedo]);
 
     // Validation
     const validation = useMemo(() => {

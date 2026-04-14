@@ -2,14 +2,34 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Wallet, TrendingUp, ArrowDownRight, ArrowUpRight, Receipt, Landmark } from 'lucide-react';
+import { TrendingUp, ArrowDownRight, ArrowUpRight, Receipt, Landmark } from 'lucide-react';
 import { AdminSidebar } from '../_components/AdminSidebar';
 import { AdminHeader } from '../_components/AdminHeader';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 
+interface RevenueTrendItem {
+  date: string;
+  revenue: number;
+}
+
+interface TransactionLedgerItem {
+  id: string;
+  desc: string;
+  amount: string;
+  type: 'credit' | 'debit';
+  date: string;
+  user: string;
+}
+
+interface FinancialStats {
+  totalRevenue: number;
+  dailyRevenueTrend: RevenueTrendItem[];
+  recentTransactions: TransactionLedgerItem[];
+}
+
 export default function FinancialDashboard() {
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<FinancialStats | null>(null);
 
   useEffect(() => {
     fetch('/api/admin/stats')
@@ -31,10 +51,9 @@ export default function FinancialDashboard() {
   const totalRevenue = stats?.totalRevenue || 0;
   // Simulated expenses for the P&L visualization (Real data would need an Expenses table)
   const opEx = Math.round(totalRevenue * 0.15); // Assuming 15% platform fee/hosting
-  const netProfit = totalRevenue - opEx;
 
   // Map real dailyRevenueTrend to P&L format
-  const pnlData = (stats?.dailyRevenueTrend || []).map((day: any) => ({
+  const pnlData = (stats?.dailyRevenueTrend || []).map((day: RevenueTrendItem) => ({
     name: day.date,
     revenue: day.revenue,
     expenses: Math.round(day.revenue * 0.15),
@@ -136,7 +155,7 @@ export default function FinancialDashboard() {
                        Ledger Feed <Receipt className="w-4 h-4 text-amber-500/50" />
                     </h3>
                     <div className="flex-1 space-y-4">
-                      {stats?.recentTransactions?.slice(0, 5).map((tx: any, i: number) => (
+                      {stats?.recentTransactions?.slice(0, 5).map((tx: TransactionLedgerItem, i: number) => (
                         <div key={i} className="flex items-center justify-between p-4 rounded-xl bg-white/[0.02] border border-white/5 group hover:border-amber-500/20 transition-all font-sans">
                            <div className="overflow-hidden">
                               <p className="text-sm font-bold text-white truncate">{tx.user}</p>
