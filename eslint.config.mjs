@@ -16,6 +16,9 @@ const eslintConfig = defineConfig([
     "public/**",
     // One-off test/utility scripts using CommonJS require()
     "test-html2pdf.js",
+    "test-kra.js",
+    "fix_canvas.js",
+    "fix_canvas_syntax.js",
     "scripts/*.js",
     "lib/pdf/receipt-template.ts",
   ]),
@@ -44,7 +47,7 @@ const eslintConfig = defineConfig([
       // Anonymous default exports in utility files — warn, not error.
       "import/no-anonymous-default-export": "warn",
 
-      // @ts-ignore is disallowed; @ts-expect-error is preferred.
+      // ts-ignore is disallowed; ts-expect-error is preferred.
       "@typescript-eslint/ban-ts-comment": [
         "error",
         { "ts-ignore": "allow-with-description", "ts-expect-error": "allow-with-description" },

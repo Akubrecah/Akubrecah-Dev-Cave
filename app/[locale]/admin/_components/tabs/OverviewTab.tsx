@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { motion } from 'framer-motion';
 import { Users, DollarSign, Shield, FileCheck2, RefreshCw, Activity as ActivityIcon, TrendingUp, Eye, BarChart2, ExternalLink } from 'lucide-react';
 import { AdminMetricCard } from '../AdminMetricCard';

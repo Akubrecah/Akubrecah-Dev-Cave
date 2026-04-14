@@ -13,7 +13,6 @@ import {
   Layers, 
   Cloud,
   ChevronRight,
-  Sparkles,
   Command
 } from 'lucide-react';
 
