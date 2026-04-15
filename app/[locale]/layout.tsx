@@ -39,10 +39,10 @@ export default async function LocaleLayout({
   // Get direction for the locale
   const direction = localeConfig[locale as Locale]?.direction || 'ltr';
 
-  // Fetch active notifications
+  // Fetch active notifications with a tight timeout to prevent build-time hangs
   let activeNotifications: any[] = [];
   try {
-    const rawNotifications = await (prisma as any).notification?.findMany({
+    const fetchNotifications = (prisma as any).notification?.findMany({
       where: { active: true },
       select: {
         id: true,
@@ -56,6 +56,10 @@ export default async function LocaleLayout({
       },
       orderBy: { createdAt: 'desc' }
     });
+    const timeout = new Promise<null>((_, reject) =>
+      setTimeout(() => reject(new Error('DB timeout')), 3000)
+    );
+    const rawNotifications = await Promise.race([fetchNotifications, timeout]);
     if (rawNotifications) {
       activeNotifications = rawNotifications;
     }

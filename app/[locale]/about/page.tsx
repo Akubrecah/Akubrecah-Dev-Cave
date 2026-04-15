@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { ShieldCheck, Target, Zap, Search } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
 
 export default function About() {
   const values = [
