@@ -453,7 +453,7 @@ export default function AdminDashboard() {
       const { generateKraPdf } = await import('@/lib/pdf/generate-kra-pdf');
       const filename = `RE_DOWNLOAD_KRA_PIN_${cert.kraPin}.pdf`;
       
-      const pdfBytes = await generateKraPdf(cert.details);
+      const pdfBytes = await generateKraPdf(cert.details as import('@/lib/pdf/generate-kra-pdf').KraPdfData);
       
       const blob = new Blob([pdfBytes as any], { type: 'application/pdf' });
       const link = document.createElement('a');
