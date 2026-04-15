@@ -125,7 +125,7 @@ export function ToolSidebar({ onDragStart, isCollapsed = false, onToggleCollapse
     })();
 
     // Filter tools based on search query
-    const filteredCategories = (() => {
+    const filteredCategories = useMemo((): CategoryGroup[] => {
         if (!searchQuery.trim()) return categories;
 
         const query = searchQuery.toLowerCase();

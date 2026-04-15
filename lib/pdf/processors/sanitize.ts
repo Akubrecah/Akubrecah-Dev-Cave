@@ -159,7 +159,7 @@ export class SanitizePDFProcessor extends BasePDFProcessor {
         } catch (e) {
           // Try to remove AcroForm if flatten fails
           try {
-            const catalogDict = pdfDoc.catalog.dict;
+            const catalogDict = (pdfDoc.catalog as any).dict;
             if (catalogDict.has(PDFName.of('AcroForm'))) {
               catalogDict.delete(PDFName.of('AcroForm'));
               removedItems.push('form fields');
@@ -176,9 +176,9 @@ export class SanitizePDFProcessor extends BasePDFProcessor {
       if (sanitizeOptions.removeMetadata) {
         try {
           // Clear info dict
-          const infoDict = pdfDoc.getInfoDict();
+          const infoDict = (pdfDoc as any).getInfoDict();
           const allKeys = infoDict.keys();
-          allKeys.forEach((key) => {
+          allKeys.forEach((key: unknown) => {
             infoDict.delete(key);
           });
 
@@ -191,7 +191,7 @@ export class SanitizePDFProcessor extends BasePDFProcessor {
 
           // Remove XMP metadata
           try {
-            const catalogDict = pdfDoc.catalog.dict;
+            const catalogDict = (pdfDoc.catalog as any).dict;
             if (catalogDict.has(PDFName.of('Metadata'))) {
               catalogDict.delete(PDFName.of('Metadata'));
             }
@@ -225,7 +225,7 @@ export class SanitizePDFProcessor extends BasePDFProcessor {
       // Remove JavaScript
       if (sanitizeOptions.removeJavaScript) {
         try {
-          const catalogDict = pdfDoc.catalog.dict;
+          const catalogDict = (pdfDoc.catalog as any).dict;
 
           // Remove from Names/JavaScript
           const namesRef = catalogDict.get(PDFName.of('Names'));
@@ -274,7 +274,7 @@ export class SanitizePDFProcessor extends BasePDFProcessor {
       // Remove embedded files/attachments
       if (sanitizeOptions.removeAttachments) {
         try {
-          const catalogDict = pdfDoc.catalog.dict;
+          const catalogDict = (pdfDoc.catalog as any).dict;
 
           // Remove from Names/EmbeddedFiles
           const namesRef = catalogDict.get(PDFName.of('Names'));

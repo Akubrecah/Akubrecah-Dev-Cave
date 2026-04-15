@@ -6,6 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import { Search, X, Filter, Star } from 'lucide-react';
 import { ToolGrid } from '@/components/pdf-tools/ToolGrid';
 import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
 import { getAllTools, getToolsByCategory, getToolById } from '@/config/pdf-tools';
 import { toolMatchesQuery } from '@/lib/utils/search';
 import { type Locale } from '@/lib/i18n/config';

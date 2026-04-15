@@ -164,6 +164,28 @@ function WorkflowEditorContent() {
         }
     }, [nodesSnapshot, edgesSnapshot, pushHistory, nodes, edges]);
 
+    /**
+     * Handle undo
+     */
+    const handleUndo = useCallback(() => {
+        const state = undo();
+        if (state) {
+            setNodes(state.nodes);
+            setEdges(state.edges as Edge[]);
+        }
+    }, [undo, setNodes, setEdges]);
+
+    /**
+     * Handle redo
+     */
+    const handleRedo = useCallback(() => {
+        const state = redo();
+        if (state) {
+            setNodes(state.nodes);
+            setEdges(state.edges as Edge[]);
+        }
+    }, [redo, setNodes, setEdges]);
+
     // Keyboard shortcuts for undo/redo
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -193,28 +215,6 @@ function WorkflowEditorContent() {
     const validation = useMemo(() => {
         return validateWorkflow(nodes as WorkflowNode[], edges as WorkflowEdge[]);
     }, [nodes, edges]);
-
-    /**
-     * Handle undo
-     */
-    const handleUndo = useCallback(() => {
-        const state = undo();
-        if (state) {
-            setNodes(state.nodes);
-            setEdges(state.edges as Edge[]);
-        }
-    }, [undo, setNodes, setEdges]);
-
-    /**
-     * Handle redo
-     */
-    const handleRedo = useCallback(() => {
-        const state = redo();
-        if (state) {
-            setNodes(state.nodes);
-            setEdges(state.edges as Edge[]);
-        }
-    }, [redo, setNodes, setEdges]);
 
     /**
      * Handle connecting nodes

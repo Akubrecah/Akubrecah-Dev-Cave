@@ -673,7 +673,7 @@ export class EmailToPDFProcessor extends BasePDFProcessor {
 
             // Prepare attachments for embedding (only non-inline attachments)
             const attachmentsToEmbed = email.attachments
-                .filter(att => !att.isInline && att.content)
+                .filter((att): att is EmailAttachment & { content: ArrayBuffer } => !att.isInline && att.content !== undefined)
                 .map(att => ({
                     filename: att.filename,
                     contentType: att.contentType,
