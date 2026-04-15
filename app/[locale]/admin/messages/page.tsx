@@ -3,7 +3,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  MessageSquare, Search, ChevronRight, RefreshCw
+  MessageSquare, Search, ChevronRight, RefreshCw,
+  Mail, User, CheckCircle2, Loader2, Send, AlertCircle
 } from 'lucide-react';
 import { AdminHeader } from '../_components/AdminHeader';
 import { AdminSidebar } from '../_components/AdminSidebar';
