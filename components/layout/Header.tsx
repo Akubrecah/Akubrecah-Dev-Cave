@@ -268,7 +268,7 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
 
     return (
         <header
-            className={`fixed ${hasMarquee ? 'top-10' : 'top-0'} z-50 w-full transition-all duration-300 ${scrolled
+            className={`fixed top-0 z-50 w-full transition-[top] duration-300 ${scrolled
                 ? 'bg-background/90 backdrop-blur-md border-b border-border shadow-sm'
                 : 'bg-background border-b border-border/50'
                 }`}

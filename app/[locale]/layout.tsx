@@ -5,10 +5,9 @@ import { locales, Locale, localeConfig } from '@/lib/i18n/config';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { AlertBanner } from '@/components/layout/AlertBanner';
-import { MarqueeBanner } from '@/components/layout/MarqueeBanner';
+import { MarqueeBannerLoader } from '@/components/layout/MarqueeBannerLoader';
 import { Analytics } from "@vercel/analytics/next";
 import Script from 'next/script';
-import prisma from '@/lib/prisma';
 import { UserActivityTracker } from '@/components/analytics/UserActivityTracker';
 import { SubscriptionBanner } from '@/components/layout/SubscriptionBanner';
 
@@ -39,48 +38,15 @@ export default async function LocaleLayout({
   // Get direction for the locale
   const direction = localeConfig[locale as Locale]?.direction || 'ltr';
 
-  // Fetch active notifications with a tight timeout to prevent build-time hangs
-  let activeNotifications: any[] = [];
-  try {
-    const fetchNotifications = (prisma as any).notification?.findMany({
-      where: { active: true },
-      select: {
-        id: true,
-        message: true,
-        type: true,
-        theme: true,
-        active: true,
-        createdAt: true,
-        updatedAt: true,
-        speed: true,
-      },
-      orderBy: { createdAt: 'desc' }
-    });
-    const timeout = new Promise<null>((_, reject) =>
-      setTimeout(() => reject(new Error('DB timeout')), 3000)
-    );
-    const rawNotifications = await Promise.race([fetchNotifications, timeout]);
-    if (rawNotifications) {
-      activeNotifications = rawNotifications;
-    }
-  } catch (error) {
-    console.warn('Failed to fetch notifications (this is expected during build if DB is unreachable):', error);
-  }
-
-  const marquee = activeNotifications.find((n: any) => n.type === 'marquee');
-  const hasMarquee = !!marquee;
-
   return (
     <NextIntlClientProvider messages={messages}>
       <UserActivityTracker />
       <div lang={locale} dir={direction} className="flex flex-col min-h-screen overflow-x-hidden">
-        {marquee && (
-          <MarqueeBanner message={marquee.message} theme={marquee.theme} speed={marquee.speed} />
-        )}
+        <MarqueeBannerLoader />
         <SubscriptionBanner />
         <div className="flex-1 flex flex-col">
-          <Header locale={locale as Locale} hasMarquee={hasMarquee} />
-          <main className={`flex-1 transition-all duration-500 ${hasMarquee ? 'pt-[160px]' : 'pt-[110px]'}`}>
+          <Header locale={locale as Locale} hasMarquee={false} />
+          <main className="flex-1 transition-all duration-500 pt-[110px]">
             {children}
           </main>
           <Footer locale={locale as Locale} />

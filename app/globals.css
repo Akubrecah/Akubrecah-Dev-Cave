@@ -327,3 +327,12 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 1rem;
 }
+
+/* Marquee banner offset — applied when MarqueeBannerLoader detects an active marquee */
+html.has-marquee header {
+  top: 2.5rem; /* 40px = h-10 */
+}
+
+html.has-marquee main {
+  padding-top: 160px;
+}
