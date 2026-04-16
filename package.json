@@ -5,9 +5,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",
-    "postbuild": "python3 .agent/scripts/verify_all.py .",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "verify": "python3 .agent/scripts/verify_all.py . --url"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.0.4",
