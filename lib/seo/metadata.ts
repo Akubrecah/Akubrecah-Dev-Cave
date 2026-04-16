@@ -287,6 +287,45 @@ export function generateTermsMetadata(locale: Locale, translations?: { title: st
 }
 
 /**
+ * Generate metadata for the PDF Lab (Workflow Editor)
+ */
+export function generatePdfLabMetadata(locale: Locale, translations?: { title: string; description: string }): Metadata {
+  return generateBaseMetadata({
+    locale,
+    path: '/pdf-lab',
+    title: translations?.title || 'PDF Lab - Workflow Automation',
+    description: translations?.description || `Automate your PDF tasks with our visual workflow editor. Combine, transform, and process multiple documents in one seamless sequence.`,
+    keywords: ['PDF lab', 'workflow automation', 'PDF editor', 'visual programming', 'document processing'],
+  });
+}
+
+/**
+ * Generate metadata for the cookies policy page
+ */
+export function generateCookiesMetadata(locale: Locale, translations?: { title: string; description: string }): Metadata {
+  return generateBaseMetadata({
+    locale,
+    path: '/cookies',
+    title: translations?.title || 'Cookie Policy',
+    description: translations?.description || `Learn about how ${siteConfig.name} uses cookies to improve your document management experience and ensure secure transactions.`,
+    keywords: ['cookies', 'tracking', 'privacy', 'security'],
+  });
+}
+
+/**
+ * Generate metadata for the TSC resources hub
+ */
+export function generateTscMetadata(locale: Locale, translations?: { title: string; description: string }): Metadata {
+  return generateBaseMetadata({
+    locale,
+    path: '/tsc',
+    title: translations?.title || 'TSC Teacher Portal & Resources',
+    description: translations?.description || `Access essential Teachers Service Commission (TSC) documents, administrative forms, and digital resource protocols for verified Kenyan educators.`,
+    keywords: ['TSC', 'teachers portal', 'Kenya teachers', 'educational resources', 'TSC forms'],
+  });
+}
+
+/**
  * Convert locale to Open Graph locale format
  */
 export function getOpenGraphLocale(locale: Locale): string {

@@ -1,11 +1,23 @@
-'use client';
-
-import React from 'react';
-import { Target, ExternalLink, ShieldCheck, Settings, PieChart } from 'lucide-react';
-import Link from 'next/link';
+import { Metadata } from 'next';
+import { setRequestLocale } from 'next-intl/server';
+import { Target } from 'lucide-react';
 import { LegalLayout, LegalSection } from '@/components/layout/LegalLayout';
+import { Locale } from '@/lib/i18n/config';
+import { generateCookiesMetadata } from '@/lib/seo/metadata';
+import Link from 'next/link';
+import { ExternalLink, ShieldCheck, Settings, PieChart } from 'lucide-react';
 
-export default function CookiesPage() {
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  return generateCookiesMetadata(locale as Locale);
+}
+
+export default async function CookiesPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  
+  // Enable static rendering
+  setRequestLocale(locale);
+
   const sections = [
     { id: 'what-are-cookies', title: 'What Are Cookies?' },
     { id: 'how-we-use-cookies', title: 'How We Use Cookies' },
@@ -152,17 +164,17 @@ export default function CookiesPage() {
         </p>
         <p><strong>Browser-Specific Instructions:</strong></p>
         <div className="flex flex-wrap gap-4 mt-4">
-          <Link href="https://support.google.com/chrome/answer/95647" className="text-primary hover:underline flex items-center gap-2 text-[9px] font-black uppercase tracking-widest bg-primary/10 px-3 py-2 rounded-xl border border-primary/20">
+          <Link href="https://support.google.com/chrome/answer/95647" target="_blank" className="text-primary hover:underline flex items-center gap-2 text-[9px] font-black uppercase tracking-widest bg-primary/10 px-3 py-2 rounded-xl border border-primary/20">
             Chrome <ExternalLink size={10} />
           </Link>
-          <Link href="https://support.apple.com/en-ie/guide/safari/sfri11471/mac" className="text-primary hover:underline flex items-center gap-2 text-[9px] font-black uppercase tracking-widest bg-primary/10 px-3 py-2 rounded-xl border border-primary/20">
+          <Link href="https://support.apple.com/en-ie/guide/safari/sfri11471/mac" target="_blank" className="text-primary hover:underline flex items-center gap-2 text-[9px] font-black uppercase tracking-widest bg-primary/10 px-3 py-2 rounded-xl border border-primary/20">
             Safari <ExternalLink size={10} />
           </Link>
-          <Link href="https://support.mozilla.org/en-US/kb/enhanced-tracking-protection-firefox-desktop" className="text-primary hover:underline flex items-center gap-2 text-[9px] font-black uppercase tracking-widest bg-primary/10 px-3 py-2 rounded-xl border border-primary/20">
+          <Link href="https://support.mozilla.org/en-US/kb/enhanced-tracking-protection-firefox-desktop" target="_blank" className="text-primary hover:underline flex items-center gap-2 text-[9px] font-black uppercase tracking-widest bg-primary/10 px-3 py-2 rounded-xl border border-primary/20">
             Firefox <ExternalLink size={10} />
           </Link>
         </div>
-        <p className="mt-8 p-4 rounded-xl bg-warning/10 border border-warning/20 text-warning-foreground text-[10px] font-bold uppercase tracking-widest leading-relaxed">
+        <p className="mt-8 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[10px] font-bold uppercase tracking-widest leading-relaxed">
           Warning: If you choose to disable all cookies, you will not be able to log in to your account or access premium PDF tool features.
         </p>
       </LegalSection>
