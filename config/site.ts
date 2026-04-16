@@ -4,7 +4,7 @@
 export const siteConfig = {
   name: 'Akubrecah',
   description: 'Your Professional KRA Compliance & PDF Mastery Suite. Verify KRA PINs and access 88+ powerful, private PDF tools locally in your browser.',
-  url: 'https://akubrecahdevcave.vercel.app/',
+  url: 'https://akubrecah.vercel.app/',
   ogImage: '/images/og-image.png',
   links: {
     github: 'https://github.com/AkubrecaH',
