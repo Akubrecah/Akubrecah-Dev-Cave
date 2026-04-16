@@ -248,6 +248,45 @@ export function generateContactMetadata(locale: Locale, translations?: { title: 
 }
 
 /**
+ * Generate metadata for the pricing page
+ */
+export function generatePricingMetadata(locale: Locale, translations?: { title: string; description: string }): Metadata {
+  return generateBaseMetadata({
+    locale,
+    path: '/pricing',
+    title: translations?.title || 'Service Plans & Pricing',
+    description: translations?.description || `Affordable KRA compliance and PDF tools. Choose the right plan for your professional needs. Instant activation.`,
+    keywords: ['pricing', 'plans', 'KRA filing fee', 'PDF tools price'],
+  });
+}
+
+/**
+ * Generate metadata for the KRA solutions hub
+ */
+export function generateKRASolutionsMetadata(locale: Locale, translations?: { title: string; description: string }): Metadata {
+  return generateBaseMetadata({
+    locale,
+    path: '/kra-solutions',
+    title: translations?.title || 'KRA Compliance Solutions',
+    description: translations?.description || `Verify KRA PINs, file Nil Returns, and manage your tax compliance with AkubrecaH's specialized Kenyan tax tools.`,
+    keywords: ['KRA', 'PIN verification', 'Nil Return', 'Kenya revenue authority', 'compliance'],
+  });
+}
+
+/**
+ * Generate metadata for the terms of service page
+ */
+export function generateTermsMetadata(locale: Locale, translations?: { title: string; description: string }): Metadata {
+  return generateBaseMetadata({
+    locale,
+    path: '/terms',
+    title: translations?.title || 'Terms of Service',
+    description: translations?.description || `Terms and conditions for using ${siteConfig.name} services. Professional document and compliance management guidelines.`,
+    keywords: ['terms', 'legal', 'service agreement'],
+  });
+}
+
+/**
  * Convert locale to Open Graph locale format
  */
 export function getOpenGraphLocale(locale: Locale): string {

@@ -51,8 +51,7 @@ export const metadata = {
     creator: siteConfig.seo.twitterHandle,
   },
   verification: {
-    // PASTE YOUR GOOGLE SEARCH CONSOLE VERIFICATION CODE HERE
-    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || "your_google_verification_code_here",
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
   },
   icons: {
     icon: [

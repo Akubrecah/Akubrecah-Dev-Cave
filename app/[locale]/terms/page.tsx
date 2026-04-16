@@ -1,10 +1,21 @@
-'use client';
-
-import React from 'react';
+import { Metadata } from 'next';
+import { setRequestLocale } from 'next-intl/server';
 import { Shield } from 'lucide-react';
 import { LegalLayout, LegalSection } from '@/components/layout/LegalLayout';
+import { Locale } from '@/lib/i18n/config';
+import { generateTermsMetadata } from '@/lib/seo/metadata';
 
-export default function TermsPage() {
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  return generateTermsMetadata(locale as Locale);
+}
+
+export default async function TermsPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  
+  // Enable static rendering
+  setRequestLocale(locale);
+
   const sections = [
     { id: 'acceptance', title: 'Acceptance of Terms' },
     { id: 'accounts', title: 'User Accounts' },

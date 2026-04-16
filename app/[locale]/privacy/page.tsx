@@ -1,10 +1,21 @@
-'use client';
-
-import React from 'react';
+import { Metadata } from 'next';
+import { setRequestLocale } from 'next-intl/server';
 import { Lock } from 'lucide-react';
 import { LegalLayout, LegalSection } from '@/components/layout/LegalLayout';
+import { Locale } from '@/lib/i18n/config';
+import { generatePrivacyMetadata } from '@/lib/seo/metadata';
 
-export default function PrivacyPage() {
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  return generatePrivacyMetadata(locale as Locale);
+}
+
+export default async function PrivacyPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  
+  // Enable static rendering
+  setRequestLocale(locale);
+
   const sections = [
     { id: 'data-collection', title: 'Data Collection' },
     { id: 'processing-basis', title: 'Processing Basis' },

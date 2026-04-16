@@ -1,11 +1,21 @@
-'use client';
-
+import { Metadata } from 'next';
+import { setRequestLocale } from 'next-intl/server';
 import Link from 'next/link';
 import { ShieldCheck, Target, Zap, Search } from 'lucide-react';
+import { Locale } from '@/lib/i18n/config';
+import { generateAboutMetadata } from '@/lib/seo/metadata';
 
-export const dynamic = 'force-dynamic';
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  return generateAboutMetadata(locale as Locale);
+}
 
-export default function About() {
+export default async function About({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  
+  // Enable static rendering
+  setRequestLocale(locale);
+
   const values = [
     {
       icon: <ShieldCheck className="text-green-500" />,
@@ -100,15 +110,15 @@ export default function About() {
             <h2 className="text-4xl font-bold text-white mb-6">Ready to streamline your workflow?</h2>
             <p className="text-[#BEA0A0] text-xl mb-12">Join the growing community of professionals in Kenya.</p>
             <div className="flex flex-col sm:flex-row justify-center gap-6">
-              <Link href="/dashboard" className="btn-primary px-12 py-5 text-xl group">
+              <Link href={`/${locale}/dashboard`} className="btn-primary px-12 py-5 text-xl group">
                 Verify KRA PIN <Search className="inline-block ml-2 group-hover:translate-x-1 transition-transform" />
               </Link>
-              <Link href="/pdf-tools" className="inline-flex items-center justify-center rounded-xl px-12 py-5 text-xl font-semibold text-white border border-white/20 hover:bg-white/10 transition-all">
+              <Link href={`/${locale}/pdf-tools`} className="inline-flex items-center justify-center rounded-xl px-12 py-5 text-xl font-semibold text-white border border-white/20 hover:bg-white/10 transition-all">
                 Browse PDF Tools
               </Link>
             </div>
           </div>
-          <Link href="/contact" className="text-[#BEA0A0] hover:text-white transition-colors underline underline-offset-4">
+          <Link href={`/${locale}/contact`} className="text-[#BEA0A0] hover:text-white transition-colors underline underline-offset-4">
             Need custom enterprise solutions? Contact us.
           </Link>
         </div>

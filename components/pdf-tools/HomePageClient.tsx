@@ -1,5 +1,3 @@
-'use client';
-
 import { 
   ArrowRight, Search, ShieldCheck, Zap, Sparkles,
   Clock, FileCheck, Users, Lock, Globe, FileText, Scissors, 
@@ -7,10 +5,10 @@ import {
 } from 'lucide-react';
 import React from 'react';
 import Link from 'next/link';
-import { useAuth } from '@clerk/nextjs';
 import { Card } from '@/components/ui/Card';
 import { type Locale } from '@/lib/i18n/config';
 import FAQSection from '@/components/home/FAQSection';
+import { HomeAuthButtons, HomeAuthCTA } from '@/components/home/HomeAuthButtons';
 
 interface HomePageClientProps {
   locale: Locale;
@@ -18,8 +16,6 @@ interface HomePageClientProps {
 }
 
 export default function HomePageClient({ locale }: HomePageClientProps) {
-  const { isSignedIn } = useAuth();
-
   // KRA Features
   const features = [
     {
@@ -132,19 +128,7 @@ export default function HomePageClient({ locale }: HomePageClientProps) {
             <p className="text-base sm:text-xl text-[#E8D5D5] mb-8 sm:mb-12 max-w-[550px] leading-relaxed font-sans">
               Instantly verify KRA PINs and master your documents with 88+ professional PDF tools. Professional precision meets lightning-fast speed.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 items-center">
-              <div className="flex flex-col gap-2 w-full sm:w-auto">
-                <Link href={isSignedIn ? `/${locale}/dashboard` : `/${locale}/sign-in`} className="btn-primary text-base px-8 py-4 flex items-center justify-center gap-2 group shadow-[0_0_20px_rgba(31,111,91,0.3)]">
-                  <Search size={20} /> Verify KRA PIN <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-                </Link>
-                <p className="text-[10px] text-white/40 text-center uppercase tracking-widest font-bold">
-                  Free Daily Lookups • Secure
-                </p>
-              </div>
-              <Link href={`/${locale}/pdf-tools`} className="inline-flex items-center justify-center rounded-xl px-8 py-4 text-base font-semibold tracking-wide text-white bg-white/5 border border-white/20 hover:bg-white/10 hover:border-white/40 transition-all duration-300 gap-2 w-full sm:w-auto">
-                <FileText size={20} /> Explore 88+ PDF Tools
-              </Link>
-            </div>
+            <HomeAuthButtons locale={locale} />
           </div>
 
           {/* Combined Preview Card */}
@@ -261,6 +245,9 @@ export default function HomePageClient({ locale }: HomePageClientProps) {
                     <h3 className="text-2xl font-bold text-white mb-4">
                       {feature.title}
                     </h3>
+                    <h2 className="text-2xl font-bold text-white mb-4">
+                      {feature.title}
+                    </h2>
                     <p className="text-[#E8D5D5]/80 text-lg leading-relaxed">
                       {feature.description}
                     </p>
@@ -391,19 +378,12 @@ export default function HomePageClient({ locale }: HomePageClientProps) {
           <div className="inline-block p-4 rounded-2xl bg-white/5 border border-white/10 mb-8 animate-bounce">
             <Sparkles className="text-[var(--color-brand-red)]" size={32} />
           </div>
-          <h1 className="text-4xl sm:text-5xl md:text-7xl font-black text-white mb-6 sm:mb-8 tracking-tighter italic leading-[0.9]">
+          <h2 className="text-4xl sm:text-5xl md:text-7xl font-black text-white mb-6 sm:mb-8 tracking-tighter italic leading-[0.9]">
             MASTER YOUR <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white/80 to-white/40">COMPLIANCE.</span>
-          </h1>
+          </h2>
           <p className="text-[#BEA0A0] text-base sm:text-xl md:text-2xl mb-8 sm:mb-12 max-w-2xl mx-auto leading-relaxed">Join thousands using Akubrecah for secure KRA compliance and high-performance document mastery.</p>
-          <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6">
-            <Link href={isSignedIn ? `/${locale}/dashboard` : `/${locale}/sign-in`} className="btn-primary text-base sm:text-xl px-8 sm:px-12 py-4 sm:py-5 flex items-center justify-center gap-3 group shadow-[0_0_20px_rgba(31,111,91,0.3)]">
-              Get Started Free <ArrowRight className="group-hover:translate-x-2 transition-transform" />
-            </Link>
-            <Link href={`/${locale}/pdf-tools`} className="inline-flex items-center justify-center rounded-xl px-8 sm:px-12 py-4 sm:py-5 text-base sm:text-xl font-semibold text-white border border-white/20 hover:bg-white/10 transition-all backdrop-blur-md">
-              Browse Tools
-            </Link>
-          </div>
+          <HomeAuthCTA locale={locale} />
         </div>
       </section>
     </div>
