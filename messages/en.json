@@ -44,7 +44,8 @@
       "about": "About",
       "faq": "FAQ",
       "privacy": "Privacy",
-      "contact": "Contact"
+      "contact": "Contact",
+      "back_to_solutions": "Back to Solutions"
     },
     "buttons": {
       "upload": "Upload Files",

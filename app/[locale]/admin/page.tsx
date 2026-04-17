@@ -164,12 +164,12 @@ export default function AdminDashboard() {
   const [notificationForm, setNotificationForm] = useState({
     message: '',
     type: 'marquee' as 'marquee' | 'popup',
-    theme: 'purple',
+    theme: 'emerald',
     customTheme: {
-      from: '#7C3AED',
-      via: '#3B82F6',
-      to: '#7C3AED',
-      border: 'rgba(124, 58, 237, 0.2)'
+      from: '#1F6F5B',
+      via: '#2E8B75',
+      to: '#1F6F5B',
+      border: 'rgba(31, 111, 91, 0.2)'
     },
     active: true,
     speed: 30
@@ -587,8 +587,8 @@ export default function AdminDashboard() {
                  <form onSubmit={handleUserUpdate} className="space-y-6">
                     <div className="grid grid-cols-2 gap-8">
                      <div className="space-y-1">
-                        <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-4 italic">Privilege Level</label>
-                        <select value={editForm.role} onChange={e => setEditForm(p => ({ ...p, role: e.target.value }))} className="w-full px-8 py-5 bg-white/5 border border-white/10 rounded-3xl text-sm font-black italic uppercase tracking-widest focus:outline-none focus:border-[var(--color-brand-red)] text-white">
+                        <label htmlFor="role-select" className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-4 italic">Privilege Level</label>
+                        <select id="role-select" value={editForm.role} onChange={e => setEditForm(p => ({ ...p, role: e.target.value }))} className="w-full px-8 py-5 bg-white/5 border border-white/10 rounded-3xl text-sm font-black italic uppercase tracking-widest focus:outline-none focus:border-[var(--color-brand-red)] text-white">
                            <option value="user">USER</option>
                            <option value="admin">ADMIN</option>
                            <option value="premium">PREMIUM</option>
@@ -597,8 +597,8 @@ export default function AdminDashboard() {
                         </select>
                      </div>
                      <div className="space-y-1">
-                        <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-4 italic">Tier Selection</label>
-                        <select value={editForm.subscriptionTier} onChange={e => setEditForm(p => ({ ...p, subscriptionTier: e.target.value }))} className="w-full px-8 py-5 bg-white/5 border border-white/10 rounded-3xl text-sm font-black italic uppercase tracking-widest focus:outline-none focus:border-[var(--color-brand-red)] text-white">
+                        <label htmlFor="tier-select" className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-4 italic">Tier Selection</label>
+                        <select id="tier-select" value={editForm.subscriptionTier} onChange={e => setEditForm(p => ({ ...p, subscriptionTier: e.target.value }))} className="w-full px-8 py-5 bg-white/5 border border-white/10 rounded-3xl text-sm font-black italic uppercase tracking-widest focus:outline-none focus:border-[var(--color-brand-red)] text-white">
                            <option value="none">NONE</option>
                            <option value="basic">BASIC (10/DAY)</option>
                            <option value="pro">PRO (UNLIMITED)</option>
@@ -609,12 +609,12 @@ export default function AdminDashboard() {
                         </select>
                      </div>
                      <div className="space-y-1">
-                        <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-4 italic">Available Credits</label>
-                        <input type="number" value={editForm.credits} onChange={e => setEditForm(p => ({ ...p, credits: parseInt(e.target.value) }))} className="w-full px-8 py-5 bg-white/5 border border-white/10 rounded-3xl text-xl font-black italic uppercase tracking-widest focus:outline-none focus:border-[var(--color-brand-red)] text-white" />
+                        <label htmlFor="credits-input" className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-4 italic">Available Credits</label>
+                        <input id="credits-input" type="number" value={editForm.credits} onChange={e => setEditForm(p => ({ ...p, credits: parseInt(e.target.value) }))} className="w-full px-8 py-5 bg-white/5 border border-white/10 rounded-3xl text-xl font-black italic uppercase tracking-widest focus:outline-none focus:border-[var(--color-brand-red)] text-white" />
                      </div>
                      <div className="space-y-1">
-                        <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-4 italic">Identity Hash</label>
-                        <input type="text" readOnly className="w-full px-8 py-5 bg-white/5 border border-white/10 rounded-3xl text-[10px] font-black text-white/20 uppercase tracking-tighter" value={editingUser.id} />
+                        <label htmlFor="id-hash" className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-4 italic">Identity Hash</label>
+                        <input id="id-hash" type="text" readOnly className="w-full px-8 py-5 bg-white/5 border border-white/10 rounded-3xl text-[10px] font-black text-white/20 uppercase tracking-tighter" value={editingUser.id} />
                      </div>
                   </div>
                     <div className="flex gap-4 pt-8">

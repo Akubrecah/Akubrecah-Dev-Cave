@@ -12,11 +12,11 @@ interface Notification {
 }
 
 const themeStyles: Record<string, { gradient: string; icon: string; text: string; shadow: string }> = {
-  purple: {
-    gradient: "from-[#7C3AED] via-[#3B82F6] to-[#7C3AED]",
-    icon: "bg-[#7C3AED]/10 text-[#7C3AED]",
-    text: "text-[#A78BFA]",
-    shadow: "shadow-[#7C3AED]/20"
+  orange: {
+    gradient: "from-[#EA580C] via-[#F5C200] to-[#EA580C]",
+    icon: "bg-[#EA580C]/10 text-[#EA580C]",
+    text: "text-[#F5C200]",
+    shadow: "shadow-[#EA580C]/20"
   },
   blue: {
     gradient: "from-[#3B82F6] via-[#22D3EE] to-[#3B82F6]",
@@ -78,7 +78,7 @@ export function AlertBanner() {
 
   if (!isVisible || !notification) return null;
 
-  const style = themeStyles[notification.theme] || themeStyles.purple;
+  const style = themeStyles[notification.theme] || themeStyles.orange;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-md animate-in fade-in duration-300">

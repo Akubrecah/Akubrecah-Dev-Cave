@@ -4,11 +4,13 @@ import React from 'react';
 import { NilReturnForm } from '@/components/kra/NilReturnForm';
 import { ArrowLeft, Sparkles } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 export default function NilReturnPage() {
   const params = useParams();
   const router = useRouter();
   const locale = params.locale as string;
+  const t = useTranslations();
 
   return (
     <div className="min-h-screen pt-32 pb-16 px-6 font-sans relative bg-black text-white">
@@ -23,7 +25,7 @@ export default function NilReturnPage() {
             className="inline-flex items-center gap-2 text-[#BEA0A0] hover:text-[var(--color-brand-red)] transition-colors group text-sm font-black uppercase tracking-widest mb-6"
           >
             <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> 
-            Back to Solutions
+            {t('common.navigation.back_to_solutions')}
           </button>
           
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8">

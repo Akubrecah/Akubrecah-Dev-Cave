@@ -4,11 +4,13 @@ import React, { useState, useEffect } from 'react';
 import { AuditCore } from '@/components/kra/AuditCore';
 import { ShieldCheck, ArrowLeft, FileText, Coins, CheckCircle2 } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 export default function AuditCorePage() {
   const params = useParams();
   const router = useRouter();
   const locale = params.locale as string;
+  const t = useTranslations();
 
   const [stats, setStats] = useState({ verifications: 0, certificates: 0, credits: 5 });
   const [subscription, setSubscription] = useState<any>(null);
@@ -42,7 +44,7 @@ export default function AuditCorePage() {
               className="inline-flex items-center gap-2 text-[#BEA0A0] hover:text-[var(--color-brand-red)] transition-colors group text-sm font-black uppercase tracking-widest"
             >
               <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> 
-              Back to Solutions
+              {t('common.navigation.back_to_solutions')}
             </button>
             <h2 className="text-3xl sm:text-5xl md:text-6xl font-black text-white leading-tight flex items-center gap-4 sm:gap-6 uppercase">
               <div className="p-4 rounded-[1.5rem] bg-white/5 border border-white/10 shadow-2xl shadow-red-500/10">

@@ -32,7 +32,7 @@ export default async function PrivacyPage({ params }: { params: Promise<{ locale
       subtitle="Data Governance & Protection"
       lastUpdated="April 7, 2026"
       sections={sections}
-      icon={Lock}
+      iconType="lock"
     >
       <LegalSection 
         id="data-collection" 

@@ -26,6 +26,74 @@ interface CategoryGroup {
  * Tool Sidebar for the workflow editor
  * Displays available tools grouped by category
  */
+
+// Format tool ID to human readable name
+const formatToolId = (id: string): string => {
+    return id
+        .split('-')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+};
+
+// Tools that require interactive UI and should be excluded from workflow
+const INTERACTIVE_TOOLS_BLACKLIST = new Set([
+    'pdf-multi-tool',
+    'edit-pdf',
+    'sign-pdf',
+    'crop-pdf',
+    'bookmark',
+    'add-stamps',
+    'form-filler',
+    'form-creator',
+    'rotate-custom',
+    'view-metadata',
+    'compare-pdfs',
+    'add-attachments',
+    'edit-attachments',
+    'page-dimensions',
+    'validate-signature',
+    'pdf-to-docx',
+    'pdf-to-pptx',
+    'pdf-to-excel'
+]);
+
+const CATEGORY_ORDER = [
+    'organize-manage',
+    'edit-annotate',
+    'convert-to-pdf',
+    'convert-from-pdf',
+    'optimize-repair',
+    'secure-pdf',
+];
+
+const CATEGORY_NAMES: Record<string, string> = {
+    'organize-manage': 'Organize & Manage',
+    'edit-annotate': 'Edit & Annotate',
+    'convert-to-pdf': 'Convert to PDF',
+    'convert-from-pdf': 'Convert from PDF',
+    'optimize-repair': 'Optimize & Repair',
+    'secure-pdf': 'Security & Privacy',
+};
+
+const CATEGORY_ICONS: Record<string, string> = {
+    'organize-manage': 'files',
+    'edit-annotate': 'pencil',
+    'convert-to-pdf': 'file-up',
+    'convert-from-pdf': 'file-down',
+    'optimize-repair': 'zap',
+    'secure-pdf': 'shield',
+};
+
+// Get icon component dynamically helper moved outside
+const getIconByName = (iconName: string) => {
+    const pascalName = iconName
+        .split('-')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join('');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (LucideIcons as any)[pascalName] || LucideIcons.FileText;
+};
+
 export function ToolSidebar({ onDragStart, isCollapsed = false, onToggleCollapse }: ToolSidebarProps) {
     const tWorkflow = useTranslations('workflow');
     const locale = useLocale() as Locale;
@@ -35,51 +103,21 @@ export function ToolSidebar({ onDragStart, isCollapsed = false, onToggleCollapse
         new Set(['organize-manage', 'convert-to-pdf'])
     );
 
-    // Format tool ID to human readable name
-    const formatToolId = (id: string): string => {
-        return id
-            .split('-')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(' ');
-    };
-
     // Helper function to get tool name with fallback using getToolContent
-    const getToolName = (toolId: string): string => {
+    const getToolName = React.useCallback((toolId: string): string => {
         const content = getToolContent(locale, toolId);
         if (content && content.title) {
             return content.title;
         }
         return formatToolId(toolId);
-    };
+    }, [locale]);
 
     // Group tools by category
-    const categories: CategoryGroup[] = (() => {
+    const categories: CategoryGroup[] = useMemo(() => {
         const categoryMap: Record<string, typeof tools> = {};
 
-        // Tools that require interactive UI and should be excluded from workflow
-        const interactiveToolsBlacklist = new Set([
-            'pdf-multi-tool',    // Interactive multi-tool
-            'edit-pdf',          // Canvas editor required
-            'sign-pdf',          // Signature drawing required
-            'crop-pdf',          // Visual crop selection required
-            'bookmark',          // Bookmark editing required
-            'add-stamps',        // Position interaction required
-            'form-filler',       // Form field interaction required
-            'form-creator',      // Form design required
-            'rotate-custom',     // Per-page rotation settings required
-            'view-metadata',     // Read-only viewer tool
-            'compare-pdfs',      // Visual comparison interface required
-            'add-attachments',   // File selection for attachments required
-            'edit-attachments',  // Attachment management interaction required
-            'page-dimensions',   // Analysis only, no PDF output
-            'validate-signature', // Read-only signature verification, no PDF output
-            'pdf-to-docx',       // Workflow executor not yet implemented
-            'pdf-to-pptx',       // Workflow executor not yet implemented
-            'pdf-to-excel',      // Workflow executor not yet implemented
-        ]);
-
         tools
-            .filter(tool => !interactiveToolsBlacklist.has(tool.id))
+            .filter(tool => !INTERACTIVE_TOOLS_BLACKLIST.has(tool.id))
             .forEach(tool => {
                 if (!categoryMap[tool.category]) {
                     categoryMap[tool.category] = [];
@@ -87,42 +125,15 @@ export function ToolSidebar({ onDragStart, isCollapsed = false, onToggleCollapse
                 categoryMap[tool.category].push(tool);
             });
 
-        const categoryOrder = [
-            'organize-manage',
-            'edit-annotate',
-            'convert-to-pdf',
-            'convert-from-pdf',
-            'optimize-repair',
-            'secure-pdf',
-        ];
-
-        const categoryNames: Record<string, string> = {
-            'organize-manage': 'Organize & Manage',
-            'edit-annotate': 'Edit & Annotate',
-            'convert-to-pdf': 'Convert to PDF',
-            'convert-from-pdf': 'Convert from PDF',
-            'optimize-repair': 'Optimize & Repair',
-            'secure-pdf': 'Security & Privacy',
-        };
-
-        const categoryIcons: Record<string, string> = {
-            'organize-manage': 'files',
-            'edit-annotate': 'pencil',
-            'convert-to-pdf': 'file-up',
-            'convert-from-pdf': 'file-down',
-            'optimize-repair': 'zap',
-            'secure-pdf': 'shield',
-        };
-
-        return categoryOrder
+        return CATEGORY_ORDER
             .filter(cat => categoryMap[cat])
             .map(cat => ({
                 id: cat,
-                name: categoryNames[cat],
-                icon: categoryIcons[cat],
+                name: CATEGORY_NAMES[cat] || cat,
+                icon: CATEGORY_ICONS[cat] || 'file-text',
                 tools: categoryMap[cat],
             }));
-    })();
+    }, []);
 
     // Filter tools based on search query
     const filteredCategories = useMemo((): CategoryGroup[] => {
@@ -141,7 +152,7 @@ export function ToolSidebar({ onDragStart, isCollapsed = false, onToggleCollapse
                 }),
             }))
             .filter(cat => cat.tools.length > 0);
-    }, [categories, searchQuery]);
+    }, [categories, searchQuery, getToolName]);
 
     const toggleCategory = (categoryId: string) => {
         setExpandedCategories(prev => {
@@ -169,15 +180,6 @@ export function ToolSidebar({ onDragStart, isCollapsed = false, onToggleCollapse
         onDragStart(e, nodeData);
     };
 
-    // Get icon component dynamically
-    const getIcon = (iconName: string) => {
-        const pascalName = iconName
-            .split('-')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-            .join('');
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return (LucideIcons as any)[pascalName] || LucideIcons.FileText;
-    };
 
     // Collapsed view
     if (isCollapsed) {
@@ -193,7 +195,7 @@ export function ToolSidebar({ onDragStart, isCollapsed = false, onToggleCollapse
                 <div className="w-8 h-px bg-[hsl(var(--color-border))] mb-2" />
                 {/* Show category icons when collapsed */}
                 {categories.slice(0, 6).map(category => {
-                    const CategoryIcon = getIcon(category.icon);
+                    const CategoryIcon = getIconByName(category.icon);
                     return (
                         <button
                             key={category.id}
@@ -248,7 +250,7 @@ export function ToolSidebar({ onDragStart, isCollapsed = false, onToggleCollapse
             <div className="flex-1 overflow-y-auto">
                 {filteredCategories.map(category => {
                     const isExpanded = expandedCategories.has(category.id);
-                    const CategoryIcon = getIcon(category.icon);
+                    const CategoryIcon = getIconByName(category.icon);
 
                     return (
                         <div key={category.id} className="border-b border-[hsl(var(--color-border))]">
@@ -275,7 +277,7 @@ export function ToolSidebar({ onDragStart, isCollapsed = false, onToggleCollapse
                             {isExpanded && (
                                 <div className="pb-2">
                                     {category.tools.map(tool => {
-                                        const ToolIcon = getIcon(tool.icon);
+                                        const ToolIcon = getIconByName(tool.icon);
 
                                         return (
                                             <div

@@ -33,7 +33,7 @@ export default async function CookiesPage({ params }: { params: Promise<{ locale
       subtitle="Transparency & Tracking"
       lastUpdated="April 7, 2026"
       sections={sections}
-      icon={Target}
+      iconType="cookies"
     >
       <LegalSection 
         id="what-are-cookies" 

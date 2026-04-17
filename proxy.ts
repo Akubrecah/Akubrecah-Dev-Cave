@@ -49,10 +49,19 @@ const isPublicRoute = createRouteMatcher([
   '/api/kra/debug(.*)',
   '/api/kra/check-pin(.*)',
   '/api/kra/check-pin-by-pin(.*)',
-  '/api/admin/setup(.*)'
+  '/api/admin/setup(.*)',
+  '/sitemap.xml',
+  '/robots.txt',
+  '/favicon.ico',
+  '/favicon.png'
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
+  // 0. Manual SEO Bypass - Ensures sitemap.xml and robots.txt are NEVER intercepted
+  if (req.nextUrl.pathname === '/sitemap.xml' || req.nextUrl.pathname === '/robots.txt') {
+    return NextResponse.next();
+  }
+
   const { userId, sessionClaims } = await auth();
   const isAdmin = (sessionClaims as any)?.publicMetadata?.role === 'admin';
   const ident = userId || req.headers.get('x-forwarded-for') || 'anon';

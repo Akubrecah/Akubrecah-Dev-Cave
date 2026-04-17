@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <!--
 Copyright 2012 Mozilla Foundation
 
@@ -20,12 +20,16 @@ Adobe CMap resources are covered by their own copyright but the same license:
 
 See https://github.com/adobe-type-tools/cmap-resources
 -->
-<html dir="ltr" mozdisallowselectionprint>
+<html dir="ltr" lang="en" mozdisallowselectionprint>
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <meta name="google" content="notranslate">
-    <title>PDF.js viewer</title>
+    <meta name="description" content="Secure, private, and professional PDF viewer. View and manage your PDF documents directly in your browser without uploading to any server.">
+    <meta property="og:title" content="PDF Viewer - AkubrecaH">
+    <meta property="og:description" content="Private & Browser-Based PDF processing.">
+    <meta property="og:type" content="website">
+    <title>PDF Viewer - AkubrecaH</title>
 
 <!-- This snippet is used in production (included from viewer.html) -->
 <link rel="resource" type="application/l10n" href="locale/locale.json">
@@ -34,6 +38,27 @@ See https://github.com/adobe-type-tools/cmap-resources
     <link rel="stylesheet" href="viewer.css">
 
   <script src="viewer.mjs" type="module"></script>
+    <style>
+      :root {
+        --toolbar-bg-color: #1F6F5B !important;
+        --toolbar-icon-bg-color: #1F6F5B !important;
+        --sidebar-bg-color: #f8fafc !important;
+        --accent-color: #F2E600 !important;
+      }
+      .toolbar, #toolbarContainer {
+        background-color: var(--toolbar-bg-color) !important;
+        background-image: none !important;
+      }
+      #loadingBar .progress {
+        background-color: var(--accent-color) !important;
+      }
+      .toolbarButton:hover, .toolbarButton:focus {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+      }
+      .toolbarButton.toggled {
+        background-color: rgba(0, 0, 0, 0.2) !important;
+      }
+    </style>
   </head>
 
   <body tabindex="0">

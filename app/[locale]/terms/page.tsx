@@ -33,7 +33,7 @@ export default async function TermsPage({ params }: { params: Promise<{ locale: 
       subtitle="Standard Usage Agreement"
       lastUpdated="April 7, 2026"
       sections={sections}
-      icon={Shield}
+      iconType="shield"
     >
       <LegalSection 
         id="acceptance" 

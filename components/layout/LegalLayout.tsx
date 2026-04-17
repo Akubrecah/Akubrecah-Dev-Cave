@@ -16,7 +16,7 @@ interface LegalLayoutProps {
   lastUpdated: string;
   sections: Section[];
   children: React.ReactNode;
-  icon: React.ElementType;
+  iconType: 'policy' | 'terms' | 'cookies' | 'legal' | 'lock' | 'shield';
 }
 
 export function LegalLayout({
@@ -25,8 +25,17 @@ export function LegalLayout({
   lastUpdated,
   sections,
   children,
-  icon: Icon,
+  iconType,
 }: LegalLayoutProps) {
+  // Map icon strings to components locally in the Client Component
+  const Icon = {
+    policy: ShieldCheck,
+    terms: Scale,
+    cookies: Target,
+    legal: FileText,
+    lock: Lock,
+    shield: Shield
+  }[iconType] || FileText;
   const [activeSection, setActiveSection] = useState(sections[0]?.id ?? '');
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
