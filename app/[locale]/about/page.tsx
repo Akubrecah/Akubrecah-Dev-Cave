@@ -50,7 +50,7 @@ export default async function About({ params }: { params: Promise<{ locale: stri
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-brand-red)] to-[var(--color-brand-yellow)]">Intelligence.</span>
           </h1>
           <p className="text-xl text-[#E8D5D5]/70 max-w-2xl mx-auto leading-relaxed">
-            AkubrecaH was built to solve a single problem: making complex Kenyan tax compliance as simple as a single click.
+            Akubrecah was built to solve a single problem: making complex Kenyan tax compliance as simple as a single click.
           </p>
         </div>
 
@@ -62,7 +62,7 @@ export default async function About({ params }: { params: Promise<{ locale: stri
             </div>
             <h2 className="text-3xl font-bold text-white mb-6">The Founder&apos;s Vision</h2>
             <p className="text-[#BEA0A0] text-lg leading-relaxed mb-6">
-              In a world where document security is often an afterthought, we envisioned a platform where privacy is the default, not an option. AkubrecaH was born in Nairobi, designed for the unique challenges of the Kenyan digital economy.
+              In a world where document security is often an afterthought, we envisioned a platform where privacy is the default, not an option. Akubrecah was born in Nairobi, designed for the unique challenges of the Kenyan digital economy.
             </p>
             <p className="text-[#BEA0A0] text-lg leading-relaxed">
               We started with a simple KRA PIN tool and expanded into a full suite of 88+ professional utilities, now used by professionals across the country.

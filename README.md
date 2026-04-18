@@ -81,8 +81,8 @@ A powerhouse for document management, processed entirely in your browser for max
 
 ### 1. Clone & Install
 ```bash
-git clone https://github.com/AkubrecaH/AkubrecaH-Dev-Cave.git
-cd AkubrecaH-Dev-Cave
+git clone https://github.com/Akubrecah/AkubrecaH-Dev-Cave.git
+cd Akubrecah-Dev-Cave
 npm install
 ```
 
@@ -146,4 +146,4 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## 📄 License
 
-This project is private and proprietary. © 2026 AkubrecaH Team.
+This project is private and proprietary. © 2026 Akubrecah Team.

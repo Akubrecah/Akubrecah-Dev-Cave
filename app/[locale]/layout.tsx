@@ -40,7 +40,7 @@ export default async function LocaleLayout({
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    "name": "AkubrecaH",
+    "name": "Akubrecah",
     "url": "https://akubrecah.app",
     "description": "Professional PDF Tools - Free, Private & Browser-Based.",
     "potentialAction": {

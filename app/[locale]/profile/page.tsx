@@ -230,7 +230,7 @@ export default function ProfilePage() {
                         </div>
                         <div>
                            <p className="text-[10px] font-black uppercase tracking-widest text-white mb-1 italic text-yellow-500">Emerald Accents</p>
-                           <p className="text-[9px] font-medium text-white/40 uppercase leading-relaxed">Accents are currently synchronized to the AkubrecaH Emerald Foundation. Custom accent support coming soon.</p>
+                           <p className="text-[9px] font-medium text-white/40 uppercase leading-relaxed">Accents are currently synchronized to the Akubrecah Emerald Foundation. Custom accent support coming soon.</p>
                         </div>
                      </div>
                   </div>

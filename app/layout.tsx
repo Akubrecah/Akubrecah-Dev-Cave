@@ -14,19 +14,16 @@ const geistMono = localFont({
 
 export const metadata = {
   metadataBase: new URL(siteConfig.url),
-  title: {
-    default: siteConfig.name,
-    template: `%s | ${siteConfig.name}`,
-  },
+  title: siteConfig.name,
   description: siteConfig.description,
   keywords: siteConfig.keywords,
   authors: [
     {
-      name: "AkubrecaH Team",
+      name: "Akubrecah Team",
       url: siteConfig.url,
     },
   ],
-  creator: "AkubrecaH",
+  creator: "Akubrecah",
   openGraph: {
     type: "website",
     locale: "en_US",
@@ -54,12 +51,9 @@ export const metadata = {
     google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
   },
   icons: {
-    icon: [
-      { url: '/favicon.png', type: 'image/png' },
-      { url: '/favicon.ico', type: 'image/x-icon' },
-    ],
-    shortcut: '/favicon.ico',
-    apple: '/favicon.png',
+    icon: '/logo.png',
+    shortcut: '/logo.png',
+    apple: '/logo.png',
   },
 };
 

@@ -107,7 +107,7 @@ export function meetsWCAGAAA(
 }
 
 /**
- * AkubrecaH color palette with verified contrast ratios
+ * Akubrecah color palette with verified contrast ratios
  * All colors meet WCAG 2.1 AA requirements
  */
 export const ACCESSIBLE_COLORS = {

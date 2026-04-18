@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
     const conversionRate = ((stats.premiumUsers / (totalUsers || 1)) * 100).toFixed(1);
     const avgTransactionValue = (stats.totalRevenue / (totalTransactions || 1));
 
-    const systemPrompt = `You are the AkubrecaH Industrial Terminal Assistant. 
+    const systemPrompt = `You are the Akubrecah Industrial Terminal Assistant. 
 You provide administrative insights based on platform data.
 The primary revenue engine is Paystack.
 CURRENCY: All revenue is in Kenya Shillings (KES).

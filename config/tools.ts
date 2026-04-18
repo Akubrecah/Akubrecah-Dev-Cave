@@ -1,7 +1,7 @@
 /**
  * Tools configuration file
  * Contains all 67 PDF tools with their properties, categories, and related tools
- * Migrated from BentoPDF and enhanced for AkubrecaH
+ * Migrated from BentoPDF and enhanced for Akubrecah
  */
 
 import { Tool, ToolCategory } from '@/types/tool';

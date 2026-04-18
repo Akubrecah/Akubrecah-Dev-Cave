@@ -1,5 +1,5 @@
 /**
- * Service Worker for AkubrecaH
+ * Service Worker for Akubrecah
  */
 
 const CACHE_NAME = 'pdfcraft-cache-v2';

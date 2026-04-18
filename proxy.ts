@@ -56,7 +56,8 @@ const isPublicRoute = createRouteMatcher([
   '/favicon.png'
 ]);
 
-export default clerkMiddleware(async (auth, req) => {
+// EXPORT Logic: Named 'proxy' and 'default' for Next.js 16 requirements
+export const proxy = clerkMiddleware(async (auth, req) => {
   // 0. Manual SEO Bypass - Ensures sitemap.xml and robots.txt are NEVER intercepted
   if (req.nextUrl.pathname === '/sitemap.xml' || req.nextUrl.pathname === '/robots.txt') {
     return NextResponse.next();
@@ -109,6 +110,8 @@ export default clerkMiddleware(async (auth, req) => {
   response.headers.set('X-Content-Type-Options', 'nosniff');
   return response;
 });
+
+export default proxy;
 
 export const config = {
   matcher: [

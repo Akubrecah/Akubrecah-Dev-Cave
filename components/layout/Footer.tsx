@@ -38,10 +38,10 @@ export const Footer: React.FC<FooterProps> = ({ locale }) => {
             >
                 <NextImage
                   src="/logo.png"
-                  alt="Akubrecah Entertainment Logo"
+                  alt="Akubrecah Logo"
                   width={150}
                   height={45}
-                  className="object-contain"
+                  className="object-contain w-auto h-auto"
                 />
             </Link>
             <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
@@ -49,10 +49,10 @@ export const Footer: React.FC<FooterProps> = ({ locale }) => {
             </p>
 
             <div className="flex gap-4">
-              <a href="https://github.com/PDFCraftTool/pdfcraft" className="p-2.5 rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground transition-all shadow-sm">
+              <a href="https://github.com/Akubrecah" className="p-2.5 rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground transition-all shadow-sm">
                 <Github className="w-5 h-5" />
               </a>
-              <a href="https://x.com/PDFCraftTool" className="p-2.5 rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground transition-all shadow-sm">
+              <a href="https://x.com/akubrecah" className="p-2.5 rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground transition-all shadow-sm">
                 <Twitter className="w-5 h-5" />
               </a>
               <a href="#" className="p-2.5 rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground transition-all shadow-sm">

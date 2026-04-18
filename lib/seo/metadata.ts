@@ -68,9 +68,7 @@ export function getAlternateUrls(path: string = ''): Record<string, string> {
 export function generateBaseMetadata(options: PageMetadataOptions): Metadata {
   const { locale, path = '', title, description, keywords = [], image, noIndex = false } = options;
 
-  const fullTitle = title.includes(siteConfig.name)
-    ? title
-    : `${title} | ${siteConfig.name}`;
+  const fullTitle = title === siteConfig.name ? title : title;
 
   const canonicalUrl = getCanonicalUrl(locale, path);
   const ogImage = image || siteConfig.ogImage;
@@ -98,9 +96,9 @@ export function generateBaseMetadata(options: PageMetadataOptions): Metadata {
         'max-video-preview': -1,
       },
     icons: {
-      icon: '/favicon.svg',
-      shortcut: '/favicon.svg',
-      apple: '/favicon.svg',
+      icon: '/logo.png',
+      shortcut: '/logo.png',
+      apple: '/logo.png',
     },
     alternates: {
       canonical: canonicalUrl,
@@ -170,7 +168,7 @@ export function generateToolMetadata(options: ToolMetadataOptions): Metadata {
  * Generate metadata for the homepage
  */
 export function generateHomeMetadata(locale: Locale, translations?: { title: string; description: string }): Metadata {
-  const defaultTitle = `${siteConfig.name} - Professional PDF Tools`;
+  const defaultTitle = siteConfig.name;
   const defaultDescription = siteConfig.description;
 
   return generateBaseMetadata({
@@ -268,7 +266,7 @@ export function generateKRASolutionsMetadata(locale: Locale, translations?: { ti
     locale,
     path: '/kra-solutions',
     title: translations?.title || 'KRA Compliance Solutions',
-    description: translations?.description || `Verify KRA PINs, file Nil Returns, and manage your tax compliance with AkubrecaH's specialized Kenyan tax tools.`,
+    description: translations?.description || `Verify KRA PINs, file Nil Returns, and manage your tax compliance with Akubrecah's specialized Kenyan tax tools.`,
     keywords: ['KRA', 'PIN verification', 'Nil Return', 'Kenya revenue authority', 'compliance'],
   });
 }

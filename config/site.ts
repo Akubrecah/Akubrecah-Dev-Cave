@@ -5,12 +5,12 @@ export const siteConfig = {
   name: 'Akubrecah',
   description: 'Your Professional KRA Compliance & PDF Mastery Suite. Verify KRA PINs and access 88+ powerful, private PDF tools locally in your browser.',
   url: 'https://akubrecah.vercel.app/',
-  ogImage: '/images/og-image.png',
+  ogImage: '/logo.png',
   links: {
-    github: 'https://github.com/AkubrecaH',
+    github: 'https://github.com/Akubrecah',
     twitter: 'https://twitter.com/akubrecah',
   },
-  creator: 'AkubrecaH Team',
+  creator: 'Akubrecah Team',
   keywords: [
     'Retrieve KRA PIN',
     'KRA PIN certificate via email',
@@ -28,12 +28,12 @@ export const siteConfig = {
     'online PDF editor',
     'browser-based PDF',
     'private PDF processing',
-    'AkubrecaH',
+    'Akubrecah',
   ],
   // SEO-related settings
   seo: {
-    titleTemplate: '%s | Akubrecah',
-    defaultTitle: 'Akubrecah - KRA Compliance & PDF Tools',
+    titleTemplate: 'Akubrecah',
+    defaultTitle: 'Akubrecah',
     twitterHandle: '@akubrecah',
     locale: 'en_US',
   },

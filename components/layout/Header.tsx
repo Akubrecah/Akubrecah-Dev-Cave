@@ -286,10 +286,10 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                             <div className="relative flex h-12 items-center justify-center transition-transform group-hover:scale-105">
                                 <NextImage
                                     src="/logo.png"
-                                    alt="AkubrecaH Logo"
+                                    alt="Akubrecah Logo"
                                     width={180}
                                     height={48}
-                                    className="object-contain"
+                                    className="object-contain w-auto h-auto"
                                     priority
                                 />
                             </div>

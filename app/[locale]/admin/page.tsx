@@ -524,7 +524,7 @@ export default function AdminDashboard() {
       <main className="lg:pl-72 min-h-screen transition-all duration-500 pb-20 relative z-10">
         <AdminHeader 
           title={activeTab === 'overview' ? 'Operational Insight' : activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} 
-          subtitle="AkubrecaH Platform Control"
+          subtitle="Akubrecah Platform Control"
           onRefresh={refreshAll}
           isSyncing={isSyncing}
         />

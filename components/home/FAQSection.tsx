@@ -48,16 +48,16 @@ export default function FAQSection() {
     {
       icon: <Globe size={20} />,
       question: "How do I verify a KRA PIN online?",
-      answer: "Simply enter the KRA PIN in our verification tool. AkubrecaH connects to official compliance channels to retrieve real-time status, taxpayer name, and registration details in milliseconds."
+      answer: "Simply enter the KRA PIN in our verification tool. Akubrecah connects to official compliance channels to retrieve real-time status, taxpayer name, and registration details in milliseconds."
     },
     {
       icon: <ShieldCheck size={20} />,
-      question: "Is my data safe with AkubrecaH?",
+      question: "Is my data safe with Akubrecah?",
       answer: "Absolutely. We use browser-native processing (WASM). Your PDF documents are never uploaded to our servers—they stay on your device. KRA queries are encrypted and processed securely without permanent storage."
     },
     {
       icon: <Zap size={20} />,
-      question: "What makes AkubrecaH different from traditional service centres?",
+      question: "What makes Akubrecah different from traditional service centres?",
       answer: "Speed and privacy. Instead of waiting or sharing your details with third parties, you can file Nil Returns and verify pins instantly from your own device, for free, with bank-grade security."
     },
     {

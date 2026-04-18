@@ -177,7 +177,7 @@ export function CheckoutContent() {
             </div>
             <div className="content space-y-4">
               <h3 className="text-2xl font-bold tracking-tight text-[#2B2B2B] leading-tight">
-                AkubrecaH <br/> {currentPlan.name}
+                Akubrecah <br/> {currentPlan.name}
               </h3>
               <div className="flex flex-col items-center">
                 <span className="text-5xl font-black text-[#1F6F5B] tabular-nums drop-shadow-[0_0_15px_rgba(31,111,91,0.1)]">
@@ -226,7 +226,7 @@ export function CheckoutContent() {
 
             <div className="flex items-center justify-between">
                <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#1F6F5B]">Payment Portal</p>
-               <NextImage src="/logo.png" alt="AkubrecaH" width={80} height={20} className="opacity-40" />
+               <NextImage src="/logo.png" alt="Akubrecah Logo" width={80} height={20} className="opacity-40 w-auto h-auto" />
             </div>
 
             <div className="details space-y-8 flex-1 flex flex-col justify-center">

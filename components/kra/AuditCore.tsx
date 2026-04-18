@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Search, CheckCircle2, AlertCircle, FileCheck2, Eye, ArrowRight, ArrowLeft
 } from 'lucide-react';
+import NextImage from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { KENYA_DATA } from '@/lib/kenya-data';
 
@@ -437,8 +438,8 @@ export function AuditCore({ stats, setStats, subscription }: AuditCoreProps) {
                 {/* Step 4: Finalize */}
                 {currentStep === 4 && (
                   <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-5 max-w-xl mx-auto text-center pt-2">
-                     <div className="bg-white/90 p-3 rounded-2xl w-max mx-auto mb-4 shadow-md">
-                       <img src="/logo.png" alt="Brand Logo" className="h-8 mx-auto opacity-90" />
+                     <div className="p-3 rounded-2xl w-max mx-auto mb-4">
+                       <NextImage src="/logo.png" alt="Akubrecah Logo" width={180} height={48} className="object-contain h-12 w-auto opacity-100" />
                      </div>
                      <h4 className="text-2xl font-bold text-white mb-2">You&apos;re all set!</h4>
                      <p className="text-white/60 mb-8 max-w-sm mx-auto">Your details are ready. Click the button below to generate and download your official KRA PIN Certificate.</p>
