@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, Info, Scale, ShieldCheck, FileText, ArrowUp, AlignLeft, X } from 'lucide-react';
+import { ChevronRight, Info, Scale, ShieldCheck, FileText, ArrowUp, AlignLeft, X, Target, Lock, Shield } from 'lucide-react';
 import { LegalSidebarNav } from './LegalSidebarNav';
 
 interface Section {
