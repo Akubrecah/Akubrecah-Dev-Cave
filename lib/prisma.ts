@@ -7,18 +7,36 @@ import ws from 'ws'
 neonConfig.webSocketConstructor = ws
 
 const prismaClientSingleton = () => {
-  // Use the database URL exactly as provided in .env
-  const connectionString = (process.env.DATABASE_URL || '').replace(/^["']|["']$/g, '');
+  // 1. Get the connection string and normalize it (strip quotes/whitespace)
+  const rawConnectionString = process.env.DATABASE_URL || '';
+  const connectionString = rawConnectionString.trim().replace(/^["']|["']$/g, '');
   
-  // If no connection string is provided (common during build time), 
-  // return a standard client without the Neon adapter to avoid hangs.
-  if (!connectionString) {
+  // 2. Log configuration status for debugging (masking sensitive parts)
+  if (process.env.NODE_ENV !== 'production') {
+    if (!connectionString) {
+      console.warn('[PRISMA] ⚠️ DATABASE_URL is missing or empty in process.env');
+    } else {
+      const sanitized = connectionString.substring(0, 15) + '...';
+      console.log(`[PRISMA] 🛠️ Initializing with connection string starting with: ${sanitized}`);
+    }
+  }
+
+  // 3. Fallback strategy: If no connection string is provided, return a standard client.
+  // This is critical for build-time safety in Next.js.
+  if (!connectionString || connectionString === 'undefined') {
     return new PrismaClient();
   }
 
-  const pool = new Pool({ connectionString });
-  const adapter = new PrismaNeon(pool as any);
-  return new PrismaClient({ adapter });
+  try {
+    // 4. Initialize with Neon adapter for serverless environments
+    const pool = new Pool({ connectionString });
+    const adapter = new PrismaNeon(pool as any);
+    return new PrismaClient({ adapter });
+  } catch (error) {
+    console.error('[PRISMA] ❌ Failed to initialize Pool with connection string:', error);
+    // Final fallback to standard prisma engine
+    return new PrismaClient();
+  }
 }
 
 declare const globalThis: {

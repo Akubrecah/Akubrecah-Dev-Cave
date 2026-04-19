@@ -8,6 +8,14 @@ export async function GET(
 ) {
   try {
     const { userId: clerkId } = await auth();
+    
+    // Diagnostic logging for DB connection in API context
+    const dbUrl = process.env.DATABASE_URL;
+    if (!dbUrl) {
+      console.error('[CERTIFICATE_DOWNLOAD] ❌ DATABASE_URL is missing in process.env at runtime');
+    } else {
+      console.log(`[CERTIFICATE_DOWNLOAD] ✅ DATABASE_URL present, length: ${dbUrl.length}`);
+    }
     if (!clerkId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -71,6 +79,11 @@ export async function GET(
 
   } catch (error) {
     console.error('[CERTIFICATE_DOWNLOAD] Error:', error);
-    return NextResponse.json({ error: 'Retrival Engine Failure' }, { status: 500 });
+    // Log details of the error to understand if it's a driver or prisma error
+    if (error instanceof Error) {
+      console.error('[CERTIFICATE_DOWNLOAD] Detail:', error.message);
+      console.error('[CERTIFICATE_DOWNLOAD] Stack:', error.stack);
+    }
+    return NextResponse.json({ error: 'Retrival Engine Failure', detail: error instanceof Error ? error.message : 'Unknown' }, { status: 500 });
   }
 }
