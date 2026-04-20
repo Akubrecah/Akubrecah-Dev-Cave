@@ -181,39 +181,58 @@ export function AuditCore({ stats, setStats, subscription }: AuditCoreProps) {
       const { generateKraPdf } = await import('@/lib/pdf/generate-kra-pdf');
       const pdfBytes = await generateKraPdf({ ...formData, tillDate: formData.tillDate || 'N.A.' });
       
-      let base64Content: string;
+      let base64Content = '';
       try {
-        let binary = '';
-        const bytes = new Uint8Array(pdfBytes as any);
-        const len = bytes.length;
-        for (let i = 0; i < len; i += 8192) {
-          binary += String.fromCharCode.apply(null, Array.from(bytes.subarray(i, i + 8192)));
+        const bytes = new Uint8Array(pdfBytes);
+        // Optimized conversion using binary string chunks to avoid stack overflow
+        const CHUNK_SIZE = 0x8000; // 32KB chunks
+        let binaryString = '';
+        for (let i = 0; i < bytes.length; i += CHUNK_SIZE) {
+          binaryString += String.fromCharCode.apply(null, Array.from(bytes.subarray(i, i + CHUNK_SIZE)));
         }
-        base64Content = btoa(binary);
+        base64Content = btoa(binaryString);
       } catch (e) {
-        console.error('Download setup failed', e);
-        base64Content = '';
+        console.error('[AUDIT_CORE] Binary conversion failed:', e);
+        showStatus('Internal error preparing download. Please try again.', true);
+        return;
       }
 
-      const blob = new Blob([pdfBytes as any], { type: 'application/pdf' });
+      // Handle Immediate Download
+      const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = `Certificate_${formData.kraPin || 'Completed'}.pdf`;
+      link.href = url;
+      link.download = `Certificate_${formData.kraPin || 'KRA'}.pdf`;
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
 
-      fetch('/api/user/certificates', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          kraPin: formData.kraPin, 
-          taxpayerName: formData.taxpayerName, 
-          details: formData,
-          pdfContent: base64Content
-        })
-      });
+      // Save to History (background)
+      try {
+        const saveRes = await fetch('/api/user/certificates', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            kraPin: formData.kraPin, 
+            taxpayerName: formData.taxpayerName, 
+            details: formData,
+            pdfContent: base64Content
+          })
+        });
+        
+        if (!saveRes.ok) {
+          const errData = await saveRes.json().catch(() => ({}));
+          console.error('[AUDIT_CORE] Failed to save certificate to history:', errData.error || saveRes.statusText);
+        } else {
+          setStats(prev => ({ ...prev, certificates: prev.certificates + 1 }));
+        }
+      } catch (saveErr) {
+        console.error('[AUDIT_CORE] Network error saving certificate:', saveErr);
+      }
 
-      setStats(prev => ({ ...prev, certificates: prev.certificates + 1 }));
+      showStatus('Certificate generated and downloaded successfully!');
       showStatus('Certificate is ready!');
     } catch (err: any) {
       showStatus(err.message || 'Something went wrong', true);
@@ -452,7 +471,7 @@ export function AuditCore({ stats, setStats, subscription }: AuditCoreProps) {
                        
                        <button onClick={generateCertificate} disabled={isStatusPending} className="w-full h-16 bg-[var(--color-brand-red)] text-white rounded-full font-bold text-lg hover:bg-[var(--color-primary-hover)] transition-all disabled:opacity-50 shadow-xl shadow-[var(--color-brand-red)]/20 flex items-center justify-center gap-3">
                           {isStatusPending ? (
-                            <><div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Preparing...</>
+                            <><div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Working...</>
                           ) : (
                             <><FileCheck2 size={24} /> Download Certificate</>
                           )}

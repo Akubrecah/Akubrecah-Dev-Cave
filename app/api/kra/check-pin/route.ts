@@ -22,13 +22,13 @@ export async function POST(req: NextRequest) {
     try {
         const { idType = 'KE', idNumber } = await req.json();
         const token = await getAccessToken('pinByID');
-        const BASE_URL = process.env.KRA_API_BASE_URL || 'https://sbx.kra.go.ke';
+        const BASE_URL = process.env.KRA_API_BASE_URL || 'https://api.kra.go.ke';
         const endpoint = `${BASE_URL}/checker/v1/pin`;
         console.log(`[KRA-ID] Calling ${endpoint} with TaxpayerType=${idType}, TaxpayerID=${idNumber}`);
 
-        for (let i = 0; i <= 2; i++) {
+        for (let i = 0; i <= 1; i++) {
             const controller = new AbortController();
-            const timeout = setTimeout(() => controller.abort(), 15000);
+            const timeout = setTimeout(() => controller.abort(), 7000);
 
             try {
                 const response = await fetch(endpoint, {
@@ -116,11 +116,11 @@ export async function POST(req: NextRequest) {
             } catch (error: unknown) {
                 clearTimeout(timeout);
                 if (error instanceof Error) {
-                    if (i === 2) throw error;
+                    if (i === 1) throw error;
                 } else {
-                    if (i === 2) throw new Error('Unknown error');
+                    if (i === 1) throw new Error('Unknown error');
                 }
-                await new Promise(resolve => setTimeout(resolve, i * 1000 + 500));
+                await new Promise(resolve => setTimeout(resolve, 300));
             }
         }
     } catch (error: unknown) {

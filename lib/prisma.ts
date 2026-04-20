@@ -11,30 +11,33 @@ const prismaClientSingleton = () => {
   const rawConnectionString = process.env.DATABASE_URL || '';
   const connectionString = rawConnectionString.trim().replace(/^["']|["']$/g, '');
   
-  // 2. Log configuration status for debugging (masking sensitive parts)
-  if (process.env.NODE_ENV !== 'production') {
-    if (!connectionString) {
-      console.warn('[PRISMA] ⚠️ DATABASE_URL is missing or empty in process.env');
-    } else {
-      const sanitized = connectionString.substring(0, 15) + '...';
-      console.log(`[PRISMA] 🛠️ Initializing with connection string starting with: ${sanitized}`);
-    }
-  }
-
-  // 3. Fallback strategy: If no connection string is provided, return a standard client.
+  // 2. Fallback strategy: If no connection string is provided, return a standard client.
   // This is critical for build-time safety in Next.js.
-  if (!connectionString || connectionString === 'undefined') {
+  if (!connectionString || connectionString === 'undefined' || connectionString.length < 10) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn('[PRISMA] ⚠️ DATABASE_URL is missing or critically short. Falling back to default engine.');
+    }
     return new PrismaClient();
   }
 
   try {
-    // 4. Initialize with Neon adapter for serverless environments
-    const pool = new Pool({ connectionString });
+    // 3. Initialize with Neon adapter for serverless environments
+    const pool = new Pool({ 
+      connectionString,
+      connectionTimeoutMillis: 5000, // Fail fast if connection cannot be established
+    });
     const adapter = new PrismaNeon(pool as any);
-    return new PrismaClient({ adapter });
+    
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`[PRISMA] 🛠️ Initialized with connection string: ${connectionString.substring(0, 15)}...`);
+    }
+
+    return new PrismaClient({ 
+      adapter,
+      log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+    });
   } catch (error) {
-    console.error('[PRISMA] ❌ Failed to initialize Pool with connection string:', error);
-    // Final fallback to standard prisma engine
+    console.error('[PRISMA] ❌ Failed to initialize Pool/Adapter:', error);
     return new PrismaClient();
   }
 }

@@ -1,4 +1,4 @@
-const KRA_DEFAULT_SBX = 'https://sbx.kra.go.ke';
+const KRA_DEFAULT_SBX = 'https://api.kra.go.ke';
 
 // Single source of truth: respect KRA_API_BASE_URL if set, otherwise default to sandbox
 const KRA_BASE = (process.env.KRA_API_BASE_URL || KRA_DEFAULT_SBX).replace(/\/+$/, '');
@@ -37,7 +37,7 @@ const tokenCache: {
   nilReturn: { token: null, expiry: 0 }
 };
 
-export async function getAccessToken(apiType: 'pinByID' | 'pinByPIN' | 'nilReturn', retries = 2) {
+export async function getAccessToken(apiType: 'pinByID' | 'pinByPIN' | 'nilReturn', retries = 1) {
     const config = KRA_CONFIG[apiType];
     const cache = tokenCache[apiType];
     const now = Math.floor(Date.now() / 1000);
@@ -55,7 +55,7 @@ export async function getAccessToken(apiType: 'pinByID' | 'pinByPIN' | 'nilRetur
     
     for (let i = 0; i <= retries; i++) {
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 15000);
+        const timeout = setTimeout(() => controller.abort(), 7000);
 
         // Try GET first (standard KRA), then POST (standard OAuth2)
         const methods: ('GET' | 'POST')[] = ['GET', 'POST'];
@@ -177,7 +177,7 @@ export async function getAccessToken(apiType: 'pinByID' | 'pinByPIN' | 'nilRetur
                 }
             }
         }
-        await new Promise(resolve => setTimeout(resolve, i * 1000 + 500));
+        await new Promise(resolve => setTimeout(resolve, 300));
     }
 }
 
