@@ -12,17 +12,6 @@ Akubrecah is a professional-grade, unified platform designed for Kenyan taxpayer
 
 ---
 
-### 📊 Project Intelligence & Velocity
-
-<p align="center">
-  <img src="https://github-readme-stats.vercel.app/api?username=Akubrecah&show_icons=true&theme=tokyonight&hide_border=true&bg_color=0D1117&title_color=EAB308&icon_color=EAB308&text_color=FFFFFF" alt="Akubrecah GitHub Stats" />
-  <img src="https://github-readme-streak-stats.herokuapp.com/?user=Akubrecah&theme=tokyonight&hide_border=true&background=0D1117&ring=EAB308&fire=EAB308&stroke=EAB308&currStreakNum=FFFFFF&sideNums=FFFFFF&sideLabels=FFFFFF&dates=FFFFFF" alt="GitHub Streak" />
-</p>
-
-<p align="center">
-  <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=Akubrecah&layout=compact&theme=tokyonight&hide_border=true&bg_color=0D1117&title_color=EAB308&text_color=FFFFFF" alt="Top Languages" />
-</p>
-
 ---
 
 ## 🚀 Core Features
