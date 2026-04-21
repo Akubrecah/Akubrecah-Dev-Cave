@@ -143,10 +143,18 @@ export function AdminSidebar() {
                 src="/logo.png" 
                 alt="Akubrecah" 
                 fill 
-                className="object-contain p-2"
+                className="object-contain p-2 hidden dark:block"
+                priority
+              />
+              <Image 
+                src="/logo-light.png" 
+                alt="Akubrecah" 
+                fill 
+                className="object-contain p-2 block dark:hidden"
                 priority
               />
             </div>
+
             <div>
               <h2 className="text-sm font-black text-white tracking-tight leading-4 uppercase">Akubrecah</h2>
               <p className="text-[10px] font-bold text-[var(--color-brand-red)] opacity-80 uppercase tracking-[0.2em] mt-1">Admin Ops</p>

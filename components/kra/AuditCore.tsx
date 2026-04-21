@@ -124,8 +124,19 @@ export function AuditCore({ stats, setStats, subscription }: AuditCoreProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
       });
+      
       const result = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(result.errorMessage || `Could not find your details. Please check your input and try again.`);
+      console.log('[KRA-DEBUG] API Result:', result);
+      
+      if (!res.ok) {
+
+        throw new Error(
+          result.errorMessage || 
+          (res.status === 504 ? 'KRA Server Timeout' : 
+           res.status === 502 ? 'KRA Service Unavailable' :
+           `Error ${res.status}: Could not find your details.`)
+        );
+      }
       
       setFormData(prev => ({
         ...prev,
@@ -139,8 +150,9 @@ export function AuditCore({ stats, setStats, subscription }: AuditCoreProps) {
       setStats(prev => ({ ...prev, verifications: prev.verifications + 1 }));
       showStatus('Details logged successfully!');
     } catch (error: any) {
-      showStatus(error.message || 'We could not find your details', true);
+      showStatus(error.message || 'We could not find your details. Please check your connection.', true);
     }
+
   };
 
   const handleQuickView = async () => {
@@ -171,71 +183,100 @@ export function AuditCore({ stats, setStats, subscription }: AuditCoreProps) {
       return;
     }
     showStatus('Preparing your certificate...', false, true);
+    console.log('[AUDIT_CORE] Starting certificate generation for:', formData.kraPin);
+
     try {
-      const limitRes = await fetch('/api/user/generate', { method: 'POST' });
-      if (!limitRes.ok) {
-        const d = await limitRes.json();
-        showStatus(d.error || 'You have reached your limit', true);
-        return;
+      // 1. Quota Check (Non-blocking analytics)
+      try {
+        console.log('[AUDIT_CORE] Checking usage limits...');
+        const limitRes = await fetch('/api/user/generate', { method: 'POST' });
+        if (!limitRes.ok) {
+          const d = await limitRes.json().catch(() => ({}));
+          console.warn('[AUDIT_CORE] Usage limit API warning:', d.error || limitRes.statusText);
+          // We continue anyway as limits are currently soft
+        }
+      } catch (limitErr) {
+        console.error('[AUDIT_CORE] Usage limit fetch failed:', limitErr);
       }
+
+      // 2. PDF Generation
+      console.log('[AUDIT_CORE] Importing PDF generator...');
       const { generateKraPdf } = await import('@/lib/pdf/generate-kra-pdf');
+      
+      console.log('[AUDIT_CORE] Generating PDF bytes...');
       const pdfBytes = await generateKraPdf({ ...formData, tillDate: formData.tillDate || 'N.A.' });
       
-      let base64Content = '';
-      try {
-        const bytes = new Uint8Array(pdfBytes);
-        // Optimized conversion using binary string chunks to avoid stack overflow
-        const CHUNK_SIZE = 0x8000; // 32KB chunks
-        let binaryString = '';
-        for (let i = 0; i < bytes.length; i += CHUNK_SIZE) {
-          binaryString += String.fromCharCode.apply(null, Array.from(bytes.subarray(i, i + CHUNK_SIZE)));
-        }
-        base64Content = btoa(binaryString);
-      } catch (e) {
-        console.error('[AUDIT_CORE] Binary conversion failed:', e);
-        showStatus('Internal error preparing download. Please try again.', true);
-        return;
+      if (!pdfBytes || pdfBytes.length === 0) {
+        throw new Error('Generated PDF is empty');
       }
+      console.log(`[AUDIT_CORE] PDF generated successfully (${pdfBytes.length} bytes)`);
 
-      // Handle Immediate Download
-      const blob = new Blob([pdfBytes as any], { type: 'application/pdf' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `Certificate_${formData.kraPin || 'KRA'}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-
-      // Save to History (background)
+      // 3. Immediate Download (Trigger BEFORE heavy processing/storage)
       try {
-        const saveRes = await fetch('/api/user/certificates', {
-          method: 'POST',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            kraPin: formData.kraPin, 
-            taxpayerName: formData.taxpayerName, 
-            details: formData,
-            pdfContent: base64Content
-          })
-        });
+        const blob = new Blob([pdfBytes as any], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `Certificate_${formData.kraPin || 'KRA'}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        console.log('[AUDIT_CORE] Download trigger sent to browser');
         
-        if (!saveRes.ok) {
-          const errData = await saveRes.json().catch(() => ({}));
-          console.error('[AUDIT_CORE] Failed to save certificate to history:', errData.error || saveRes.statusText);
-        } else {
-          setStats(prev => ({ ...prev, certificates: prev.certificates + 1 }));
-        }
-      } catch (saveErr) {
-        console.error('[AUDIT_CORE] Network error saving certificate:', saveErr);
+        // Clean up
+        setTimeout(() => {
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+        }, 100);
+      } catch (downloadErr) {
+        console.error('[AUDIT_CORE] Browser download failed:', downloadErr);
+        throw new Error('Browser blocked the download. Please check your popup settings.');
       }
+
+      // 4. Save to History (Background Task)
+      const saveToHistory = async () => {
+        try {
+          console.log('[AUDIT_CORE] Preparing base64 for storage...');
+          // Optimized conversion using binary string chunks to avoid stack overflow
+          const CHUNK_SIZE = 8192; 
+          let binaryString = '';
+          for (let i = 0; i < pdfBytes.length; i += CHUNK_SIZE) {
+            const chunk = pdfBytes.subarray(i, i + CHUNK_SIZE);
+            binaryString += String.fromCharCode.apply(null, chunk as any);
+          }
+          const base64Content = btoa(binaryString);
+
+          console.log('[AUDIT_CORE] Sending to certificate history API...');
+          const saveRes = await fetch('/api/user/certificates', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              kraPin: formData.kraPin, 
+              taxpayerName: formData.taxpayerName, 
+              details: formData,
+              pdfContent: base64Content
+            })
+          });
+          
+          if (!saveRes.ok) {
+            const errData = await saveRes.json().catch(() => ({}));
+            console.error('[AUDIT_CORE] Failed to save certificate to history:', errData.error || saveRes.statusText);
+          } else {
+            console.log('[AUDIT_CORE] Certificate saved to history successfully');
+            setStats(prev => ({ ...prev, certificates: prev.certificates + 1 }));
+          }
+        } catch (saveErr) {
+          console.error('[AUDIT_CORE] Error during background save:', saveErr);
+        }
+      };
+
+      // Run storage in parallel/background so it doesn't block the UI feedback
+      saveToHistory();
 
       showStatus('Certificate generated and downloaded successfully!');
-      showStatus('Certificate is ready!');
     } catch (err: any) {
-      showStatus(err.message || 'Something went wrong', true);
+      console.error('[AUDIT_CORE] Final generation error:', err);
+      showStatus(err.message || 'Something went wrong while generating the PDF', true);
     }
   };
 

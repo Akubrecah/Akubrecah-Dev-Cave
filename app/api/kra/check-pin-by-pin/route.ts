@@ -49,11 +49,18 @@ export async function POST(req: NextRequest) {
                 console.log(`[KRA-PIN] Response status: ${response.status}, body: ${rawText.substring(0, 500)}`);
 
                 if (!response.ok || (data && (data.ErrorCode || data.errorMessage || data.ErrorMessage))) {
-                    const errorBody = data?.errorMessage || data?.ErrorMessage || data?.error || data?.message || data?.ErrorMessage || `KRA API error ${data?.ErrorCode || response.status}`;
+                    const errorDetail = data?.errorMessage || data?.ErrorMessage || data?.error || data?.message;
+                    const errorCode = data?.ErrorCode || response.status;
+                    
                     // If error is 0 or "0", it's not an error (some APIs use ErrorCode: "0" for success)
-                    if (data?.ErrorCode !== "0" && data?.ErrorCode !== 0) {
+                    if (errorCode !== "0" && errorCode !== 0) {
+                        const errorBody = errorDetail || `KRA API error ${errorCode}`;
                         console.error(`[KRA-PIN] API Error: ${errorBody}`, data);
-                        return NextResponse.json({ errorMessage: errorBody, data }, { status: response.ok ? 400 : response.status });
+                        return NextResponse.json({ 
+                            errorMessage: errorBody, 
+                            errorCode,
+                            data 
+                        }, { status: response.ok ? 400 : response.status });
                     }
                 }
 
@@ -77,45 +84,64 @@ export async function POST(req: NextRequest) {
                   }
                 }
 
+                // Check if we actually found a name
+                if (!normalizedData.TaxpayerName && !normalizedData.KRAPIN && !normalizedData.TaxpayerPIN) {
+                    console.warn('[KRA-PIN] API returned success but no recognizable taxpayer data was found.', data);
+                    return NextResponse.json({ 
+                        errorMessage: "Taxpayer details not found in API response.",
+                        data 
+                    }, { status: 404 });
+                }
+
                 if (normalizedData && normalizedData.TaxpayerName) {
                     normalizedData.TaxpayerName = normalizedData.TaxpayerName.toUpperCase();
                 }
 
-                // Persistence: Save verification record to DB
+                // Persistence: Save verification record to DB (Defensive)
                 try {
-                  const dbUser = await prisma.user.findUnique({
-                    where: { clerkId: (await auth()).userId! },
-                    select: { id: true }
-                  });
-                  if (dbUser) {
-                    await prisma.verification.create({
-                      data: {
-                        userId: dbUser.id,
-                        kraPin: normalizedData.KRAPIN || normalizedData.TaxpayerPIN || pin || 'UNKNOWN',
-                        taxpayerName: normalizedData.TaxpayerName || 'UNKNOWN',
-                        result: normalizedData
-                      }
-                    });
+                  const authData = await auth().catch(() => null);
+                  const userId = authData?.userId;
+                  
+                  if (userId) {
+                    const dbUser = await prisma.user.findUnique({
+                      where: { clerkId: userId },
+                      select: { id: true }
+                    }).catch(() => null);
+
+                    if (dbUser) {
+                      await prisma.verification.create({
+                        data: {
+                          userId: dbUser.id,
+                          kraPin: normalizedData.KRAPIN || normalizedData.TaxpayerPIN || pin || 'UNKNOWN',
+                          taxpayerName: normalizedData.TaxpayerName || 'UNKNOWN',
+                          result: normalizedData
+                        }
+                      }).catch(e => console.warn('[KRA-PIN] Verification create failed:', e));
+                    }
                   }
-                } catch (saveErr) {
-                  console.warn('[KRA-PIN] Verification record creation failed:', saveErr);
+                } catch (persistErr) {
+                  console.warn('[KRA-PIN] General persistence failure:', persistErr);
                 }
 
                 return NextResponse.json(normalizedData);
             } catch (error: unknown) {
                 clearTimeout(timeout);
-                if (error instanceof Error) {
-                    if (i === 1) throw error;
-                } else {
-                    if (i === 1) throw new Error('Unknown error');
-                }
+                const errorMsg = error instanceof Error ? error.message : 'Unknown fetch error';
+                console.error(`[KRA-PIN] Fetch attempt ${i + 1} failed: ${errorMsg}`);
+                if (i === 1) throw error;
                 await new Promise(resolve => setTimeout(resolve, 300));
             }
         }
     } catch (error: unknown) {
-        if (error instanceof Error) {
-            return NextResponse.json({ errorMessage: error.message }, { status: 500 });
-        }
-        return NextResponse.json({ errorMessage: 'Unknown error occurred' }, { status: 500 });
+        const errorMsg = error instanceof Error ? error.message : 'Unknown error occurred';
+        console.error(`[KRA-PIN] Final Endpoint Error: ${errorMsg}`);
+        
+        return NextResponse.json({ 
+            errorMessage: errorMsg,
+            details: error instanceof Error ? error.stack?.substring(0, 100) : undefined,
+            type: 'SERVER_ERROR'
+        }, { status: 500 });
     }
 }
+
+

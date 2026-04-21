@@ -1,0 +1,276 @@
+{
+  "project": ".",
+  "timestamp": "2026-04-21T23:19:57.955200",
+  "scan_type": "all",
+  "scans": {
+    "dependencies": {
+      "tool": "dependency_scanner",
+      "findings": [
+        {
+          "type": "Missing Lock File",
+          "severity": "high",
+          "message": "yarn: No lock file found. Supply chain integrity at risk."
+        },
+        {
+          "type": "Missing Lock File",
+          "severity": "high",
+          "message": "pnpm: No lock file found. Supply chain integrity at risk."
+        }
+      ],
+      "status": "[OK] Secure"
+    },
+    "secrets": {
+      "tool": "secret_scanner",
+      "findings": [
+        {
+          "file": "eslint_full.json",
+          "type": "Password",
+          "severity": "high",
+          "count": 3
+        },
+        {
+          "file": "types/pdf.ts",
+          "type": "Password",
+          "severity": "high",
+          "count": 1
+        },
+        {
+          "file": "lib/pdf/receipt-template.json",
+          "type": "AWS Access Key",
+          "severity": "critical",
+          "count": 1
+        },
+        {
+          "file": "lib/pdf/pin-certificate-template.ts",
+          "type": "AWS Access Key",
+          "severity": "critical",
+          "count": 1
+        },
+        {
+          "file": "lib/pdf/processors/remove-restrictions.ts",
+          "type": "Password",
+          "severity": "high",
+          "count": 1
+        },
+        {
+          "file": "lib/pdf/processors/decrypt.ts",
+          "type": "Password",
+          "severity": "high",
+          "count": 1
+        },
+        {
+          "file": "lib/pdf/processors/change-permissions.ts",
+          "type": "Password",
+          "severity": "high",
+          "count": 1
+        },
+        {
+          "file": ".agent/skills/vulnerability-scanner/scripts/security_scan.py",
+          "type": "Bearer Token",
+          "severity": "critical",
+          "count": 1
+        }
+      ],
+      "status": "[!!] CRITICAL: Secrets exposed!",
+      "scanned_files": 644,
+      "by_severity": {
+        "critical": 3,
+        "high": 7,
+        "medium": 0
+      }
+    },
+    "code_patterns": {
+      "tool": "pattern_scanner",
+      "findings": [
+        {
+          "file": "app/layout.tsx",
+          "line": 77,
+          "pattern": "dangerouslySetInnerHTML",
+          "severity": "high",
+          "category": "XSS risk",
+          "snippet": "dangerouslySetInnerHTML={{"
+        },
+        {
+          "file": "app/layout.tsx",
+          "line": 83,
+          "pattern": "dangerouslySetInnerHTML",
+          "severity": "high",
+          "category": "XSS risk",
+          "snippet": "dangerouslySetInnerHTML={{"
+        },
+        {
+          "file": "app/layout.tsx",
+          "line": 89,
+          "pattern": "dangerouslySetInnerHTML",
+          "severity": "high",
+          "category": "XSS risk",
+          "snippet": "dangerouslySetInnerHTML={{"
+        },
+        {
+          "file": "app/[locale]/layout.tsx",
+          "line": 59,
+          "pattern": "dangerouslySetInnerHTML",
+          "severity": "high",
+          "category": "XSS risk",
+          "snippet": "dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}"
+        },
+        {
+          "file": "components/layout/MarqueeBanner.tsx",
+          "line": 33,
+          "pattern": "dangerouslySetInnerHTML",
+          "severity": "high",
+          "category": "XSS risk",
+          "snippet": "dangerouslySetInnerHTML={{ __html: `${message.toUpperCase()} &nbsp; \u2022 &nbsp;` }}"
+        },
+        {
+          "file": "components/layout/MarqueeBanner.tsx",
+          "line": 42,
+          "pattern": "dangerouslySetInnerHTML",
+          "severity": "high",
+          "category": "XSS risk",
+          "snippet": "dangerouslySetInnerHTML={{ __html: `${message.toUpperCase()} &nbsp; \u2022 &nbsp;` }}"
+        },
+        {
+          "file": "components/layout/AlertBanner.tsx",
+          "line": 103,
+          "pattern": "dangerouslySetInnerHTML",
+          "severity": "high",
+          "category": "XSS risk",
+          "snippet": "dangerouslySetInnerHTML={{ __html: notification.message }}"
+        },
+        {
+          "file": "components/seo/JsonLd.tsx",
+          "line": 26,
+          "pattern": "dangerouslySetInnerHTML",
+          "severity": "high",
+          "category": "XSS risk",
+          "snippet": "dangerouslySetInnerHTML={{"
+        },
+        {
+          "file": "components/seo/PerformanceHints.tsx",
+          "line": 99,
+          "pattern": "dangerouslySetInnerHTML",
+          "severity": "high",
+          "category": "XSS risk",
+          "snippet": "dangerouslySetInnerHTML={{"
+        },
+        {
+          "file": "components/pdf-tools/ToolPage.tsx",
+          "line": 211,
+          "pattern": "dangerouslySetInnerHTML",
+          "severity": "high",
+          "category": "XSS risk",
+          "snippet": "dangerouslySetInnerHTML={{ __html: sanitizedDescription }}"
+        },
+        {
+          "file": "components/pdf-tools/HomePageClient.tsx",
+          "line": 216,
+          "pattern": "dangerouslySetInnerHTML",
+          "severity": "high",
+          "category": "XSS risk",
+          "snippet": "<style dangerouslySetInnerHTML={{__html: `"
+        },
+        {
+          "file": "components/pdf-tools/DownloadButton.tsx",
+          "line": 138,
+          "pattern": "eval() usage",
+          "severity": "critical",
+          "category": "Code Injection risk",
+          "snippet": "// Auto-save to Database for easy retrieval (Requirement: Generated PDFs stored "
+        },
+        {
+          "file": "components/pdf-tools/pdf-to-markdown/PDFToMarkdownTool.tsx",
+          "line": 401,
+          "pattern": "dangerouslySetInnerHTML",
+          "severity": "high",
+          "category": "XSS risk",
+          "snippet": "dangerouslySetInnerHTML={{ __html: sanitizeHtml(htmlContent) }}"
+        },
+        {
+          "file": "components/pdf-tools/pdf-to-svg/PDFToSVGTool.tsx",
+          "line": 400,
+          "pattern": "dangerouslySetInnerHTML",
+          "severity": "high",
+          "category": "XSS risk",
+          "snippet": "dangerouslySetInnerHTML={{"
+        },
+        {
+          "file": "components/pdf-tools/pdf-to-svg/PDFToSVGTool.tsx",
+          "line": 466,
+          "pattern": "dangerouslySetInnerHTML",
+          "severity": "high",
+          "category": "XSS risk",
+          "snippet": "dangerouslySetInnerHTML={{ __html: svgResults[previewIndex].svg.replace(/<\\?xml["
+        },
+        {
+          "file": "components/pdf-tools/background-color/BackgroundColorTool.tsx",
+          "line": 24,
+          "pattern": "exec() usage",
+          "severity": "critical",
+          "category": "Code Injection risk",
+          "snippet": "const result = /^#?([a-f\\d]{2})([a-f\\d]{2})([a-f\\d]{2})$/i.exec(hex);"
+        },
+        {
+          "file": "components/pdf-tools/markdown-to-pdf/MarkdownToPDFTool.tsx",
+          "line": 306,
+          "pattern": "dangerouslySetInnerHTML",
+          "severity": "high",
+          "category": "XSS risk",
+          "snippet": "dangerouslySetInnerHTML={{ __html: sanitizeHtml(previewHtml) }}"
+        },
+        {
+          "file": "components/pdf-tools/text-color/TextColorTool.tsx",
+          "line": 30,
+          "pattern": "exec() usage",
+          "severity": "critical",
+          "category": "Code Injection risk",
+          "snippet": "const result = /^#?([a-f\\d]{2})([a-f\\d]{2})([a-f\\d]{2})$/i.exec(hex);"
+        },
+        {
+          "file": "public/qpdf.js",
+          "line": 19,
+          "pattern": "exec() usage",
+          "severity": "critical",
+          "category": "Code Injection risk",
+          "snippet": "b||(a=\".\");a&&c&&(a+=\"/\");return(b?\"/\":\"\")+a},Ra=a=>{var b=/^(\\/?|)([\\s\\S]*?)((?"
+        },
+        {
+          "file": "public/coherentpdf.browser.min.js",
+          "line": 10,
+          "pattern": "exec() usage",
+          "severity": "critical",
+          "category": "Code Injection risk",
+          "snippet": "!function(t){\"object\"==typeof exports&&\"undefined\"!=typeof module?module.exports"
+        }
+      ],
+      "status": "[!!] CRITICAL: 35 dangerous patterns",
+      "scanned_files": 616,
+      "by_category": {
+        "XSS risk": 19,
+        "Code Injection risk": 30,
+        "SQL Injection risk": 7,
+        "Security disabled": 1
+      }
+    },
+    "configuration": {
+      "tool": "config_scanner",
+      "findings": [
+        {
+          "issue": "No security headers configuration found",
+          "severity": "medium",
+          "recommendation": "Configure CSP, HSTS, X-Frame-Options headers"
+        }
+      ],
+      "status": "[?] Minor configuration issues",
+      "checks": {
+        "security_headers_config": false
+      }
+    }
+  },
+  "summary": {
+    "total_findings": 31,
+    "critical": 8,
+    "high": 22,
+    "overall_status": "[!!] CRITICAL ISSUES FOUND"
+  }
+}

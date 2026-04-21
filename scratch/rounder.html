@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Icon Rounder</title>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <script>
+        async function roundIcon() {
+            const img = new Image();
+            img.src = 'data:image/png;base64,BASE64_PLACEHOLDER';
+            await new Promise(resolve => img.onload = resolve);
+
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            const size = Math.min(img.width, img.height);
+            canvas.width = size;
+            canvas.height = size;
+
+            // Create circular mask
+            ctx.beginPath();
+            ctx.arc(size/2, size/2, size/2, 0, Math.PI * 2);
+            ctx.closePath();
+            ctx.clip();
+
+            // Draw image centered
+            ctx.drawImage(img, (size - img.width) / 2, (size - img.height) / 2, img.width, img.height);
+
+            // Send result back to agent (I'll extract this via browser_subagent)
+            document.body.setAttribute('data-result', canvas.toDataURL('image/png'));
+        }
+        roundIcon();
+    </script>
+</body>
+</html>

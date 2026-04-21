@@ -95,7 +95,7 @@ def run_linter(linter: dict, cwd: Path) -> dict:
             text=True,
             encoding='utf-8',
             errors='replace',
-            timeout=120,
+            timeout=300,
             shell=platform.system() == "Windows" # Shell=True often helps with path resolution on Windows
         )
         

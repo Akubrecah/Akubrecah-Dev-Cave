@@ -51,10 +51,11 @@ export const metadata = {
     google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
   },
   icons: {
-    icon: '/logo.png',
-    shortcut: '/logo.png',
-    apple: '/logo.png',
+    icon: '/tab-icon.png',
+    shortcut: '/tab-icon.png',
+    apple: '/tab-icon.png',
   },
+
 };
 
 import { ThemeProvider } from "@/components/providers/ThemeProvider";

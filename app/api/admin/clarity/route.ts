@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-guard';
 
+export const dynamic = 'force-dynamic';
+
+
 const CLARITY_PROJECT_ID = process.env.CLARITY_PROJECT_ID || 'w4r5iil0md';
 const CLARITY_EXPORT_TOKEN = process.env.CLARITY_EXPORT_TOKEN;
 const CLARITY_ENDPOINT = "https://www.clarity.ms/export-data/api/v1/project-live-insights";

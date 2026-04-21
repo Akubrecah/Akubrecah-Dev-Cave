@@ -284,15 +284,26 @@ export const Header: React.FC<HeaderProps> = ({ locale: propLocale, showSearch =
                             aria-label={`${t('brand')} - ${t('navigation.home')}`}
                         >
                             <div className="relative flex h-12 items-center justify-center transition-transform group-hover:scale-105">
+                                {/* Dark Mode Logo */}
                                 <NextImage
                                     src="/logo.png"
                                     alt="Akubrecah Logo"
                                     width={180}
                                     height={48}
-                                    className="object-contain w-auto h-auto"
+                                    className="object-contain w-auto h-auto hidden dark:block"
+                                    priority
+                                />
+                                {/* Light Mode Logo */}
+                                <NextImage
+                                    src="/logo-light.png"
+                                    alt="Akubrecah Logo"
+                                    width={180}
+                                    height={48}
+                                    className="object-contain w-auto h-auto block dark:hidden"
                                     priority
                                 />
                             </div>
+
                         </Link>
                     </div>
 
